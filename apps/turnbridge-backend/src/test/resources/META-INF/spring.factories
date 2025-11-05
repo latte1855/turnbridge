@@ -1,0 +1,4 @@
+org.springframework.test.context.ContextCustomizerFactory = \
+    com.asynctide.turnbridge.config.\
+    SqlTestContainersSpringContextCustomizerFactory,com.asynctide.turnbridge.\
+    config.RedisTestContainersSpringContextCustomizerFactory

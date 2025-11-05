@@ -1,0 +1,30 @@
+* text=auto
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.java text
+*.js text
+*.ts text
+*.tsx text
+*.json text
+*.yaml text
+*.yml text
+*.xml text
+*.properties text
+*.md text
+*.csv text
+*.txt text
+*.pdf diff=astextplain
+*.doc diff=astextplain
+*.docx diff=astextplain
+*.rtf diff=astextplain
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.class binary
+*.jar binary
+*.war binary

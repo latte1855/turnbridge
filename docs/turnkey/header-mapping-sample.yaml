@@ -1,0 +1,68 @@
+profiles:
+  Profile-Legacy:
+    detect:
+      byHeadersContainAll:
+      - message_type
+      - invoice_date
+      - seller_id
+      - item_name
+      - item_seq
+    mapping:
+      message_type: messageType
+      invoice_no: invoiceNo
+      invoice_date: issueDate
+      invoice_time: issueTime
+      seller_id: seller.taxId
+      seller_name: seller.name
+      buyer_id: buyer.taxIdOrId
+      buyer_name: buyer.name
+      invoice_type: invoiceType
+      donate_flag: donate
+      carrier_type: carrier.type
+      carrier_id1: carrier.id1
+      carrier_id2: carrier.id2
+      random_code: randomCode
+      item_seq: items[].sequence
+      item_name: items[].description
+      item_qty: items[].quantity
+      item_price: items[].unitPrice
+      item_amount: items[].amount
+      item_tax: items[].tax
+      tax_type: tax.type
+      tax_rate: tax.rate
+      sum_taxable: amount.taxable
+      sum_dutyfree: amount.dutyFree
+      sum_zerotax: amount.zeroTax
+      grand_total: amount.total
+  Profile-Canonical:
+    detect:
+      byHeadersContainAll:
+      - period
+      - track_code
+      - item_description
+      - item_seq
+    mapping:
+      invoice_no: invoiceNo
+      track_code: trackCode
+      period: period
+      issue_date: issueDate
+      issue_time: issueTime
+      seller_tax_id: seller.taxId
+      buyer_tax_id: buyer.taxIdOrId
+      invoice_type: invoiceType
+      donate: donate
+      carrier_type: carrier.type
+      carrier_id1: carrier.id1
+      carrier_id2: carrier.id2
+      random_code: randomCode
+      item_seq: items[].sequence
+      item_description: items[].description
+      item_quantity: items[].quantity
+      item_unit: items[].unit
+      item_unit_price: items[].unitPrice
+      item_amount: items[].amount
+      tax_type: tax.type
+      tax_rate: tax.rate
+      item_tax: items[].tax
+      total_amount: amount.total
+      currency: currency

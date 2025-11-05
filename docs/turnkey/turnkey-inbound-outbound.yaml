@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Turnkey 加值平台 Inbound/Outbound API
+  version: 1.0.0
+  description: 支援 CSV/ZIP 上傳、批次查詢與結果下載；最終轉為 MIG4.1 並丟入 Turnkey 目錄。
+servers:
+- url: https://api.example.com
+paths:
+  /api/invoices:upload:
+    post:
+      summary: 上傳發票 CSV 或 ZIP（多 Profile）
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                sellerId:
+                  type: string
+                profile:
+                  type: string
+                  enum:
+                  - Profile-Legacy
+                  - Profile-Canonical
+              required:
+              - file
+              - sellerId
+      responses:
+        '202':
+          description: 已接收並建立批次
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadAck'
+        '400':
+          description: 格式錯誤
+        '401':
+          description: 未授權
+  /api/upload-jobs/{jobId}:
+    get:
+      summary: 查詢上傳批次狀態
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadJob'
+  /api/upload-jobs/{jobId}/items:
+    get:
+      summary: 查詢批次明細與每筆處理結果
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobItemResult'
+  /api/upload-jobs/{jobId}/result:download:
+    get:
+      summary: 下載回饋 CSV（原欄位 + result_code 等）
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: text/csv
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UploadAck:
+      type: object
+      properties:
+        jobId:
+          type: string
+        receivedAt:
+          type: string
+          format: date-time
+        profile:
+          type: string
+        itemsCount:
+          type: integer
+    UploadJob:
+      type: object
+      properties:
+        jobId:
+          type: string
+        sellerId:
+          type: string
+        profile:
+          type: string
+        status:
+          type: string
+          enum:
+          - RECEIVED
+          - PARSING
+          - VALIDATING
+          - PACKING
+          - SENT
+          - RESULT_READY
+          - FAILED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        counters:
+          type: object
+          properties:
+            total:
+              type: integer
+            accepted:
+              type: integer
+            failed:
+              type: integer
+            sent:
+              type: integer
+    JobItemResult:
+      type: object
+      properties:
+        lineNo:
+          type: integer
+        traceId:
+          type: string
+        invoiceNo:
+          type: string
+        buyerId:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+          enum:
+          - QUEUED
+          - OK
+          - ERROR
+        resultCode:
+          type: string
+        resultMsg:
+          type: string
