@@ -1,0 +1,294 @@
+ /**
+ * TurnBridge - Milestone 0 基礎資料結構（Upload / Items / Storage / TrackRange）
+ * 目的：用 JHipster 產生後端 CRUD + React UI，欄位含繁中註解，並啟用審計欄位（新增/修改人員與時間）。
+ *
+ * 說明：
+ * - 全實體 extends AbstractAuditingEntity：取得 createdBy/createdDate/lastModifiedBy/lastModifiedDate。
+ * - 時間以 UTC ISO-8601（Z）存取；審計時間由 Spring Data JPA 自動帶值。
+ * - StoredObject 的欄位改為 contentLength（避免與分頁參數 size 衝突）。
+ */
+
+//////////////////////////////////////////////////////
+// Enums（枚舉）
+//////////////////////////////////////////////////////
+
+/** 批次狀態（UploadJob.status） */
+enum UploadJobStatus {
+  /**已接收 */
+  RECEIVED("已接收"),
+  /** 解析中 */
+  PARSING("解析中"), 
+  /** 驗證中 */
+  VALIDATING("驗證中"), 
+  /** 打包中（MIG/XML） */
+  PACKING("打包中（MIG/XML）"), 
+  /** 已送 Turnkey */
+  SENT("已送 Turnkey"), 
+  /** 回饋已備妥 */
+  RESULT_READY("回饋已備妥"),
+  /** 失敗（需人工或重送） */
+  FAILED("失敗（需人工或重送）") 
+}
+
+/** 明細處理狀態（UploadJobItem.status） */
+enum JobItemStatus {
+  /** 佇列中 */
+  QUEUED("佇列中"),  // 
+  /** 成功 */
+  OK("成功"),      // 
+  /** 失敗 */
+  ERROR("失敗")    // 
+}
+
+/** 儲存物件用途（StoredObject.purpose） */
+enum StoragePurpose {
+  /** 原始上傳 CSV/ZIP */
+  UPLOAD_ORIGINAL("原始上傳 CSV/ZIP"),
+  /** 回饋 CSV */
+  RESULT_CSV("回饋 CSV"), 
+  /** 產出的 MIG 4.1 XML（壓縮/封裝後） */
+  MIG_XML("產出的 MIG XML"), 
+  /** 財政部回饋 XML（Process/Summary） */
+  FEEDBACK_XML("財政部回饋 XML")
+}
+
+/** 稅別（UploadJobItem.taxType，依 MIG4.1 常見分類抽象化） */
+enum TaxType {
+  /** 應稅（TX） */
+  TAXABLE("應稅"),
+  /** 零稅率 */
+  ZERO("零稅率"),  
+  /** 免稅 */
+  EXEMPT("免稅")
+}
+
+/** 字軌區間狀態（TrackRange.status） */
+enum TrackRangeStatus {
+  /** 可用 */
+  ACTIVE("可用"),
+  /** 用盡 */
+  EXHAUSTED("用盡"),
+  /** 結束（含期末收斂）*/
+  CLOSED("結束")
+}
+
+//////////////////////////////////////////////////////
+// Entities（實體定義）— 全部繼承審計基底，帶「建立/修改人員帳號」
+//////////////////////////////////////////////////////
+
+/**
+ * 上傳批次主檔（UploadJob）
+ * 追蹤每次上傳的狀態、統計、來源檔資訊與回饋檔關聯。
+ */
+entity UploadJob  { //extends AbstractAuditingEntity
+  /** 批次識別碼（系統產生，對外曝光）；唯一 */
+  jobId String required unique minlength(8) maxlength(64)
+
+  /** 賣方統編或客戶識別碼（上傳端提供） */
+  sellerId String required minlength(3) maxlength(32)
+
+  /** 賣方名稱（可選；來自客戶資料或 CSV 抬頭） */
+  sellerName String maxlength(128)
+
+  /** 期別 YYYYMM（雙月分區用；可選） */
+  period String pattern(/[0-9]{6}/)
+
+  /** 解析 Profile 名稱（Legacy/Canonical 或其他） */
+  profile String minlength(3) maxlength(64)
+
+  /** 原始上傳檔案名稱（僅中繼資訊，實體位於 StoredObject） */
+  sourceFilename String maxlength(255)
+
+  /** 原始上傳檔案 MIME 類型（text/csv、application/zip…） */
+  sourceMediaType String maxlength(128)
+
+  /** 批次處理狀態 */
+  status UploadJobStatus required
+
+  // counters 統計
+  /** 批次總筆數 */
+  total Integer required min(0)
+
+  /** 驗證通過數 */
+  accepted Integer required min(0)
+
+  /** 驗證失敗數 */
+  failed Integer required min(0)
+
+  /** 已送 Turnkey 數 */
+  sent Integer required min(0)
+
+  /** 備註（營運人員補充或系統說明） */
+  remark String maxlength(1024)
+  
+}
+
+/**
+ * 上傳批次明細（UploadJobItem）
+ * 對應原始 CSV 每一行；保留處理結果、關鍵欄位與原始 payload（利於重送/追蹤）。
+ */
+entity UploadJobItem  { // extends AbstractAuditingEntity
+  /** 原始檔行號（1-based） */
+  lineNo Integer required min(1)
+
+  /** 全流程追蹤 ID（系統生成；jobId 衍生） */
+  traceId String required minlength(8) maxlength(64)
+
+  /** 處理狀態（QUEUED/OK/ERROR） */
+  status JobItemStatus required
+
+  /** 錯誤碼（如 0402 欄位缺漏、0510 金額不平…） */
+  resultCode String minlength(2) maxlength(16)
+
+  /** 錯誤訊息（可讀） */
+  resultMsg String maxlength(2048)
+
+  /** 買方統編/識別碼（B2C 可留空） */
+  buyerId String maxlength(64)
+
+  /** 買方名稱（B2C 常用） */
+  buyerName String maxlength(128)
+
+  /** 幣別（ISO 4217；預設 TWD） */
+  currency String maxlength(3)
+
+  /** 未稅金額（小數 2~4 位；實際精度依 DB 設定） */
+  amountExcl BigDecimal
+
+  /** 稅額 */
+  taxAmount BigDecimal
+
+  /** 含稅金額 */
+  amountIncl BigDecimal
+
+  /** 稅別（應稅/零稅/免稅） */
+  taxType TaxType
+
+  /** 發票日期（來源資料或預計開立日期） */
+  invoiceDate LocalDate
+
+  /** 指定或已分配的發票號碼（可為空） */
+  invoiceNo String maxlength(16)
+
+  /** 已分配字軌前綴（2 碼；如 AB） */
+  assignedPrefix String pattern(/[A-Z]{2}/)
+
+  /** 原始欄位 JSON（保留上傳原貌，利於重送/核對） */
+  rawPayload TextBlob
+
+  /** 原始資料 SHA-256（重送冪等等用途） */
+  rawHash String minlength(64) maxlength(64)
+
+  /** 系統自動判定之 Profile（如未指定時） */
+  profileDetected String maxlength(64)
+}
+
+/**
+ * 儲存物件（StoredObject）
+ * 存放檔案中繼資料；位元檔實際存於檔案系統/MinIO/S3。
+ */
+entity StoredObject  { // extends AbstractAuditingEntity
+  /** 儲存桶（或邏輯名稱） */
+  bucket String required maxlength(64)
+
+  /** 物件鍵（路徑+檔名） */
+  objectKey String required maxlength(512)
+
+  /** MIME 類型 */
+  mediaType String required maxlength(128)
+
+  /** 內容長度（bytes；避免保留字 size，改名 contentLength） */
+  contentLength Long required min(0)
+
+  /** 內容 SHA-256 */
+  sha256 String required minlength(64) maxlength(64)
+
+  /** 用途（原檔/結果/MIG/回饋） */
+  purpose StoragePurpose required
+
+  /** 原始檔名（未必等於 objectKey 最後片段） */
+  filename String maxlength(255)
+
+  /** 儲存等級（STANDARD/GLACIER…；自由字串） */
+  storageClass String maxlength(32)
+
+  /** 加密演算法（如 AES256 / aws:kms；自由字串） */
+  encryption String maxlength(32)
+
+  /** 其他中繼資料（JSON） */
+  metadata TextBlob
+}
+
+/**
+ * 字軌配號區間（TrackRange）
+ * 來源自 E0401；配號併發控制用 version 與（未來）Redis 鎖。
+ */
+entity TrackRange  { //extends AbstractAuditingEntity
+  /** 賣方識別（統編/客戶 ID） */
+  sellerId String required minlength(3) maxlength(32)
+
+  /** 期別 YYYYMM（雙月） */
+  period String required pattern(/[0-9]{6}/)
+
+  /** 字軌前綴（2 碼） */
+  prefix String required pattern(/[A-Z]{2}/)
+
+  /** 起號（含） */
+  startNo Long required min(1)
+
+  /** 迄號（含） */
+  endNo Long required min(1)
+
+  /** 目前已用到的號碼（0 表尚未使用） */
+  currentNo Long required min(0)
+
+  /** 區間狀態（ACTIVE/EXHAUSTED/CLOSED） */
+  status TrackRangeStatus required
+
+  /** 樂觀鎖版本（每次取號遞增） */
+  version Integer required min(0)
+
+  /** 併發鎖擁有者（節點 ID 或執行緒記號；可選） */
+  lockOwner String maxlength(64)
+
+  /** 併發鎖時間（UTC；可選） */
+  lockAt Instant
+}
+
+//////////////////////////////////////////////////////
+// Relationships（關聯）
+//////////////////////////////////////////////////////
+
+/** UploadJob 1 - * UploadJobItem（明細隸屬批次） */
+relationship OneToMany {
+  UploadJob{items} to UploadJobItem{job(jobId) required}
+}
+
+/** UploadJob 多對一 兩個檔案關聯：原始檔（必填）/ 回饋檔（可空） */
+relationship ManyToOne {
+  UploadJob{originalFile required } to StoredObject,
+  UploadJob{resultFile} to StoredObject
+}
+
+//////////////////////////////////////////////////////
+// Options（DTO/Service/Filtering/Pagination/UI）
+//////////////////////////////////////////////////////
+
+dto * with mapstruct
+service * with serviceClass
+filter *
+paginate UploadJob, UploadJobItem, StoredObject, TrackRange with pagination
+
+//////////////////////////////////////////////////////
+// 後續用 Liquibase 補複合鍵與索引（見下方 XML）
+//////////////////////////////////////////////////////
+
+/*
+產出後請用 Liquibase 補充：
+- unique (track_range.seller_id, track_range.period, track_range.prefix)
+- index  (upload_job_item.job_id, upload_job_item.line_no)
+- index  (upload_job.seller_id, upload_job.created_at)
+- index  (upload_job_item.status, upload_job_item.result_code)
+- check  (track_range.start_no <= track_range.end_no)
+- index  (stored_object.sha256)
+*/

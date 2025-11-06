@@ -1,0 +1,62 @@
+{
+  "turnbridgeBackendApp": {
+    "uploadJobItem": {
+      "home": {
+        "title": "Upload Job Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Upload Job Item",
+        "createOrEditLabel": "Create or edit a Upload Job Item",
+        "notFound": "No Upload Job Items found"
+      },
+      "created": "A new Upload Job Item is created with identifier {{ param }}",
+      "updated": "A Upload Job Item is updated with identifier {{ param }}",
+      "deleted": "A Upload Job Item is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Upload Job Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Upload Job Item"
+      },
+      "id": "ID",
+      "lineNo": "Line No",
+      "traceId": "Trace Id",
+      "status": "Status",
+      "resultCode": "Result Code",
+      "resultMsg": "Result Msg",
+      "buyerId": "Buyer Id",
+      "buyerName": "Buyer Name",
+      "currency": "Currency",
+      "amountExcl": "Amount Excl",
+      "taxAmount": "Tax Amount",
+      "amountIncl": "Amount Incl",
+      "taxType": "Tax Type",
+      "invoiceDate": "Invoice Date",
+      "invoiceNo": "Invoice No",
+      "assignedPrefix": "Assigned Prefix",
+      "rawPayload": "Raw Payload",
+      "rawHash": "Raw Hash",
+      "profileDetected": "Profile Detected",
+      "job": "Job",
+      "help": {
+        "lineNo": "原始檔行號（1-based）",
+        "traceId": "全流程追蹤 ID（系統生成；jobId 衍生）",
+        "status": "處理狀態（QUEUED/OK/ERROR）",
+        "resultCode": "錯誤碼（如 0402 欄位缺漏、0510 金額不平…）",
+        "resultMsg": "錯誤訊息（可讀）",
+        "buyerId": "買方統編/識別碼（B2C 可留空）",
+        "buyerName": "買方名稱（B2C 常用）",
+        "currency": "幣別（ISO 4217；預設 TWD）",
+        "amountExcl": "未稅金額（小數 2~4 位；實際精度依 DB 設定）",
+        "taxAmount": "稅額",
+        "amountIncl": "含稅金額",
+        "taxType": "稅別（應稅/零稅/免稅）",
+        "invoiceDate": "發票日期（來源資料或預計開立日期）",
+        "invoiceNo": "指定或已分配的發票號碼（可為空）",
+        "assignedPrefix": "已分配字軌前綴（2 碼；如 AB）",
+        "rawPayload": "原始欄位 JSON（保留上傳原貌，利於重送/核對）",
+        "rawHash": "原始資料 SHA-256（重送冪等等用途）",
+        "profileDetected": "系統自動判定之 Profile（如未指定時）"
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "annotations": {
+    "changelogDate": "20251106053605"
+  },
+  "applications": "*",
+  "documentation": "儲存物件（StoredObject）\\n存放檔案中繼資料；位元檔實際存於檔案系統/MinIO/S3。",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "儲存桶（或邏輯名稱）",
+      "fieldName": "bucket",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "物件鍵（路徑+檔名）",
+      "fieldName": "objectKey",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "512"
+    },
+    {
+      "documentation": "MIME 類型",
+      "fieldName": "mediaType",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "內容長度（bytes；避免保留字 size，改名 contentLength）",
+      "fieldName": "contentLength",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "內容 SHA-256",
+      "fieldName": "sha256",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "64",
+      "fieldValidateRulesMinlength": "64"
+    },
+    {
+      "documentation": "用途（原檔/結果/MIG/回饋）",
+      "fieldName": "purpose",
+      "fieldType": "StoragePurpose",
+      "fieldTypeDocumentation": "儲存物件用途（StoredObject.purpose）",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "UPLOAD_ORIGINAL (原始上傳 CSV/ZIP),RESULT_CSV (回饋 CSV),MIG_XML (產出的 MIG XML),FEEDBACK_XML (財政部回饋 XML)",
+      "fieldValuesJavadocs": {
+        "FEEDBACK_XML": "財政部回饋 XML（Process/Summary）",
+        "MIG_XML": "產出的 MIG 4.1 XML（壓縮/封裝後）",
+        "RESULT_CSV": "回饋 CSV",
+        "UPLOAD_ORIGINAL": "原始上傳 CSV/ZIP"
+      }
+    },
+    {
+      "documentation": "原始檔名（未必等於 objectKey 最後片段）",
+      "fieldName": "filename",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "255"
+    },
+    {
+      "documentation": "儲存等級（STANDARD/GLACIER…；自由字串）",
+      "fieldName": "storageClass",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "加密演算法（如 AES256 / aws:kms；自由字串）",
+      "fieldName": "encryption",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "其他中繼資料（JSON）",
+      "fieldName": "metadata",
+      "fieldType": "TextBlob"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "StoredObject",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

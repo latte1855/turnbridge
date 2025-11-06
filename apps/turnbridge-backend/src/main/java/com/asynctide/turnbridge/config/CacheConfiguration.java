@@ -83,6 +83,11 @@ public class CacheConfiguration {
             createCache(cm, com.asynctide.turnbridge.domain.User.class.getName(), jcacheConfiguration);
             createCache(cm, com.asynctide.turnbridge.domain.Authority.class.getName(), jcacheConfiguration);
             createCache(cm, com.asynctide.turnbridge.domain.User.class.getName() + ".authorities", jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.UploadJob.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.UploadJob.class.getName() + ".items", jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.UploadJobItem.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.StoredObject.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.TrackRange.class.getName(), jcacheConfiguration);
             // jhipster-needle-redis-add-entry
         };
     }

@@ -1,0 +1,91 @@
+{
+  "annotations": {
+    "changelogDate": "20251106053606"
+  },
+  "applications": "*",
+  "documentation": "字軌配號區間（TrackRange）\\n來源自 E0401；配號併發控制用 version 與（未來）Redis 鎖。",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "賣方識別（統編/客戶 ID）",
+      "fieldName": "sellerId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "32",
+      "fieldValidateRulesMinlength": "3"
+    },
+    {
+      "documentation": "期別 YYYYMM（雙月）",
+      "fieldName": "period",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "pattern"],
+      "fieldValidateRulesPattern": "[0-9]{6}"
+    },
+    {
+      "documentation": "字軌前綴（2 碼）",
+      "fieldName": "prefix",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "pattern"],
+      "fieldValidateRulesPattern": "[A-Z]{2}"
+    },
+    {
+      "documentation": "起號（含）",
+      "fieldName": "startNo",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "documentation": "迄號（含）",
+      "fieldName": "endNo",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "documentation": "目前已用到的號碼（0 表尚未使用）",
+      "fieldName": "currentNo",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "區間狀態（ACTIVE/EXHAUSTED/CLOSED）",
+      "fieldName": "status",
+      "fieldType": "TrackRangeStatus",
+      "fieldTypeDocumentation": "字軌區間狀態（TrackRange.status）",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "ACTIVE (可用),EXHAUSTED (用盡),CLOSED (結束)",
+      "fieldValuesJavadocs": {
+        "ACTIVE": "可用",
+        "CLOSED": "結束（含期末收斂）",
+        "EXHAUSTED": "用盡"
+      }
+    },
+    {
+      "documentation": "樂觀鎖版本（每次取號遞增）",
+      "fieldName": "version",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "併發鎖擁有者（節點 ID 或執行緒記號；可選）",
+      "fieldName": "lockOwner",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "併發鎖時間（UTC；可選）",
+      "fieldName": "lockAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "TrackRange",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

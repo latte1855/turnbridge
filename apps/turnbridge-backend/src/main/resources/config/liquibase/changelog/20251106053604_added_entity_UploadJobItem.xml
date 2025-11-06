@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity UploadJobItem.
+    -->
+    <changeSet id="20251106053604-1" author="jhipster">
+        <createTable tableName="upload_job_item" remarks="上傳批次明細（UploadJobItem）\n對應原始 CSV 每一行；保留處理結果、關鍵欄位與原始 payload（利於重送/追蹤）。">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="line_no" type="integer" remarks="原始檔行號（1-based）">
+                <constraints nullable="false" />
+            </column>
+            <column name="trace_id" type="varchar(64)" remarks="全流程追蹤 ID（系統生成；jobId 衍生）">
+                <constraints nullable="false" />
+            </column>
+            <column name="status" type="varchar(255)" remarks="處理狀態（QUEUED/OK/ERROR）">
+                <constraints nullable="false" />
+            </column>
+            <column name="result_code" type="varchar(16)" remarks="錯誤碼（如 0402 欄位缺漏、0510 金額不平…）">
+                <constraints nullable="true" />
+            </column>
+            <column name="result_msg" type="varchar(2048)" remarks="錯誤訊息（可讀）">
+                <constraints nullable="true" />
+            </column>
+            <column name="buyer_id" type="varchar(64)" remarks="買方統編/識別碼（B2C 可留空）">
+                <constraints nullable="true" />
+            </column>
+            <column name="buyer_name" type="varchar(128)" remarks="買方名稱（B2C 常用）">
+                <constraints nullable="true" />
+            </column>
+            <column name="currency" type="varchar(3)" remarks="幣別（ISO 4217；預設 TWD）">
+                <constraints nullable="true" />
+            </column>
+            <column name="amount_excl" type="decimal(21,2)" remarks="未稅金額（小數 2~4 位；實際精度依 DB 設定）">
+                <constraints nullable="true" />
+            </column>
+            <column name="tax_amount" type="decimal(21,2)" remarks="稅額">
+                <constraints nullable="true" />
+            </column>
+            <column name="amount_incl" type="decimal(21,2)" remarks="含稅金額">
+                <constraints nullable="true" />
+            </column>
+            <column name="tax_type" type="varchar(255)" remarks="稅別（應稅/零稅/免稅）">
+                <constraints nullable="true" />
+            </column>
+            <column name="invoice_date" type="date" remarks="發票日期（來源資料或預計開立日期）">
+                <constraints nullable="true" />
+            </column>
+            <column name="invoice_no" type="varchar(16)" remarks="指定或已分配的發票號碼（可為空）">
+                <constraints nullable="true" />
+            </column>
+            <column name="assigned_prefix" type="varchar(255)" remarks="已分配字軌前綴（2 碼；如 AB）">
+                <constraints nullable="true" />
+            </column>
+            <column name="raw_payload" type="${clobType}" remarks="原始欄位 JSON（保留上傳原貌，利於重送/核對）">
+                <constraints nullable="true" />
+            </column>
+            <column name="raw_hash" type="varchar(64)" remarks="原始資料 SHA-256（重送冪等等用途）">
+                <constraints nullable="true" />
+            </column>
+            <column name="profile_detected" type="varchar(64)" remarks="系統自動判定之 Profile（如未指定時）">
+                <constraints nullable="true" />
+            </column>
+            <column name="job_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_by" type="varchar(50)" remarks="建立人員">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_date" type="${datetimeType}" remarks="建立時間">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_modified_by" type="varchar(50)" remarks="異動人員）">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" remarks="異動時間">
+                <constraints nullable="false" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+        <dropDefaultValue tableName="upload_job_item" columnName="created_date" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="upload_job_item" columnName="last_modified_date" columnDataType="${datetimeType}"/>
+    </changeSet>
+
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+
+    <!--
+        Load sample data generated with Faker.js
+        - This data can be easily edited using a CSV editor (or even MS Excel) and
+          is located in the 'src/main/resources/config/liquibase/fake-data' directory
+        - By default this data is applied when running with the JHipster 'dev' profile.
+          This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
+          Spring Boot configuration key.
+    -->
+    <changeSet id="20251106053604-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/upload_job_item.csv"
+                  separator=";"
+                  tableName="upload_job_item"
+                  usePreparedStatements="true">
+            <column name="id" type="numeric"/>
+            <column name="line_no" type="numeric"/>
+            <column name="trace_id" type="string"/>
+            <column name="status" type="string"/>
+            <column name="result_code" type="string"/>
+            <column name="result_msg" type="string"/>
+            <column name="buyer_id" type="string"/>
+            <column name="buyer_name" type="string"/>
+            <column name="currency" type="string"/>
+            <column name="amount_excl" type="numeric"/>
+            <column name="tax_amount" type="numeric"/>
+            <column name="amount_incl" type="numeric"/>
+            <column name="tax_type" type="string"/>
+            <column name="invoice_date" type="date"/>
+            <column name="invoice_no" type="string"/>
+            <column name="assigned_prefix" type="string"/>
+            <column name="raw_payload" type="string"/>
+            <column name="raw_hash" type="string"/>
+            <column name="profile_detected" type="string"/>
+            <column name="job_id" type="numeric"/>
+            <column name="created_by" type="string"/>
+            <column name="created_date" type="date"/>
+            <column name="last_modified_by" type="string"/>
+            <column name="last_modified_date" type="date"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

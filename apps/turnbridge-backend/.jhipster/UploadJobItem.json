@@ -1,0 +1,156 @@
+{
+  "annotations": {
+    "changelogDate": "20251106053604"
+  },
+  "applications": "*",
+  "documentation": "上傳批次明細（UploadJobItem）\\n對應原始 CSV 每一行；保留處理結果、關鍵欄位與原始 payload（利於重送/追蹤）。",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "原始檔行號（1-based）",
+      "fieldName": "lineNo",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "documentation": "全流程追蹤 ID（系統生成；jobId 衍生）",
+      "fieldName": "traceId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "64",
+      "fieldValidateRulesMinlength": "8"
+    },
+    {
+      "documentation": "處理狀態（QUEUED/OK/ERROR）",
+      "fieldName": "status",
+      "fieldType": "JobItemStatus",
+      "fieldTypeDocumentation": "明細處理狀態（UploadJobItem.status）",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "QUEUED (佇列中),OK (成功),ERROR (失敗)",
+      "fieldValuesJavadocs": {
+        "ERROR": "失敗",
+        "OK": "成功",
+        "QUEUED": "佇列中"
+      }
+    },
+    {
+      "documentation": "錯誤碼（如 0402 欄位缺漏、0510 金額不平…）",
+      "fieldName": "resultCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "16",
+      "fieldValidateRulesMinlength": "2"
+    },
+    {
+      "documentation": "錯誤訊息（可讀）",
+      "fieldName": "resultMsg",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "2048"
+    },
+    {
+      "documentation": "買方統編/識別碼（B2C 可留空）",
+      "fieldName": "buyerId",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "買方名稱（B2C 常用）",
+      "fieldName": "buyerName",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "幣別（ISO 4217；預設 TWD）",
+      "fieldName": "currency",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "3"
+    },
+    {
+      "documentation": "未稅金額（小數 2~4 位；實際精度依 DB 設定）",
+      "fieldName": "amountExcl",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "稅額",
+      "fieldName": "taxAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "含稅金額",
+      "fieldName": "amountIncl",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "稅別（應稅/零稅/免稅）",
+      "fieldName": "taxType",
+      "fieldType": "TaxType",
+      "fieldTypeDocumentation": "稅別（UploadJobItem.taxType，依 MIG4.1 常見分類抽象化）",
+      "fieldValues": "TAXABLE (應稅),ZERO (零稅率),EXEMPT (免稅)",
+      "fieldValuesJavadocs": {
+        "EXEMPT": "免稅",
+        "TAXABLE": "應稅（TX）",
+        "ZERO": "零稅率"
+      }
+    },
+    {
+      "documentation": "發票日期（來源資料或預計開立日期）",
+      "fieldName": "invoiceDate",
+      "fieldType": "LocalDate"
+    },
+    {
+      "documentation": "指定或已分配的發票號碼（可為空）",
+      "fieldName": "invoiceNo",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "已分配字軌前綴（2 碼；如 AB）",
+      "fieldName": "assignedPrefix",
+      "fieldType": "String",
+      "fieldValidateRules": ["pattern"],
+      "fieldValidateRulesPattern": "[A-Z]{2}"
+    },
+    {
+      "documentation": "原始欄位 JSON（保留上傳原貌，利於重送/核對）",
+      "fieldName": "rawPayload",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "原始資料 SHA-256（重送冪等等用途）",
+      "fieldName": "rawHash",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "64",
+      "fieldValidateRulesMinlength": "64"
+    },
+    {
+      "documentation": "系統自動判定之 Profile（如未指定時）",
+      "fieldName": "profileDetected",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "UploadJobItem",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "jobId",
+      "otherEntityName": "uploadJob",
+      "otherEntityRelationshipName": "items",
+      "relationshipName": "job",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}
