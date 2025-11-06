@@ -39,4 +39,7 @@ public interface UploadJobItemRepository
 
     @Query("select uploadJobItem from UploadJobItem uploadJobItem left join fetch uploadJobItem.job where uploadJobItem.id =:id")
     Optional<UploadJobItem> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Page<UploadJobItem> findByJobId(Long jobId, Pageable p);
+    boolean existsByJobIdAndLineNo(Long jobId, Integer lineNo);
 }
