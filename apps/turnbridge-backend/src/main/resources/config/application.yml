@@ -227,3 +227,17 @@ jhipster:
 # ===================================================================
 
 # application:
+
+turnbridge:
+  storage:
+    type: local            # local|minio
+    local:
+      base-dir: ${USER_HOME:/tmp}/turnbridge/storage
+    minio:
+      endpoint: http://localhost:9000
+      access-key: minioadmin
+      secret-key: minioadmin
+      bucket-policy: private
+  upload:
+    result-filename-template: "RESULT_CSV-%s-%s-%s.csv" # sellerId, period, random
+
