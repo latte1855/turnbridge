@@ -1,13 +1,17 @@
 package com.asynctide.turnbridge.web.rest;
 
+import com.asynctide.turnbridge.domain.StoredObject;
 import com.asynctide.turnbridge.repository.StoredObjectRepository;
 import com.asynctide.turnbridge.service.StoredObjectQueryService;
 import com.asynctide.turnbridge.service.StoredObjectService;
 import com.asynctide.turnbridge.service.criteria.StoredObjectCriteria;
 import com.asynctide.turnbridge.service.dto.StoredObjectDTO;
+import com.asynctide.turnbridge.storage.StorageProvider;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -46,14 +51,18 @@ public class StoredObjectResource {
 
     private final StoredObjectQueryService storedObjectQueryService;
 
+    private final StorageProvider storage;
+
     public StoredObjectResource(
         StoredObjectService storedObjectService,
         StoredObjectRepository storedObjectRepository,
-        StoredObjectQueryService storedObjectQueryService
+        StoredObjectQueryService storedObjectQueryService,
+        StorageProvider storage
     ) {
         this.storedObjectService = storedObjectService;
         this.storedObjectRepository = storedObjectRepository;
         this.storedObjectQueryService = storedObjectQueryService;
+        this.storage = storage;
     }
 
     /**
@@ -202,5 +211,23 @@ public class StoredObjectResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /**
+     * {@code GET  /stored-objects/:id/download} : download the "id" storedObject.
+     *
+     *  @param id the id of the storedObjectDTO to download.
+     *  @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the storedObjectDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable Long id) throws Exception {
+        StoredObject so = storedObjectRepository.findById(id).orElseThrow();
+        InputStream in = storage.open(so.getBucket(), so.getObjectKey()).orElseThrow();
+        byte[] bytes = in.readAllBytes();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + so.getFilename() + "\"")
+                .contentType(MediaType.parseMediaType(so.getMediaType()))
+                .contentLength(bytes.length)
+                .body(bytes);
     }
 }

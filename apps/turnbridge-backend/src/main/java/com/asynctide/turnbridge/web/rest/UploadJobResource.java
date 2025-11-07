@@ -1,5 +1,10 @@
 package com.asynctide.turnbridge.web.rest;
 
+import com.asynctide.turnbridge.app.UploadJobAppService;
+import com.asynctide.turnbridge.domain.UploadJob;
+import com.asynctide.turnbridge.domain.UploadJobItem;
+import com.asynctide.turnbridge.domain.enumeration.JobItemStatus;
+import com.asynctide.turnbridge.repository.UploadJobItemRepository;
 import com.asynctide.turnbridge.repository.UploadJobRepository;
 import com.asynctide.turnbridge.service.UploadJobQueryService;
 import com.asynctide.turnbridge.service.UploadJobService;
@@ -7,6 +12,7 @@ import com.asynctide.turnbridge.service.criteria.UploadJobCriteria;
 import com.asynctide.turnbridge.service.dto.UploadJobDTO;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,8 +25,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -46,14 +55,22 @@ public class UploadJobResource {
 
     private final UploadJobQueryService uploadJobQueryService;
 
+    private final UploadJobAppService appService;
+
+    private final UploadJobItemRepository uploadJobItemRepository;
+
     public UploadJobResource(
         UploadJobService uploadJobService,
         UploadJobRepository uploadJobRepository,
-        UploadJobQueryService uploadJobQueryService
+        UploadJobQueryService uploadJobQueryService,
+        UploadJobAppService appService,
+        UploadJobItemRepository uploadJobItemRepository
     ) {
         this.uploadJobService = uploadJobService;
         this.uploadJobRepository = uploadJobRepository;
         this.uploadJobQueryService = uploadJobQueryService;
+        this.appService = appService;
+        this.uploadJobItemRepository = uploadJobItemRepository;
     }
 
     /**
@@ -201,5 +218,32 @@ public class UploadJobResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /** 建立批次（multipart），支援 Idempotency-Key（Header）。 */
+    @PostMapping(value="/_multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadJob> createJob(
+            @RequestPart("file") MultipartFile file,
+            @RequestParam @NotBlank String sellerId,
+            @RequestParam(required = false) String profile,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idemKey) {
+        UploadJob job = appService.createFromMultipart(file, sellerId, profile, idemKey);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
+    }
+
+    
+
+    /** 查詢明細：可用 status 篩選（其他條件 M1 再補）。 */
+    @GetMapping("/{id}/items")
+    public ResponseEntity<Page<UploadJobItem>> findItems(@PathVariable Long id,
+                                                         @RequestParam(required = false) JobItemStatus status,
+                                                         Pageable pageable) {
+        Page<UploadJobItem> page = (status == null)
+                ? uploadJobItemRepository.findByJobId(id, pageable)
+                : uploadJobItemRepository.findAll((root, q, cb) -> cb.and(
+                    cb.equal(root.get("job").get("id"), id),
+                    cb.equal(root.get("status"), status)
+                ), pageable);
+        return ResponseEntity.ok(page);
     }
 }
