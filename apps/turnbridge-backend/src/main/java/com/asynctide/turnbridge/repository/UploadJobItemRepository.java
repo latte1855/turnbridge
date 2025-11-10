@@ -69,8 +69,22 @@ public interface UploadJobItemRepository
     @Query("select count(i) from UploadJobItem i where i.job.jobId = :jobId and i.status = :status")
     long countByJobJobIdAndStatus(@Param("jobId") String jobId, @Param("status") JobItemStatus status);
     
-    @Modifying
-    @Query("update UploadJobItem i set i.status = 'QUEUED', i.resultCode = null, i.resultMsg = null where i.job.jobId = :jobId and i.status = 'ERROR'")
+    /** 批次更新：把某個 字串 jobId（UploadJob.jobId）底下 ERROR -> QUEUED */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        update UploadJobItem i
+           set i.status = com.asynctide.turnbridge.domain.enumeration.JobItemStatus.QUEUED,
+               i.resultCode = null,
+               i.resultMsg = null
+         where i.job.jobId = :jobId
+           and i.status = com.asynctide.turnbridge.domain.enumeration.JobItemStatus.ERROR
+    """)
     int requeueFailedByJobJobId(@Param("jobId") String jobId);
+    
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update UploadJobItem i set i.status = :to where i.job.jobId = :jobId and i.status = :from")
+    int updateStatusByJobJobIdAndStatus(@Param("jobId") String jobId,
+                                        @Param("from") JobItemStatus from,
+                                        @Param("to") JobItemStatus to);
 
 }

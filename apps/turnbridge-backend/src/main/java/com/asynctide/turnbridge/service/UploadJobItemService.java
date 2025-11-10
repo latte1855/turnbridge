@@ -227,8 +227,9 @@ public class UploadJobItemService {
         return page.map(uploadJobItemMapper::toDto);
     }
 
-    /** 依字串 jobId（UploadJob.jobId）更新狀態為 QUEUE */
-	public int requeueFailedByJobJobId(String jobId) {
-		return uploadJobItemRepository.requeueFailedByJobJobId(jobId);
-	}
+	
+	/** 依字串 jobId（UploadJob.jobId）把 ERROR 明細改成 QUEUED，回傳影響筆數 */
+    public int requeueFailedByJobJobId(String jobId) {
+        return uploadJobItemRepository.requeueFailedByJobJobId(jobId);
+    }
 }

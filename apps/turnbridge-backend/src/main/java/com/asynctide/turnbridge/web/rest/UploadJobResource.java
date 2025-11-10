@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,6 +39,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
+
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -394,10 +397,11 @@ public class UploadJobResource {
             body = merged;
         }
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + so.getFilename() + "\"")
-            .contentType(mt)
-            .contentLength(body.length)
-            .body(body);
+        	    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + UriUtils.encode(so.getFilename(), StandardCharsets.UTF_8))
+        	    .header(HttpHeaders.ETAG, "\"" + Optional.ofNullable(so.getSha256()).orElse(String.valueOf(body.length)) + "\"")
+        	    .contentType(mt)
+        	    .contentLength(body.length)
+        	    .body(body);
     }
     
     
