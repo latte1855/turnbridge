@@ -1,6 +1,7 @@
 package com.asynctide.turnbridge.service;
 
 import com.asynctide.turnbridge.domain.UploadJobItem;
+import com.asynctide.turnbridge.domain.enumeration.JobItemStatus;
 import com.asynctide.turnbridge.repository.UploadJobItemRepository;
 import com.asynctide.turnbridge.service.dto.UploadJobItemDTO;
 import com.asynctide.turnbridge.service.mapper.UploadJobItemMapper;
@@ -209,5 +210,20 @@ public class UploadJobItemService {
             ? uploadJobItemRepository.findAll(sort).stream()
             : StreamSupport.stream(uploadJobItemRepository.findAll(predicate, sort).spliterator(), false);
         return stream.map(mapper).collect(Collectors.toList());
+    }
+    
+    /** 依數字主鍵 id（UploadJob.id）查詢 */
+    @Transactional(readOnly = true)
+    public Page<UploadJobItemDTO> findByJobId(Long jobId, Pageable page){
+    	return this.uploadJobItemRepository.findByJobId(jobId, page).map(uploadJobItemMapper::toDto);
+    }
+
+    /** 依字串 jobId（UploadJob.jobId）查詢 */
+    @Transactional(readOnly = true)
+    public Page<UploadJobItemDTO> findByJobJobId(String jobId, JobItemStatus status, Pageable pageable) {
+        Page<UploadJobItem> page = (status == null)
+            ? uploadJobItemRepository.findByJobJobId(jobId, pageable)
+            : uploadJobItemRepository.findByJobJobIdAndStatus(jobId, status, pageable);
+        return page.map(uploadJobItemMapper::toDto);
     }
 }

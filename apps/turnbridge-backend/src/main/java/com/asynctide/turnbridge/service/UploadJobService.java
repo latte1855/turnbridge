@@ -195,4 +195,10 @@ public class UploadJobService {
             : StreamSupport.stream(uploadJobRepository.findAll(predicate, sort).spliterator(), false);
         return stream.map(mapper).collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+	public Optional<UploadJobDTO> findOneByJobId(String jobId) {
+		LOG.debug("Request to get UploadJob by JobId(String) : {}", jobId);
+		return uploadJobRepository.findOneByJobId(jobId).map(uploadJobMapper::toDto);
+	}
 }

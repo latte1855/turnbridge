@@ -94,3 +94,13 @@ management:
   health:
     mail:
       enabled: false
+
+
+
+turnbridge:
+  storage:
+    type: local            # local|minio
+    local:
+      base-dir: ${java.io.tmpdir}/turnbridge-it-storage
+  upload:
+    result-filename-template: "RESULT_CSV-%s-%s-%s.csv" # sellerId, period, random

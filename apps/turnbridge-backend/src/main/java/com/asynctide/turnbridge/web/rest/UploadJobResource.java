@@ -1,19 +1,25 @@
 package com.asynctide.turnbridge.web.rest;
 
 import com.asynctide.turnbridge.app.UploadJobAppService;
-import com.asynctide.turnbridge.domain.UploadJob;
-import com.asynctide.turnbridge.domain.UploadJobItem;
 import com.asynctide.turnbridge.domain.enumeration.JobItemStatus;
 import com.asynctide.turnbridge.repository.UploadJobItemRepository;
 import com.asynctide.turnbridge.repository.UploadJobRepository;
+import com.asynctide.turnbridge.service.StoredObjectService;
+import com.asynctide.turnbridge.service.UploadJobItemQueryService;
+import com.asynctide.turnbridge.service.UploadJobItemService;
 import com.asynctide.turnbridge.service.UploadJobQueryService;
 import com.asynctide.turnbridge.service.UploadJobService;
 import com.asynctide.turnbridge.service.criteria.UploadJobCriteria;
+import com.asynctide.turnbridge.service.criteria.UploadJobItemCriteria;
+import com.asynctide.turnbridge.service.dto.StoredObjectDTO;
 import com.asynctide.turnbridge.service.dto.UploadJobDTO;
+import com.asynctide.turnbridge.service.dto.UploadJobItemDTO;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
+
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -25,11 +31,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -37,6 +41,9 @@ import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing {@link com.asynctide.turnbridge.domain.UploadJob}.
+ * 上傳批次（UploadJob）REST API。
+ * 
+ * <p>注意：所有清單端點皆回傳 DTO，避免 Entity 在序列化過程中被修改造成非預期 flush。</p>
  */
 @RestController
 @RequestMapping("/api/upload-jobs")
@@ -58,19 +65,31 @@ public class UploadJobResource {
     private final UploadJobAppService appService;
 
     private final UploadJobItemRepository uploadJobItemRepository;
+    
+    private final UploadJobItemService uploadJobItemService;
+    
+    private final UploadJobItemQueryService uploadJobItemQueryService;
+    
+    private final StoredObjectService storedObjectService;
 
     public UploadJobResource(
         UploadJobService uploadJobService,
         UploadJobRepository uploadJobRepository,
         UploadJobQueryService uploadJobQueryService,
         UploadJobAppService appService,
-        UploadJobItemRepository uploadJobItemRepository
+        UploadJobItemRepository uploadJobItemRepository,
+        UploadJobItemService uploadJobItemService,
+        UploadJobItemQueryService uploadJobItemQueryService,
+        StoredObjectService storedObjectService
     ) {
         this.uploadJobService = uploadJobService;
         this.uploadJobRepository = uploadJobRepository;
         this.uploadJobQueryService = uploadJobQueryService;
         this.appService = appService;
         this.uploadJobItemRepository = uploadJobItemRepository;
+        this.uploadJobItemService = uploadJobItemService;
+        this.uploadJobItemQueryService = uploadJobItemQueryService;
+        this.storedObjectService = storedObjectService;
     }
 
     /**
@@ -219,31 +238,92 @@ public class UploadJobResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
     }
-
-    /** 建立批次（multipart），支援 Idempotency-Key（Header）。 */
-    @PostMapping(value="/_multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UploadJob> createJob(
-            @RequestPart("file") MultipartFile file,
-            @RequestParam @NotBlank String sellerId,
-            @RequestParam(required = false) String profile,
-            @RequestHeader(value = "Idempotency-Key", required = false) String idemKey) {
-        UploadJob job = appService.createFromMultipart(file, sellerId, profile, idemKey);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(job);
-    }
-
     
+    // -----------------------------
+    // 批次明細查詢（DTO + 分頁 headers）
+    // -----------------------------
 
-    /** 查詢明細：可用 status 篩選（其他條件 M1 再補）。 */
+    /** 依數字 id 查詢明細（可選 status；回傳 DTO List）。 */
     @GetMapping("/{id}/items")
-    public ResponseEntity<Page<UploadJobItem>> findItems(@PathVariable Long id,
-                                                         @RequestParam(required = false) JobItemStatus status,
-                                                         Pageable pageable) {
-        Page<UploadJobItem> page = (status == null)
-                ? uploadJobItemRepository.findByJobId(id, pageable)
-                : uploadJobItemRepository.findAll((root, q, cb) -> cb.and(
-                    cb.equal(root.get("job").get("id"), id),
-                    cb.equal(root.get("status"), status)
-                ), pageable);
-        return ResponseEntity.ok(page);
+    public ResponseEntity<List<UploadJobItemDTO>> findItemsByNumericId(
+        @PathVariable Long id,
+        @RequestParam(required = false) JobItemStatus status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
+        UploadJobItemCriteria criteria = new UploadJobItemCriteria();
+        criteria.jobId().setEquals(id);
+        if (status != null) criteria.status().setEquals(status);
+
+        Page<UploadJobItemDTO> page = uploadJobItemQueryService.findByCriteria(criteria, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
+
+    /** 依字串 jobId 查詢明細（可選 status；回傳 DTO List）。 */
+    @GetMapping("/by-job-id/{jobId}/items")
+    public ResponseEntity<List<UploadJobItemDTO>> findItemsByJobId(
+        @PathVariable String jobId,
+        @RequestParam(required = false) JobItemStatus status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
+        Page<UploadJobItemDTO> page = uploadJobItemService.findByJobJobId(jobId, status, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    // -----------------------------
+    // 回饋檔下載（兩種路徑）
+    // -----------------------------
+
+    /** 以數字 id 下載回饋檔。 */
+    @GetMapping("/{id}/result")
+    public ResponseEntity<byte[]> downloadResultById(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "false") boolean bom
+    ) throws Exception {
+        UploadJobDTO job = uploadJobService.findOne(id).orElseThrow();
+        return buildResultResponse(job, bom);
+    }
+
+    /** 以字串 jobId 下載回饋檔（對應你的測試呼叫方式）。 */
+    @GetMapping("/by-job-id/{jobId}/result")
+    public ResponseEntity<byte[]> downloadResultByJobId(
+        @PathVariable String jobId,
+        @RequestParam(defaultValue = "false") boolean bom
+    ) throws Exception {
+        UploadJobDTO job = uploadJobService.findOneByJobId(jobId).orElseThrow();
+        return buildResultResponse(job, bom);
+    }
+
+    // 共用回應建構
+    private ResponseEntity<byte[]> buildResultResponse(UploadJobDTO job, boolean bom) throws Exception {
+        StoredObjectDTO so = job.getResultFile();
+        so = storedObjectService.findOne(so.getId()).orElseThrow();
+        LOG.info("buildResultResponse.so : {}", so);
+        if (so == null) return ResponseEntity.notFound().build();
+
+        byte[] body;
+        try (InputStream in = appService.openStoredObject(so)) {
+            body = in.readAllBytes();
+        }
+        catch (Exception e) {
+			LOG.error("", e);
+			throw e;
+		}
+        MediaType mt = MediaType.parseMediaType(so.getMediaType());
+        if (bom && "text".equalsIgnoreCase(mt.getType())) {
+            byte[] bomBytes = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+            byte[] merged = new byte[bomBytes.length + body.length];
+            System.arraycopy(bomBytes, 0, merged, 0, bomBytes.length);
+            System.arraycopy(body, 0, merged, bomBytes.length, body.length);
+            body = merged;
+        }
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + so.getFilename() + "\"")
+            .contentType(mt)
+            .contentLength(body.length)
+            .body(body);
+    }
+    
+    
 }
