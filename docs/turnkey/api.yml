@@ -1,8 +1,8 @@
 # API-first development with OpenAPI
-# 這份檔案會由 openapi-generator 於編譯時產生 Spring MVC 的 endpoint stubs（Resource/Delegate）
+# 由 openapi-generator 於編譯時產生 Spring MVC stubs；paths 不含 /api 前綴
 openapi: '3.0.1'
 info:
-  title: 'turnbridgeBackend'  # 與 JHipster 專案一致即可
+  title: 'turnbridgeBackend'
   version: 1.0.0
   description: |
     TurnBridge（橋票雲）Inbound/Outbound API
@@ -10,7 +10,7 @@ info:
     - 批次狀態/明細查詢、回饋 CSV 下載
     - 後端會將資料轉 Canonical，產生 MIG 4.1 XML 並投遞至 Turnkey 目錄
 servers:
-  # 注意：JHipster 預設 server url 已含 /api 前綴，paths 就不要再加 /api
+  # 注意：這裡的 URL 已含 /api，所以 paths 不要再加 /api
   - url: http://localhost:8080/api
     description: Development server
   - url: https://localhost:8080/api
@@ -36,10 +36,10 @@ paths:
         - 接收 CSV/ZIP，建立 UploadJob 與 JobItem（非同步處理）
         - 若未指定 profile，系統會依抬頭欄位自動判斷（Legacy / Canonical）
         - 建議檔名：INV_UPLOAD_{sellerId}_{yyyyMMddHHmmss}.csv|zip
+
         容量：
         - >50MB 請改分批或透過 SFTP（由 Agent 監看）
-      security:
-        - jwt: []   # 沿用 JHipster 的 jwt security scheme
+      security: [ { jwt: [] } ]
       requestBody:
         required: true
         content:
@@ -60,7 +60,7 @@ paths:
                   type: string
                   description: 選填；若省略則由系統自動偵測
                   enum: [Profile-Legacy, Profile-Canonical]
-                  example: "Profile-Legacy"
+                  example: "Profile-Canonical"
       responses:
         '202':
           description: 已接收並建立批次（非同步）
@@ -76,10 +76,8 @@ paths:
                     receivedAt: "2025-11-05T04:12:33Z"
                     profile: "Profile-Legacy"
                     itemsCount: 1200
-        '400':
-          $ref: '#/components/responses/Problem'
-        '401':
-          $ref: '#/components/responses/Problem'
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
         '413':
           description: 檔案過大（請使用分批或 SFTP）
 
@@ -90,23 +88,20 @@ paths:
       tags: [Jobs]
       summary: 查詢上傳批次狀態
       description: 回傳 UploadJob 當前狀態與統計
-      security:
-        - jwt: []
+      security: [ { jwt: [] } ]
       parameters:
         - name: jobId
           in: path
           required: true
           description: 批次識別碼（由上傳時回傳）
-          schema:
-            type: string
+          schema: { type: string }
           example: "JOB-20251105-0001"
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/UploadJob'
+              schema: { $ref: '#/components/schemas/UploadJob' }
               examples:
                 processing:
                   summary: 處理中批次
@@ -117,15 +112,29 @@ paths:
                     status: "VALIDATING"
                     createdAt: "2025-11-05T04:12:33Z"
                     updatedAt: "2025-11-05T04:16:01Z"
-                    counters:
-                      total: 1200
-                      accepted: 1180
-                      failed: 20
-                      sent: 0
-        '401':
-          $ref: '#/components/responses/Problem'
-        '404':
-          $ref: '#/components/responses/Problem'
+                    counters: { total: 1200, accepted: 1180, failed: 20, sent: 0 }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  # ========= 批次統計 =========
+  /upload-jobs/{jobId}/stats:
+    get:
+      operationId: getUploadJobStats
+      tags: [Jobs]
+      summary: 取得批次統計
+      security: [ { jwt: [] } ]
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadJobStats' }
+        '404': { $ref: '#/components/responses/Problem' }
 
   # ========= 批次明細 =========
   /upload-jobs/{jobId}/items:
@@ -134,81 +143,80 @@ paths:
       tags: [Jobs]
       summary: 查詢批次明細與每筆處理結果
       description: |
-        可分頁與過濾（status/resultCode），供 Portal 顯示逐筆錯誤訊息引導修正。
-      security:
-        - jwt: []
+        **JHipster 風格分頁**：回傳 body 為「陣列」，分頁資訊在 headers。
+        - `X-Total-Count`: 總筆數
+        - `Link`: RFC5988 分頁連結（first, prev, next, last）
+      security: [ { jwt: [] } ]
       parameters:
         - name: jobId
           in: path
           required: true
           description: 批次識別碼
-          schema:
-            type: string
+          schema: { type: string }
           example: "JOB-20251105-0001"
         - name: page
           in: query
           description: 第幾頁（0-based）
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
+          schema: { type: integer, minimum: 0, default: 0 }
         - name: size
           in: query
           description: 每頁筆數
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 500
-            default: 100
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
         - name: status
           in: query
           description: 以處理狀態過濾
-          schema:
-            type: string
-            enum: [QUEUED, OK, ERROR]
+          schema: { type: string, enum: [QUEUED, OK, ERROR] }
           example: "ERROR"
         - name: resultCode
           in: query
           description: 以錯誤碼過濾（例如 0402、0510）
-          schema:
-            type: string
+          schema: { type: string }
           example: "0510"
       responses:
         '200':
-          description: OK
+          description: OK（body 為陣列；分頁 headers 見上）
+          headers:
+            X-Total-Count:
+              description: 總筆數
+              schema: { type: integer }
+            Link:
+              description: 分頁導覽連結（first, prev, next, last）
+              schema: { type: string }
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PageJobItemResult'
-              examples:
-                pageError:
-                  summary: 錯誤篩選結果（第 1 頁，每頁 2 筆）
-                  value:
-                    content:
-                      - lineNo: 12
-                        traceId: "TRC-20251105-0001-000012"
-                        invoiceNo: null
-                        buyerId: "12233456"
-                        amount: 1580
-                        status: "ERROR"
-                        resultCode: "0510"
-                        resultMsg: "含稅/未稅金額不平"
-                      - lineNo: 48
-                        traceId: "TRC-20251105-0001-000048"
-                        invoiceNo: null
-                        buyerId: "53456789"
-                        amount: 899
-                        status: "ERROR"
-                        resultCode: "0402"
-                        resultMsg: "必要欄位缺漏：buyerName"
-                    page: 1
-                    size: 2
-                    totalElements: 20
-                    totalPages: 10
-        '401':
-          $ref: '#/components/responses/Problem'
-        '404':
-          $ref: '#/components/responses/Problem'
+                type: array
+                items: { $ref: '#/components/schemas/JobItemResult' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  # ========= 原始檔下載 =========
+  /upload-jobs/{jobId}/original:
+    get:
+      operationId: downloadOriginal
+      tags: [Jobs]
+      summary: 下載原始上傳檔
+      security: [ { jwt: [] } ]
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: bom
+          schema: { type: boolean, default: true }
+          description: 文字檔是否加入 UTF-8 BOM
+      responses:
+        '200':
+          description: 原始檔內容
+          content:
+            '*/*':
+              schema: { type: string, format: binary }
+          headers:
+            Content-Disposition:
+              description: 下載檔名
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/Problem' }
 
   # ========= 回饋 CSV 下載 =========
   /upload-jobs/{jobId}/result:
@@ -221,43 +229,77 @@ paths:
         - 以原上傳 CSV 的欄位為基礎，尾欄加上：
           result_code, result_msg, trace_id, assigned_invoice_no
         - 預設輸出 UTF-8 with BOM（Excel 友善）
-      security:
-        - jwt: []
+      security: [ { jwt: [] } ]
       parameters:
         - name: jobId
           in: path
           required: true
           description: 批次識別碼
-          schema:
-            type: string
+          schema: { type: string }
           example: "JOB-20251105-0001"
         - name: bom
           in: query
           description: 是否加入 UTF-8 BOM（預設 true）
-          schema:
-            type: boolean
-            default: true
+          schema: { type: boolean, default: true }
       responses:
         '200':
           description: CSV 檔案內容
           content:
             text/csv:
-              schema:
-                type: string
-                format: binary
+              schema: { type: string, format: binary }
           headers:
             Content-Disposition:
               description: 下載檔名
-              schema:
-                type: string
+              schema: { type: string }
               example: attachment; filename="JOB-20251105-0001-result.csv"
-        '401':
-          $ref: '#/components/responses/Problem'
-        '404':
-          $ref: '#/components/responses/Problem'
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  # ========= 重試失敗明細 =========
+  /upload-jobs/{jobId}/retry-failed:
+    post:
+      operationId: retryFailedItems
+      tags: [Jobs]
+      summary: 將 ERROR 明細重試（改為 QUEUED 並清空錯誤欄位）
+      security: [ { jwt: [] } ]
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+      responses:
+        '202': { description: 已接受 }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  # ========= 以 ID 下載任何儲存物件 =========
+  /stored-objects/{id}/download:
+    get:
+      operationId: downloadStoredObject
+      tags: [Results]
+      summary: 以 id 下載儲存物件
+      security: [ { jwt: [] } ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+        - in: query
+          name: bom
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: 檔案內容
+          content:
+            '*/*':
+              schema: { type: string, format: binary }
+          headers:
+            Content-Disposition:
+              description: 下載檔名
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/Problem' }
 
 components:
-  # ====== 保留 JHipster 預設的 Problem 響應（整個 Response 供 $ref 使用） ======
+  # ====== 保留 JHipster 預設的 Problem 響應 ======
   responses:
     Problem:
       description: error occurred - see status code and problem object for more information.
@@ -269,33 +311,23 @@ components:
               type:
                 type: string
                 format: uri
-                description: |
-                  An absolute URI that identifies the problem type.  When dereferenced,
-                  it SHOULD provide human-readable documentation for the problem type.
                 default: 'about:blank'
                 example: 'https://www.jhipster.tech/problem/problem-with-message'
               title:
                 type: string
-                description: A short, summary of the problem type (English).
                 example: 'Bad Request'
               status:
                 type: integer
                 format: int32
-                description: The HTTP status code.
-                minimum: 100
-                maximum: 600
-                exclusiveMaximum: true
                 example: 400
               detail:
                 type: string
-                description: A human readable explanation specific to this occurrence of the problem.
                 example: 'CSV 欄位 buyerName 缺漏'
               instance:
                 type: string
                 format: uri
-                description: An absolute URI that identifies the specific occurrence of the problem.
 
-  # ====== 與 JHipster 相容的 SecuritySchemes（jwt/basic） ======
+  # ====== SecuritySchemes（jwt/basic） ======
   securitySchemes:
     jwt:
       type: http
@@ -307,9 +339,8 @@ components:
       description: Basic Authentication
       scheme: basic
 
-  # ====== 本專案的 DTO Schemas（繁中註解 + 範例） ======
+  # ====== DTO Schemas ======
   schemas:
-    # 上傳接收回覆
     UploadAck:
       type: object
       description: 上傳成功建立批次後的回覆（非同步處理）
@@ -332,51 +363,38 @@ components:
           description: 解析得到的列數（ZIP 需解開後才精準）
           example: 1200
 
-    # 批次主檔
     UploadJob:
       type: object
       description: 上傳批次主檔狀態與統計
       properties:
-        jobId:
-          type: string
-          example: "JOB-20251105-0001"
-        sellerId:
-          type: string
-          example: "24567891"
-        profile:
-          type: string
-          example: "Profile-Legacy"
+        jobId:     { type: string, example: "JOB-20251105-0001" }
+        sellerId:  { type: string, example: "24567891" }
+        profile:   { type: string, example: "Profile-Legacy" }
         status:
           type: string
           description: 批次處理狀態
           enum: [RECEIVED, PARSING, VALIDATING, PACKING, SENT, RESULT_READY, FAILED]
           example: "VALIDATING"
-        createdAt:
-          type: string
-          format: date-time
-          example: "2025-11-05T04:12:33Z"
-        updatedAt:
-          type: string
-          format: date-time
-          example: "2025-11-05T04:16:01Z"
+        createdAt: { type: string, format: date-time, example: "2025-11-05T04:12:33Z" }
+        updatedAt: { type: string, format: date-time, example: "2025-11-05T04:16:01Z" }
         counters:
           type: object
           description: 批次統計數量
           properties:
-            total:
-              type: integer
-              example: 1200
-            accepted:
-              type: integer
-              example: 1180
-            failed:
-              type: integer
-              example: 20
-            sent:
-              type: integer
-              example: 0
+            total:    { type: integer, example: 1200 }
+            accepted: { type: integer, example: 1180 }
+            failed:   { type: integer, example: 20 }
+            sent:     { type: integer, example: 0 }
 
-    # 批次明細結果
+    UploadJobStats:
+      type: object
+      description: 成功/失敗/待處理統計
+      properties:
+        total:  { type: integer, example: 1200 }
+        ok:     { type: integer, example: 1180 }
+        error:  { type: integer, example: 20 }
+        queued: { type: integer, example: 0 }
+
     JobItemResult:
       type: object
       description: 批次中每筆資料的處理結果（含錯誤碼與訊息）
@@ -413,28 +431,6 @@ components:
           type: string
           description: 錯誤訊息（可讀）
           example: "含稅/未稅金額不平"
-
-    # 分頁包裝
-    PageJobItemResult:
-      type: object
-      description: 分頁查詢結果
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobItemResult'
-        page:
-          type: integer
-          example: 1
-        size:
-          type: integer
-          example: 2
-        totalElements:
-          type: integer
-          example: 20
-        totalPages:
-          type: integer
-          example: 10
 
 # 全域 Security（可由 Filter/Config 覆蓋）
 security:
