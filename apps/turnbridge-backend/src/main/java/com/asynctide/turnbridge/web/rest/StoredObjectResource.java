@@ -1,5 +1,6 @@
 package com.asynctide.turnbridge.web.rest;
 
+import com.asynctide.turnbridge.app.UploadJobAppService;
 import com.asynctide.turnbridge.domain.StoredObject;
 import com.asynctide.turnbridge.repository.StoredObjectRepository;
 import com.asynctide.turnbridge.service.StoredObjectQueryService;
@@ -14,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,10 +25,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
+
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -52,17 +58,21 @@ public class StoredObjectResource {
     private final StoredObjectQueryService storedObjectQueryService;
 
     private final StorageProvider storage;
+    
+    private final UploadJobAppService appService;
 
     public StoredObjectResource(
         StoredObjectService storedObjectService,
         StoredObjectRepository storedObjectRepository,
         StoredObjectQueryService storedObjectQueryService,
-        StorageProvider storage
+        StorageProvider storage,
+        UploadJobAppService appService
     ) {
         this.storedObjectService = storedObjectService;
         this.storedObjectRepository = storedObjectRepository;
         this.storedObjectQueryService = storedObjectQueryService;
         this.storage = storage;
+        this.appService = appService;
     }
 
     /**
@@ -220,14 +230,37 @@ public class StoredObjectResource {
      *  @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the storedObjectDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> download(@PathVariable Long id) throws Exception {
-        StoredObject so = storedObjectRepository.findById(id).orElseThrow();
-        InputStream in = storage.open(so.getBucket(), so.getObjectKey()).orElseThrow();
-        byte[] bytes = in.readAllBytes();
+    public ResponseEntity<byte[]> download(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean bom) throws Exception {
+        StoredObjectDTO so = storedObjectService.findOne(id).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到指定的檔案"));
+
+        byte[] body;
+        try (InputStream in = appService.openStoredObject(so)) {
+            body = in.readAllBytes();
+        } catch (IllegalStateException ex) {
+            if ("物件不存在於 Storage".equals(ex.getMessage())) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+            }
+            throw ex;
+        }
+
+        MediaType mt = MediaType.parseMediaType(
+            so.getMediaType() == null ? "application/octet-stream" : so.getMediaType()
+        );
+        if (bom && "text".equalsIgnoreCase(mt.getType())) {
+            byte[] bomBytes = new byte[]{ (byte)0xEF, (byte)0xBB, (byte)0xBF };
+            byte[] merged = new byte[bomBytes.length + body.length];
+            System.arraycopy(bomBytes, 0, merged, 0, bomBytes.length);
+            System.arraycopy(body, 0, merged, bomBytes.length, body.length);
+            body = merged;
+        }
+
+        String filename = so.getFilename() == null ? "download.bin" : so.getFilename();
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + so.getFilename() + "\"")
-                .contentType(MediaType.parseMediaType(so.getMediaType()))
-                .contentLength(bytes.length)
-                .body(bytes);
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + UriUtils.encode(filename, StandardCharsets.UTF_8))
+            .header(HttpHeaders.ETAG, "\"" + (so.getSha256() == null ? String.valueOf(body.length) : so.getSha256()) + "\"")
+            .contentType(mt)
+            .contentLength(body.length)
+            .body(body);
     }
 }

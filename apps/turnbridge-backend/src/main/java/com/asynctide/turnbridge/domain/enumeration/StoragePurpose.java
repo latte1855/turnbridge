@@ -19,7 +19,11 @@ public enum StoragePurpose {
     /**
      * 財政部回饋 XML（Process/Summary）
      */
-    FEEDBACK_XML("財政部回饋 XML");
+    FEEDBACK_XML("財政部回饋 XML"),
+    /**
+     * 其他
+     */
+    OTHER("其他");
 
     private final String value;
 

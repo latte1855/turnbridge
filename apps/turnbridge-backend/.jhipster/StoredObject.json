@@ -48,12 +48,13 @@
       "fieldType": "StoragePurpose",
       "fieldTypeDocumentation": "儲存物件用途（StoredObject.purpose）",
       "fieldValidateRules": ["required"],
-      "fieldValues": "UPLOAD_ORIGINAL (原始上傳 CSV/ZIP),RESULT_CSV (回饋 CSV),MIG_XML (產出的 MIG XML),FEEDBACK_XML (財政部回饋 XML)",
+      "fieldValues": "UPLOAD_ORIGINAL (原始上傳 CSV/ZIP),RESULT_CSV (回饋 CSV),MIG_XML (產出的 MIG XML),FEEDBACK_XML (財政部回饋 XML),OTHER (其他)",
       "fieldValuesJavadocs": {
         "FEEDBACK_XML": "財政部回饋 XML（Process/Summary）",
         "MIG_XML": "產出的 MIG 4.1 XML（壓縮/封裝後）",
         "RESULT_CSV": "回饋 CSV",
-        "UPLOAD_ORIGINAL": "原始上傳 CSV/ZIP"
+        "UPLOAD_ORIGINAL": "原始上傳 CSV/ZIP"	,
+		"OTHER": "其他"
       }
     },
     {

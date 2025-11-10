@@ -221,23 +221,27 @@ class JobsAndResultsApiIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.total").value(3))
             .andExpect(jsonPath("$.error").value(1));
+        
 
-     // 1) 原本 ERROR 的第 2 筆 → 變成 QUEUED，且錯誤欄位清空
-     mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/items?status=QUEUED", job.getJobId()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[?(@.lineNo==2)].resultCode").value(org.hamcrest.Matchers.hasItem((Object) null)))
-        .andExpect(jsonPath("$[?(@.lineNo==2)].resultMsg").value(org.hamcrest.Matchers.hasItem((Object) null)));
+        mvc.perform(post("/api/upload-jobs/by-job-id/{jobId}/retry-failed", job.getJobId()))
+        	    .andExpect(status().isAccepted());
 
-     // 2) 原本 OK 的第 1 筆 → 仍為 OK，且（若先前有值）錯誤欄位不被動到
-     mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/items?status=OK", job.getJobId()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].lineNo").value(1))
-        .andExpect(jsonPath("$[0].status").value("OK"));
-
-     // 3) 原本就 QUEUED 的第 3 筆 → 仍為 QUEUED（沒有被二次清空或異動）
-     mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/items?status=QUEUED", job.getJobId()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[*].lineNo").value(org.hamcrest.Matchers.hasItems(2, 3)));
+	     // 1) 原本 ERROR 的第 2 筆 → 變成 QUEUED，且錯誤欄位清空
+	     mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/items?status=QUEUED", job.getJobId()))
+	        .andExpect(status().isOk())
+	        .andExpect(jsonPath("$[?(@.lineNo==2)].resultCode").value(org.hamcrest.Matchers.hasItem((Object) null)))
+	        .andExpect(jsonPath("$[?(@.lineNo==2)].resultMsg").value(org.hamcrest.Matchers.hasItem((Object) null)));
+	
+	     // 2) 原本 OK 的第 1 筆 → 仍為 OK，且（若先前有值）錯誤欄位不被動到
+	     mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/items?status=OK", job.getJobId()))
+	        .andExpect(status().isOk())
+	        .andExpect(jsonPath("$[0].lineNo").value(1))
+	        .andExpect(jsonPath("$[0].status").value("OK"));
+	
+	     // 3) 原本就 QUEUED 的第 3 筆 → 仍為 QUEUED（沒有被二次清空或異動）
+	     mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/items?status=QUEUED", job.getJobId()))
+	        .andExpect(status().isOk())
+	        .andExpect(jsonPath("$[*].lineNo").value(org.hamcrest.Matchers.hasItems(2, 3)));
     }
 
     private UploadJobItem newItem(
