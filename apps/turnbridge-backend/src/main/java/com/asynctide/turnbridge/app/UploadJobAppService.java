@@ -7,6 +7,7 @@ import com.asynctide.turnbridge.domain.enumeration.StoragePurpose;
 import com.asynctide.turnbridge.domain.enumeration.UploadJobStatus;
 import com.asynctide.turnbridge.repository.StoredObjectRepository;
 import com.asynctide.turnbridge.repository.UploadJobRepository;
+import com.asynctide.turnbridge.service.StoredObjectService;
 import com.asynctide.turnbridge.service.dto.StoredObjectDTO;
 import com.asynctide.turnbridge.storage.StoredObjectRef;
 import com.asynctide.turnbridge.storage.StorageProvider;
@@ -34,6 +35,7 @@ public class UploadJobAppService {
     private final IdempotencyService idem;
     private final StorageProps props;
     private final UploadPipeline pipeline;
+    private final StoredObjectService storedObjectService;
 
     public UploadJobAppService(
         StorageProvider storage,
@@ -41,7 +43,8 @@ public class UploadJobAppService {
         StoredObjectRepository soRepo,
         IdempotencyService idem,
         StorageProps props,
-        UploadPipeline pipeline
+        UploadPipeline pipeline,
+        StoredObjectService storedObjectService
     ) {
         this.storage = storage;
         this.jobRepo = jobRepo;
@@ -49,6 +52,7 @@ public class UploadJobAppService {
         this.idem = idem;
         this.props = props;
         this.pipeline = pipeline;
+        this.storedObjectService = storedObjectService;
     }
 
     /**
@@ -137,11 +141,16 @@ public class UploadJobAppService {
             throw new IllegalStateException("StoredObject.objectKey is null/blank");
         }
 
-        // ✅ 正規化：若 objectKey 以 "<bucket>/" 開頭，去掉重複的 bucket 前綴
+        // 正規化：若 objectKey 以 "<bucket>/" 開頭，去掉重複的 bucket 前綴
         String normalizedKey = normalizeObjectKey(bucket, objectKey);
 
         // 交給 StorageProvider 開啟
         return storage.open(bucket, normalizedKey).orElseThrow(() -> new IllegalStateException("物件不存在於 Storage"));
+    }
+    
+    public InputStream openStoredObject(Long soId) throws Exception {
+        StoredObjectDTO so = storedObjectService.findOne(soId).orElseThrow();
+        return openStoredObject(so);
     }
 
 

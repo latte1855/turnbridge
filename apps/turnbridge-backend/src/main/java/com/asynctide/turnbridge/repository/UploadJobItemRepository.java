@@ -48,10 +48,29 @@ public interface UploadJobItemRepository
 
     /** 依字串 jobId（UploadJob.jobId）查詢 */
     Page<UploadJobItem> findByJobJobId(String jobId, Pageable pageable);
-    
 
     /** 依字串 jobId（UploadJob.jobId）與狀態 查詢 */
     Page<UploadJobItem> findByJobJobIdAndStatus(String jobId, JobItemStatus status, Pageable pageable);
 
     boolean existsByJobIdAndLineNo(Long jobId, Integer lineNo);
+    
+    /** 依數字主鍵 id（UploadJob.id）統計 */
+    long countByJobId(Long jobId);
+    
+    /** 依數字主鍵 id（UploadJob.id）跟明細狀態 統計 */
+    long countByJobIdAndStatus(Long jobId, JobItemStatus status);
+    
+    // 以 jobId(String) 的 join 版本（for 便利）
+    /** 依字串 jobId（UploadJob.jobId） 統計 */
+    @Query("select count(i) from UploadJobItem i where i.job.jobId = :jobId")
+    long countByJobJobId(@Param("jobId") String jobId);
+
+    /** 依字串 jobId（UploadJob.jobId）跟明細狀態 統計 */
+    @Query("select count(i) from UploadJobItem i where i.job.jobId = :jobId and i.status = :status")
+    long countByJobJobIdAndStatus(@Param("jobId") String jobId, @Param("status") JobItemStatus status);
+    
+    @Modifying
+    @Query("update UploadJobItem i set i.status = 'QUEUED', i.resultCode = null, i.resultMsg = null where i.job.jobId = :jobId and i.status = 'ERROR'")
+    int requeueFailedByJobJobId(@Param("jobId") String jobId);
+
 }

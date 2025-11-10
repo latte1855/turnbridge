@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -71,21 +72,33 @@ class JobsAndResultsApiIT {
     @BeforeEach
     void setUp() throws Exception {
         // 1) 建立實體 CSV 檔（含 BOM）
+    	
         String baseDir = System.getProperty("java.io.tmpdir") + "/turnbridge-it-storage";
-        realFile = Path.of(baseDir, "outbound/77665544/202511/result-ACK.csv");
-        TestFiles.writeCsvWithBom(realFile,
+        // 建立 outbound/result 檔（含 BOM）
+        Path resultPath = Path.of(baseDir, "outbound/77665544/202511/result-ACK.csv");
+        Files.createDirectories(resultPath.getParent());
+        TestFiles.writeCsvWithBom(resultPath,
             "invoiceNo,result_code,result_msg\nAB00000001,0000,OK\nAB00000002,0402,欄位缺漏\n");
+        byte[] resultBytes = Files.readAllBytes(resultPath);
+        String shaResult = sha256Hex(resultBytes);
 
-        byte[] bytes = Files.readAllBytes(realFile);
-        String sha256 = sha256Hex(bytes);
+        // 建立 inbound/original 檔（也寫一份內容，供原始檔下載使用）
+        Path originalPath = Path.of(baseDir, "inbound/77665544/202511/upload-original.csv");
+        Files.createDirectories(originalPath.getParent());
+        TestFiles.writeCsvWithBom(originalPath,
+            "colA,colB\nx,y\n"); // 內容可任意，僅需存在
+        byte[] originalBytes = Files.readAllBytes(originalPath);
+        String shaOriginal = sha256Hex(originalBytes);
 
         // 2) Dummy 原始檔 StoredObject（滿足 UploadJob 非空關聯）
+        // Dummy StoredObject：original
         StoredObject original = new StoredObject();
         original.setBucket("inbound");
+        // objectKey 僅放相對路徑，不含 bucket
         original.setObjectKey("77665544/202511/upload-original.csv");
         original.setMediaType("text/csv");
-        original.setContentLength((long) bytes.length);
-        original.setSha256(sha256);
+        original.setContentLength((long) originalBytes.length);
+        original.setSha256(shaOriginal);
         original.setPurpose(StoragePurpose.UPLOAD_ORIGINAL);
         original.setFilename("upload-original.csv");
         original.setStorageClass("STANDARD");
@@ -97,10 +110,11 @@ class JobsAndResultsApiIT {
         // 3) 回饋檔 StoredObject
         resultFile = new StoredObject();
         resultFile.setBucket("outbound");
+        // objectKey 僅放相對路徑，不含 bucket
         resultFile.setObjectKey("77665544/202511/result-ACK.csv");
         resultFile.setMediaType("text/csv");
-        resultFile.setContentLength((long) bytes.length);
-        resultFile.setSha256(sha256);
+        resultFile.setContentLength((long) resultBytes.length);
+        resultFile.setSha256(shaResult);
         resultFile.setPurpose(StoragePurpose.RESULT_CSV);
         resultFile.setFilename("result-ACK.csv");
         resultFile.setStorageClass("STANDARD");
@@ -184,6 +198,37 @@ class JobsAndResultsApiIT {
         assertThat(body).contains("invoiceNo,result_code,result_msg");
         assertThat(body).contains("AB00000001,0000,OK");
         assertThat(body).contains("AB00000002,0402,欄位缺漏");
+    }
+    
+    @Test
+    @DisplayName("下載原始檔（以 jobId 字串）：GET /upload-jobs/by-job-id/{jobId}/original?bom=true")
+    void downloadOriginal_byJobId_shouldReturnCsvWithBom() throws Exception {
+        byte[] bytes = mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/original?bom=true", job.getJobId()))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("text/csv")))
+            .andReturn().getResponse().getContentAsByteArray();
+
+        assertThat(bytes.length).isGreaterThan(3);
+        assertThat((bytes[0] & 0xFF)).isEqualTo(0xEF);
+        assertThat((bytes[1] & 0xFF)).isEqualTo(0xBB);
+        assertThat((bytes[2] & 0xFF)).isEqualTo(0xBF);
+    }
+
+    @Test
+    @DisplayName("統計與重試：/stats + /retry-failed")
+    void stats_and_retry() throws Exception {
+        mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/stats", job.getJobId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.total").value(3))
+            .andExpect(jsonPath("$.error").value(1));
+
+        mvc.perform(post("/api/upload-jobs/by-job-id/{jobId}/retry-failed", job.getJobId()))
+        	    .andExpect(status().isAccepted());
+
+        mvc.perform(get("/api/upload-jobs/by-job-id/{jobId}/stats", job.getJobId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.error").value(0))
+            .andExpect(jsonPath("$.queued").value(2)); // 先前 error=1 → queued 增加
     }
 
     private UploadJobItem newItem(

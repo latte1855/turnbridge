@@ -14,6 +14,7 @@ import com.asynctide.turnbridge.service.criteria.UploadJobItemCriteria;
 import com.asynctide.turnbridge.service.dto.StoredObjectDTO;
 import com.asynctide.turnbridge.service.dto.UploadJobDTO;
 import com.asynctide.turnbridge.service.dto.UploadJobItemDTO;
+import com.asynctide.turnbridge.service.dto.UploadJobStatsDTO;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
 
 import jakarta.validation.Valid;
@@ -31,9 +32,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -272,6 +275,65 @@ public class UploadJobResource {
     }
 
     // -----------------------------
+    // 「原始上傳檔」下載（兩種路徑）
+    // -----------------------------
+    /** 以字串 jobId 下載「原始上傳檔」。 */
+    @GetMapping("/by-job-id/{jobId}/original")
+    public ResponseEntity<byte[]> downloadOriginalByJobId(
+        @PathVariable String jobId,
+        @RequestParam(defaultValue = "false") boolean bom
+    ) throws Exception {
+        UploadJobDTO job = uploadJobService.findOneByJobId(jobId).orElseThrow();
+        StoredObjectDTO so = job.getOriginalFile();
+        if (so == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "尚無原始檔");
+        return buildBinaryResponse(so, bom);
+    }
+    
+    /** 以數字 id 下載「原始上傳檔」。 */
+    @GetMapping("/{id}/original")
+    public ResponseEntity<byte[]> downloadOriginalById(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "false") boolean bom
+    ) throws Exception {
+        UploadJobDTO job = uploadJobService.findOne(id).orElseThrow();
+        StoredObjectDTO so = job.getOriginalFile();
+        if (so == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "尚無原始檔");
+        return buildBinaryResponse(so, bom);
+    }
+    
+
+    // -----------------------------
+    // 「統計檔」下載
+    // -----------------------------
+    /** 統計：成功/失敗/待處理（數字 id）。 */
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<UploadJobStatsDTO> statsById(@PathVariable Long id) {
+        long total = uploadJobItemRepository.countByJobId(id);
+        long ok = uploadJobItemRepository.countByJobIdAndStatus(id, JobItemStatus.OK);
+        long error = uploadJobItemRepository.countByJobIdAndStatus(id, JobItemStatus.ERROR);
+        long queued = uploadJobItemRepository.countByJobIdAndStatus(id, JobItemStatus.QUEUED);
+        return ResponseEntity.ok(new UploadJobStatsDTO(total, ok, error, queued));
+    }
+
+    /** 統計：成功/失敗/待處理（字串 jobId）。 */
+    @GetMapping("/by-job-id/{jobId}/stats")
+    public ResponseEntity<UploadJobStatsDTO> statsByJobId(@PathVariable String jobId) {
+        long total = uploadJobItemRepository.countByJobJobId(jobId);
+        long ok = uploadJobItemRepository.countByJobJobIdAndStatus(jobId, JobItemStatus.OK);
+        long error = uploadJobItemRepository.countByJobJobIdAndStatus(jobId, JobItemStatus.ERROR);
+        long queued = uploadJobItemRepository.countByJobJobIdAndStatus(jobId, JobItemStatus.QUEUED);
+        return ResponseEntity.ok(new UploadJobStatsDTO(total, ok, error, queued));
+    }
+
+    /** 重試：把 ERROR 的明細改成 QUEUED（字串 jobId）。 */
+    @PostMapping("/by-job-id/{jobId}/retry-failed")
+    public ResponseEntity<Void> retryFailed(@PathVariable String jobId) {
+        int affected = uploadJobItemService.requeueFailedByJobJobId(jobId);
+        LOG.info("Retry failed items for jobId={}, affected={}", jobId, affected);
+        return ResponseEntity.accepted().build(); // 202 Accepted
+    }
+
+    // -----------------------------
     // 回饋檔下載（兩種路徑）
     // -----------------------------
 
@@ -295,22 +357,35 @@ public class UploadJobResource {
         return buildResultResponse(job, bom);
     }
 
+
+    // === 共用位元檔回應 ===
+    
     // 共用回應建構
     private ResponseEntity<byte[]> buildResultResponse(UploadJobDTO job, boolean bom) throws Exception {
-        StoredObjectDTO so = job.getResultFile();
-        so = storedObjectService.findOne(so.getId()).orElseThrow();
-        LOG.info("buildResultResponse.so : {}", so);
+    	StoredObjectDTO so = job.getResultFile();
         if (so == null) return ResponseEntity.notFound().build();
+        return buildBinaryResponse(so, bom);
+    }
+    
+    private ResponseEntity<byte[]> buildBinaryResponse(StoredObjectDTO so, boolean bom) throws Exception {
+        // 若 mapper 填充不完整，補一次（你已經注入 storedObjectService）
+        so = storedObjectService.findOne(so.getId()).orElse(so);
 
         byte[] body;
         try (InputStream in = appService.openStoredObject(so)) {
             body = in.readAllBytes();
+        } catch (IllegalStateException e) {
+            // 「物件不存在於 Storage」→ 轉 404
+            if ("物件不存在於 Storage".equals(e.getMessage())) {
+            	LOG.error("物件不存在於 Storage", e);
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            }
+            throw e;
         }
-        catch (Exception e) {
-			LOG.error("", e);
-			throw e;
-		}
-        MediaType mt = MediaType.parseMediaType(so.getMediaType());
+
+        MediaType mt = MediaType.parseMediaType(
+            so.getMediaType() == null ? "application/octet-stream" : so.getMediaType()
+        );
         if (bom && "text".equalsIgnoreCase(mt.getType())) {
             byte[] bomBytes = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
             byte[] merged = new byte[bomBytes.length + body.length];

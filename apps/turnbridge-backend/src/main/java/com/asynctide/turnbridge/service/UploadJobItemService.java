@@ -226,4 +226,9 @@ public class UploadJobItemService {
             : uploadJobItemRepository.findByJobJobIdAndStatus(jobId, status, pageable);
         return page.map(uploadJobItemMapper::toDto);
     }
+
+    /** 依字串 jobId（UploadJob.jobId）更新狀態為 QUEUE */
+	public int requeueFailedByJobJobId(String jobId) {
+		return uploadJobItemRepository.requeueFailedByJobJobId(jobId);
+	}
 }
