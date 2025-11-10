@@ -16,7 +16,7 @@ import java.time.Instant;
  */
 @Component
 public class UploadPipeline {
-    private static final Logger log = LoggerFactory.getLogger(UploadPipeline.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadPipeline.class);
 
     private final TaskExecutor taskExecutor;
     private final UploadJobRepository jobRepo;
@@ -44,7 +44,7 @@ public class UploadPipeline {
                 job.setStatus(UploadJobStatus.FAILED);
                 job.setLastModifiedDate(Instant.now());
                 jobRepo.save(job);
-                log.error("管線執行失敗：jobId={}, {}", job.getJobId(), e.getMessage(), e);
+                LOG.error("管線執行失敗：jobId={}, {}", job.getJobId(), e.getMessage(), e);
             }
         });
     }

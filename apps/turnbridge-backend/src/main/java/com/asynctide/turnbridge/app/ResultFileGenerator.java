@@ -7,6 +7,9 @@ import com.asynctide.turnbridge.domain.UploadJob;
 import com.asynctide.turnbridge.domain.enumeration.StoragePurpose;
 import com.asynctide.turnbridge.repository.StoredObjectRepository;
 import com.asynctide.turnbridge.repository.UploadJobRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +22,7 @@ import java.util.Map;
  */
 @Component
 public class ResultFileGenerator {
+    private static final Logger LOG = LoggerFactory.getLogger(UploadPipeline.class);
     private final StorageProvider storage;
     private final UploadJobRepository jobRepo;
     private final StoredObjectRepository soRepo;
@@ -54,6 +58,7 @@ public class ResultFileGenerator {
 
         job.setResultFile(so);
         job.setLastModifiedDate(Instant.now());
+
         jobRepo.save(job);
     }
 }
