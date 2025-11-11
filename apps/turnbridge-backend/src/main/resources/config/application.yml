@@ -168,8 +168,8 @@ spring:
       console-available: true
   servlet:
     multipart:
-    max-file-size: 10MB
-    max-request-size: 11MB
+    max-file-size: 20MB # 高於 turnbridge.upload.max-size-bytes 一些，讓我們先攔在應用層
+    max-request-size: 21MB
 
 server:
   servlet:
@@ -230,7 +230,20 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+  uploadProps:
+    result-filename-template: "RESULT_CSV-%s-%s-%s.csv" # sellerId, period, random
+    max-size-bytes: 52428800 # 50MB
+    allowed-mime-types:
+      - text/csv
+      - application/zip
+      - application/x-zip-compressed
+      - application/octet-stream
+      - application/vnd.ms-excel
+    allowed-extensions:
+      - csv
+      - zip
+    idempotency-ttl: PT24H
 
 turnbridge:
   storage:
@@ -242,6 +255,4 @@ turnbridge:
       access-key: minioadmin
       secret-key: minioadmin
       bucket-policy: private
-  upload:
-    result-filename-template: "RESULT_CSV-%s-%s-%s.csv" # sellerId, period, random
 

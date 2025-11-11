@@ -1,5 +1,7 @@
 package com.asynctide.turnbridge.app;
 
+import com.asynctide.turnbridge.config.ApplicationProperties;
+import com.asynctide.turnbridge.config.ApplicationProperties.UploadProps;
 import com.asynctide.turnbridge.config.StorageProps;
 import com.asynctide.turnbridge.domain.StoredObject;
 import com.asynctide.turnbridge.domain.UploadJob;
@@ -12,12 +14,19 @@ import com.asynctide.turnbridge.service.dto.StoredObjectDTO;
 import com.asynctide.turnbridge.storage.StoredObjectRef;
 import com.asynctide.turnbridge.storage.StorageProvider;
 import com.asynctide.turnbridge.support.IdempotencyService;
+import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
+import com.asynctide.turnbridge.web.rest.errors.DuplicateIdempotencyKeyException;
+import com.asynctide.turnbridge.web.rest.errors.PayloadTooLargeException;
+
 import jakarta.transaction.Transactional;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +45,8 @@ public class UploadJobAppService {
     private final StorageProps props;
     private final UploadPipeline pipeline;
     private final StoredObjectService storedObjectService;
+    private final UploadProps uploadProps;
+
 
     public UploadJobAppService(
         StorageProvider storage,
@@ -44,7 +55,8 @@ public class UploadJobAppService {
         IdempotencyService idem,
         StorageProps props,
         UploadPipeline pipeline,
-        StoredObjectService storedObjectService
+        StoredObjectService storedObjectService,
+        ApplicationProperties applicationProperties
     ) {
         this.storage = storage;
         this.jobRepo = jobRepo;
@@ -53,6 +65,7 @@ public class UploadJobAppService {
         this.props = props;
         this.pipeline = pipeline;
         this.storedObjectService = storedObjectService;
+        this.uploadProps = applicationProperties.getUploadProps();
     }
 
     /**
@@ -60,9 +73,39 @@ public class UploadJobAppService {
      */
     @Transactional
     public UploadJob createFromMultipart(MultipartFile file, String sellerId, String profile, String idemKey) {
-        if (idemKey != null && !idem.markIfNew(idemKey)) {
-            throw new IllegalStateException("重複的 Idempotency-Key，已處理過本次請求。");
+    	if (file == null || file.isEmpty()) {
+            throw new BadRequestAlertException("未收到上傳檔案（file 為空）", "uploadJob", "file.empty");
         }
+        if (StringUtils.isBlank(sellerId)) {
+            throw new BadRequestAlertException("sellerId 為必填", "uploadJob", "file.sellerId.empty");
+        }
+        // 大小檢查
+        long size = file.getSize();
+        if (size <= 0) {
+            throw new BadRequestAlertException("上傳檔案大小為 0", "uploadJob", "file.zero");
+        }
+        if (size > uploadProps.getMaxSizeBytes()) {
+        	throw new PayloadTooLargeException("檔案過大，請分批或改用 Agent/SFTP 上傳（上限 " + uploadProps.getMaxSizeBytes() + " bytes）");
+        }
+
+        // 副檔名/MIME 白名單
+        String originalName = file.getOriginalFilename();
+        if (StringUtils.isBlank(originalName) || originalName.contains("..")) {
+            throw new BadRequestAlertException("檔名不合法", "uploadJob", "file.name.illegal");
+        }
+        String ext = getExtensionLower(originalName);
+        if (!uploadProps.getAllowedExtensions().contains(ext)) {
+            throw new BadRequestAlertException("不支援的檔案類型（僅允許：" + String.join(", ", uploadProps.getAllowedExtensions()) + "）", "uploadJob", "file.extension.illegal");
+        }
+        String mime = StringUtils.defaultIfBlank(file.getContentType(), "application/octet-stream");
+        if (!isMimeAllowed(mime, uploadProps.getAllowedMimeTypes(), ext)) {
+        	throw new BadRequestAlertException("MIME 類型不被接受（傳入：" + mime + "）", "uploadJob", "file.mime.illegal");
+        }
+
+        if (idemKey != null && !idem.markIfNew(idemKey)) {
+            throw new DuplicateIdempotencyKeyException("重複的 Idempotency-Key，已處理過本次請求。");
+        }
+        
         String jobId =
             "JOB-" + Instant.now().toString().replace(":", "").replace(".", "") + "-" + UUID.randomUUID().toString().substring(0, 8);
 
@@ -161,6 +204,21 @@ public class UploadJobAppService {
 	        return objectKey.substring(prefix.length());
 	    }
 	    return objectKey;
+	}
+	
+
+	// === 私有工具 ===
+	private static String getExtensionLower(String filename) {
+	    int i = filename.lastIndexOf('.');
+	    return (i >= 0 && i < filename.length() - 1) ? filename.substring(i + 1).toLowerCase() : "";
+	}
+
+	private static boolean isMimeAllowed(String mime, Set<String> allowed, String ext) {
+	    // 寬鬆接受 CSV/ZIP 在不同瀏覽器的常見 MIME
+	    if (allowed.contains(mime)) return true;
+	    if ("csv".equals(ext) && ("application/vnd.ms-excel".equals(mime) || "application/octet-stream".equals(mime))) return true;
+	    if ("zip".equals(ext) && ("application/octet-stream".equals(mime) || "application/x-zip-compressed".equals(mime))) return true;
+	    return false;
 	}
     
 }
