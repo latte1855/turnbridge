@@ -3,6 +3,8 @@ package com.asynctide.turnbridge.app;
 import com.asynctide.turnbridge.domain.UploadJob;
 import com.asynctide.turnbridge.domain.enumeration.UploadJobStatus;
 import com.asynctide.turnbridge.repository.UploadJobRepository;
+import com.asynctide.turnbridge.service.parse.InvoiceParseService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
@@ -21,11 +23,13 @@ public class UploadPipeline {
     private final TaskExecutor taskExecutor;
     private final UploadJobRepository jobRepo;
     private final ResultFileGenerator resultFileGenerator;
+    private final InvoiceParseService parseService;
 
-    public UploadPipeline(TaskExecutor taskExecutor, UploadJobRepository jobRepo, ResultFileGenerator resultFileGenerator) {
+    public UploadPipeline(TaskExecutor taskExecutor, UploadJobRepository jobRepo, ResultFileGenerator resultFileGenerator, InvoiceParseService parseService) {
         this.taskExecutor = taskExecutor;
         this.jobRepo = jobRepo;
         this.resultFileGenerator = resultFileGenerator;
+        this.parseService = parseService;
     }
 
     /** 將 jobId 丟入背景執行（單純模擬延時與狀態推進）。 */
@@ -33,6 +37,16 @@ public class UploadPipeline {
         taskExecutor.execute(() -> {
             try {
                 step(jobDbId, UploadJobStatus.PARSING);
+                
+                // 解析 + 寫入明細 + 更新 counters
+                UploadJob job = jobRepo.findById(jobDbId).orElseThrow();
+                var stats = parseService.parseAndPersistItems(job);
+                job.setTotal(stats.total());
+                job.setAccepted(stats.ok());
+                job.setFailed(stats.error());
+                job.setLastModifiedDate(Instant.now());
+                jobRepo.save(job);
+                
                 step(jobDbId, UploadJobStatus.VALIDATING);
                 step(jobDbId, UploadJobStatus.PACKING);
                 step(jobDbId, UploadJobStatus.SENT);

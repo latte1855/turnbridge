@@ -18,7 +18,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "upload_job")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SuppressWarnings("common-java:DuplicatedBlocks")
-public class UploadJob extends AbstractAuditingEntity implements Serializable {
+public class UploadJob extends AbstractAuditingEntity<Long> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

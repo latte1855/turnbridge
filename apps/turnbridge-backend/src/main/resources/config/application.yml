@@ -168,8 +168,8 @@ spring:
       console-available: true
   servlet:
     multipart:
-    max-file-size: 20MB # 高於 turnbridge.upload.max-size-bytes 一些，讓我們先攔在應用層
-    max-request-size: 21MB
+      max-file-size: 20MB # 高於 turnbridge.upload.max-size-bytes 一些，讓我們先攔在應用層
+      max-request-size: 21MB
 
 server:
   servlet:
