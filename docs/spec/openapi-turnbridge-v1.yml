@@ -1,0 +1,355 @@
+openapi: '3.0.1'
+info:
+  title: 'turnbridgeBackend (Turnbridge OpenAPI v1)'
+  version: '1.0.0'
+  description: |
+    OpenAPI v3 skeleton for Turnbridge inbound APIs. 以 `docs/turnkey/api.yml` 為範本，並補上 Idempotency-Key 與 Webhook security components。
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+  - url: https://localhost:8443/api
+    description: TLS development server
+tags:
+  - name: Upload
+    description: 上傳與批次建立
+  - name: Jobs
+    description: 批次與明細查詢
+  - name: Results
+    description: 回饋生成與下載
+
+paths:
+  /upload/invoice:
+    post:
+      operationId: uploadInvoices
+      tags: [Upload]
+      summary: 上傳發票 CSV 或 ZIP
+      description: |
+        上傳 CSV/ZIP 建立 UploadJob（非同步處理）。支援 Idempotency-Key 以避免重複建立。
+      security:
+        - jwt: []
+      parameters:
+        - $ref: '#/components/parameters/Idempotency-Key'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, sellerId]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 上傳檔案（CSV 或 ZIP）
+                sellerId:
+                  type: string
+                  description: 賣方統編或客戶識別碼
+                md5:
+                  type: string
+                  description: 選填；檔案 MD5
+                encoding:
+                  type: string
+                  enum: [UTF-8, BIG5]
+                  description: 檔案編碼
+      responses:
+        '202':
+          description: 已接收並建立批次（非同步）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadAck'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+
+  /upload/e0501:
+    post:
+      operationId: uploadE0501
+      tags: [Upload]
+      summary: 上傳 E0501 配號檔
+      security:
+        - jwt: []
+      parameters:
+        - $ref: '#/components/parameters/Idempotency-Key'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, sellerId]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                sellerId:
+                  type: string
+      responses:
+        '202':
+          description: 已接收
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadAck'
+
+  /imports/{importId}:
+    get:
+      operationId: getUploadJob
+      tags: [Jobs]
+      summary: 查詢上傳批次狀態
+      security:
+        - jwt: []
+      parameters:
+        - name: importId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadJob'
+
+  /imports/{importId}/items:
+    get:
+      operationId: listUploadJobItems
+      tags: [Jobs]
+      summary: 查詢批次明細與每筆處理結果
+      security:
+        - jwt: []
+      parameters:
+        - name: importId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageJobItemResult'
+
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [Jobs]
+      summary: 查詢發票
+      security:
+        - jwt: []
+      parameters:
+        - name: normalizedMessageType
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+  /invoices/{id}/resend:
+    post:
+      operationId: resendInvoice
+      tags: [Jobs]
+      summary: 人工重送發票（需審核）
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: 已排入重送佇列
+
+  /turnkey/messages:
+    get:
+      operationId: listTurnkeyMessages
+      tags: [Results]
+      summary: 回饋查詢
+      security:
+        - jwt: []
+      responses:
+        '200':
+          description: OK
+
+  /webhooks:
+    post:
+      operationId: registerWebhook
+      tags: [Results]
+      summary: 註冊 Webhook
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, events]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                events:
+                  type: array
+                  items:
+                    type: string
+                secret:
+                  type: string
+      responses:
+        '201':
+          description: 註冊成功
+
+  /webhooks/{id}/logs:
+    get:
+      operationId: getWebhookLogs
+      tags: [Results]
+      summary: 取得 Webhook 投遞紀錄
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+components:
+  parameters:
+    Idempotency-Key:
+      name: Idempotency-Key
+      in: header
+      description: 客戶端提供的 Idempotency Key，用於避免重複建立相同批次
+      required: false
+      schema:
+        type: string
+
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Problem:
+      description: error occurred - see status code and problem object for more information.
+      content:
+        application/problem+json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              title:
+                type: string
+              status:
+                type: integer
+              detail:
+                type: string
+
+  schemas:
+    UploadAck:
+      type: object
+      properties:
+        jobId:
+          type: string
+        receivedAt:
+          type: string
+          format: date-time
+        profile:
+          type: string
+        itemsCount:
+          type: integer
+
+    UploadJob:
+      type: object
+      properties:
+        jobId:
+          type: string
+        sellerId:
+          type: string
+        profile:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        counters:
+          type: object
+          properties:
+            total:
+              type: integer
+            accepted:
+              type: integer
+            failed:
+              type: integer
+
+    JobItemResult:
+      type: object
+      properties:
+        lineNo:
+          type: integer
+        traceId:
+          type: string
+        invoiceNo:
+          type: string
+          nullable: true
+        buyerId:
+          type: string
+        amount:
+          type: number
+          format: double
+        status:
+          type: string
+        resultCode:
+          type: string
+        resultMsg:
+          type: string
+
+    PageJobItemResult:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobItemResult'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+security:
+  - jwt: []
+
+# Webhook security notes (非標準元件)：
+# - Webhook payloads MUST be signed using HMAC-SHA256 with tenant secret.
+# - Signature header: X-Turnbridge-Signature: sha256=<hex>
+# - Receiver should validate timestamp/nonce and accept within configurable window (e.g. 5 minutes) to prevent replay.
