@@ -22,6 +22,7 @@
 | DEC-009 | 批次檔筆數上限 | 每檔 999 筆；單張發票不可跨檔拆分 | 🔴 High | ✅ Approved | 匯入/切檔、驗證 |
 | DEC-010 | Backend / Agent 分工 | Backend 轉檔交換；Agent 整理上傳 | 🟡 Medium | ✅ Approved | 架構、維運 |
 | DEC-011 | Turnkey 整合方式 | Backend 產生 XML → Turnkey 排程上拋；回饋解析入庫 | 🔴 High | ✅ Approved | 整合、排程 |
+| DEC-012 | `docs/` 基礎結構 | 清理舊檔、鎖定目錄責任；`turnkey/` 僅存官方 PDF，legacy 檔案改以 `舊系統_*` 前綴 | 🟡 Medium | ✅ Approved | 文件、治理 |
 
 ---
 
@@ -119,6 +120,15 @@
 **決定**：Backend 生成 XML 置於 Turnkey 指定目錄，由 Turnkey 既有排程上拋 MOF；回饋（ACK/ERROR）由 Backend 解析更新狀態並推播。  
 **影響**：需要雙向目錄與權限設定；排程與錯誤補償（重送）機制納入 SRS 與測試。
 
+### DEC-012：`docs/` 基礎結構治理
+**背景**：原 `docs/` 內含多份過期或重複檔案（如舊版 `api.yml`、樣板 YAML）；新版規範需確保指向唯一來源並在 AGENTS/SRS 內說明。  
+**決定**：  
+1. 清理冗餘檔案，僅保留目前有效的規格：`requirements/` 與 `spec/` 維持既有 Markdown/YAML，`turnkey/` 限縮為官方 PDF（`MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf`），`legacy-system-docs/` 全數檔案加上 `舊系統_` 前綴。  
+2. 在 `AGENTS.md §13` 與 `SRS §1.3` 登記最新清單與責任歸屬，並預留 `integration/`、`operations/` 未來目錄。  
+**影響**：部署/維運指引皆需引用新的檔案名稱；CI 應檢查文件引用是否與表列一致。  
+**進度**：2025-11-13 已建立 `docs/README.md`、`docs/integration/README.md`、`docs/operations/README.md`，並於 `AGENTS.md`/`SRS` 同步說明。  
+**後續**：搬遷 Turnkey/Webhook 深入內容至 `integration/`，撰寫 `operations/` Runbook，並導入文件引用檢核流程。
+
 ---
 
 ## 📊 決策跟蹤表（更新）
@@ -136,6 +146,7 @@
 | DEC-009 | 999 筆上限與切檔 | 🔴 High | Phase 1 | Backend | 2025-02-15 | 📋 Planned |
 | DEC-010 | Backend/Agent 分工 | 🟡 Medium | Phase 2 | Arch / Backend | 2025-03-15 | 📋 Planned |
 | DEC-011 | Turnkey 整合 | 🔴 High | Phase 1 | Arch / Backend | 2025-02-28 | ⏳ In Progress |
+| DEC-012 | `docs/` 結構治理 | 🟡 Medium | Phase 1 | DocOps / Arch | 2025-02-15 | ✅ Completed（清檔＋目錄）；內容搬遷進行中 |
 
 ---
 

@@ -26,11 +26,11 @@
 | --- | --- | --- |
 | 決策與訪談 | `docs/requirements/` → `DECISION_LOG_v0.3.md`、`turnkey_system_interview_draft_v0.3.md`、`webhook_spec.md` | 決策、容量、Webhook 契約；PO/SA 維護 |
 | 系統規格 | `docs/spec/` → 本 SRS、`openapi-turnbridge-v1.yml`、`turnbridge-rfp-v1.0.md`、`mig-message-type-mapping.md` | 功能/介面/訊息定義；架構師與技術主管同步 |
-| 整合指南 | `docs/integration/`（新） → Turnkey/Webhook/外部系統操作（由 `docs/turnkey/` 與 `webhook_spec.md` 拆分） | 整合工程師維護；保存指令稿與測試流程 |
-| 運維流程 | `docs/operations/`（新） → Monitoring、Incident、Manual resend runbook | SRE/Ops 維護；與 §5 人工流程對應 |
-| 舊制參考 | `docs/legacy/`（由 `docs/legacy-system-docs/` 遷移） → `import-spec.md`、模板 | 僅供轉換參考，不得再更新流程 |
+| 整合指南 | `docs/integration/` → `README.md`（索引）＋待搬遷 Turnkey/Webhook 深入說明；`docs/turnkey/` 僅存官方 PDF | 整合工程師維護；搬遷依 DEC-012 追蹤 |
+| 運維流程 | `docs/operations/` → `README.md`（索引）＋ Runbook（Monitoring、Incident、Manual Resend） | SRE/Ops 維護；與 §5 人工流程對應 |
+| 舊制參考 | `docs/legacy-system-docs/` → `舊系統_import-spec.md`、`舊系統_E0501_template.md`、`舊系統_Invoice_template.md` 等 | 僅供轉換參考，不得再更新流程 |
 
-> `docs/README.md` 將提供快捷導覽並標註責任人；任何程式或流程變更需檢查對應文件是否同步（搭配 `AGENTS.md §13`）。
+> `docs/README.md` 提供快捷導覽並標註責任人；任何程式或流程變更需檢查對應文件是否同步（搭配 `AGENTS.md §13`）。
 
 ---
 

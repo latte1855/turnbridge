@@ -260,9 +260,11 @@ curl -fS -H "Authorization: Bearer $TOKEN" \
 | 範疇 | 目錄 | 代表文件 | 內容摘要 / 負責人 |
 | --- | --- | --- | --- |
 | 需求與決策 | `docs/requirements/` | `DECISION_LOG_v0.3.md`、`CAPACITY_AND_ARCHITECTURE.md`、`webhook_spec.md`、`turnkey_review_findings_v0.1.md`、`turnkey_system_interview_draft_v0.3.md` | 決策、容量、Webhook、訪談摘要；由 SA/PO 維護 |
-| 系統規格 | `docs/spec/` | `turnbridge_srs_v1.0_chatgpt.md`、`turnbridge-srs-v1.0.md`、`openapi-turnbridge-v1.yml`、`turnbridge-rfp-v1.0.md`、`mig-message-type-mapping.md`、`mig4.0-changelog.md`、`mig4.1-changelog.md`、`turnkey-mig41-integration.md` | SRS、API、MIG 變更、RFP；由 架構師/Tech Lead 維護 |
-| Turnkey 接軌 | `docs/turnkey/` | `MIG4.1.pdf`、`api.yml`、`header-mapping-sample.yaml`、`turnkey-inbound-outbound.yaml`、`todo-tasks.md` | 官方 MIG 與 Turnkey 對接細節；由 Turnkey 專案小組維護 |
-| 舊系統教材 | `docs/legacy-system-docs/` | `import-spec.md`、`E0501_template.md`、`Invoice_template.md` | 舊版操作與模板；作為轉換參考 |
+| 系統規格 | `docs/spec/` | `turnbridge-srs-v1.0.md`、`openapi-turnbridge-v1.yml`、`turnbridge-rfp-v1.0.md`、`mig-message-type-mapping.md`、`mig4.0-changelog.md`、`mig4.1-changelog.md`、`turnkey-mig41-integration.md` | SRS、API、MIG 變更、RFP；由 架構師/Tech Lead 維護 |
+| 整合指南 | `docs/integration/` | `README.md`（索引）＋待搬遷 Turnkey/Webhook 深入說明 | 整合工程師；依 DEC-012 搬遷 |
+| 運維流程 | `docs/operations/` | `README.md`（索引）＋ Runbook（Monitoring/Incident/Manual Resend） | SRE/Ops；對應 DEC-006、DEC-011 |
+| Turnkey 接軌 | `docs/turnkey/` | `MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf` | 官方 MIG 與 Turnkey 原廠手冊；由 Turnkey 專案小組維護 |
+| 舊系統教材 | `docs/legacy-system-docs/` | `舊系統_import-spec.md`、`舊系統_E0501_template.md`、`舊系統_Invoice_template.md`、`舊系統_BUSINESS_FLOW.md`、`舊系統_QUICK_REFERENCE.md` | 舊版操作與模板；作為轉換參考 |
 | JDL 模型 | `docs/jdl/` | `m0-upload-core.jdl` | JHipster/資料模型種子 |
 
 > 其他臨時筆記請移至 `workspace/` 或個人目錄，避免進入 `docs/` 正式結構。
@@ -280,11 +282,11 @@ docs/
   assets/                # 共用圖檔、Mermaid 來源、匯出的 PDF
 ```
 
-* **新增 `docs/README.md`**：列出每個子目錄用途、主要檔案、責任人。
-* **`integration/`**：將現有 `docs/turnkey/` 與 Webhook 深入說明（示例 payload、簽章）逐步搬遷；保留 `turnkey/` 僅作官方原始檔鏡像。
-* **`operations/`**：新增 `monitoring.md`、`incident-playbook.md`、`manual-resend.md` 等，配合第 5 章人工重送/審核規則。
+* **`docs/README.md` 已就緒**：新增或移除文件時務必同步更新該檔與本節。
+* **`integration/`**：索引 README 已建，請將 `docs/turnkey/`、`webhook_spec.md` 中的實作/測試內容搬遷並標記進度；`turnkey/` 僅存官方 PDF。
+* **`operations/`**：索引 README 已建，Runbook（Monitoring/Incident/Manual Resend 等）需依 §5 規範補齊。
 * **治理流程**：任一程式/流程變更需檢查對應目錄是否需同步更新（搭配 §9.2「Documentation-as-Code」）。
 
-> 實作前請建立對應目錄並補一頁 README（10 行以內），內容含「目的 / 典型文件 / 主要負責人」即可。
+> 目錄與 README 已建；新增子章節時仍應維持「目的 / 典型文件 / 主要負責人」格式並保持 10 行以內。
 
 **本文件完**
