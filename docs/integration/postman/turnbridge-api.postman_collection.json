@@ -1,0 +1,67 @@
+{
+  "info": {
+    "name": "Turnbridge API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Minimal collection for upload + webhook registration"
+  },
+  "item": [
+    {
+      "name": "Upload Invoice",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {"key": "file", "type": "file", "src": "{{invoice_file}}"},
+            {"key": "md5", "value": "{{invoice_md5}}"},
+            {"key": "encoding", "value": "UTF-8"}
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/upload/invoice",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "upload", "invoice"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Import",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/imports/{{import_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "imports", "{{import_id}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register Webhook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"},
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://example.com/webhooks/invoice\",\n  \"events\": [\"upload.completed\", \"invoice.status.updated\"],\n  \"secret\": null,\n  \"description\": \"Main webhook endpoint\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/webhooks",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "webhooks"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

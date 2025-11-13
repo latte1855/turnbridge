@@ -1,0 +1,84 @@
+# Turnkey 目錄與流程設定（範例 YAML）
+
+# 此檔提供整合工程師在測試/佈署環境中設定 Turnkey 目錄、排程與通知行為的最小參考。
+# 實際路徑請依環境調整；若有多租戶，可用變數置換 ${tenant}.
+
+environment: prod
+turnkey_host: turnkey01.internal
+
+directories:
+  base: /turnkey
+  inbox:
+    path: /turnkey/INBOX
+    pickup_interval_seconds: 300   # Turnkey 預設 5 分鐘掃描
+    naming_rule: "FG${messageType}_${date}_${seq}.xml"
+    permissions:
+      user: turnkey
+      group: turnbridge
+      mode: "750"
+  outbox:
+    path: /turnkey/OUTBOX
+    parser_interval_seconds: 120
+    retention_days: 30
+  error:
+    path: /turnkey/ERROR
+    retention_days: 7
+    alert_threshold: 1            # 偵測到檔案即告警
+
+xml_export:
+  source: postgres://turnbridge/app
+  batch_size: 200
+  schedule: "*/5 * * * *"         # Kubernetes CronJob，5 分鐘
+  message_types:
+    - F0401
+    - F0501
+    - F0701
+    - G0401
+    - G0501
+
+turnkey_pickup:
+  type: systemd
+  service_name: turnkey-pickup
+  restart_policy: on-failure
+  healthcheck:
+    command: /usr/local/bin/turnkey-monitor pickup
+    interval_seconds: 60
+
+turnkey_receive:
+  type: systemd
+  service_name: turnkey-receive
+  healthcheck:
+    command: /usr/local/bin/turnkey-monitor receive
+    interval_seconds: 60
+
+backend_parser:
+  type: kubernetes_cronjob
+  name: turnkey-parser
+  schedule: "*/2 * * * *"
+  env:
+    OUTBOX_PATH: /turnkey/OUTBOX
+    POLL_TIMEOUT_SECONDS: 30
+
+alerts:
+  - name: inbox_backlog
+    metric: turnkey_inbox_backlog
+    threshold: 10            # 檔案數
+    severity: P2
+  - name: outbox_backlog
+    metric: turnkey_outbox_backlog
+    threshold: 5
+    severity: P2
+  - name: error_dir_growth
+    metric: turnkey_error_files
+    threshold: 1
+    severity: P1
+
+webhook:
+  retry_policy: [0, 60, 300, 900] # 秒
+  dlq_topic: webhook.dlq
+  delivery_log: postgres://turnbridge/webhook
+
+notes:
+  - "若 Turnkey 主機採 Windows，service_name 可改為 Task Scheduler 名稱"
+  - "測試環境可改用 /mnt/shared/turnkey 作為 base"
+  - "請將此 YAML 連結於 integration README 的測試腳本描述中"

@@ -126,8 +126,8 @@
 1. 清理冗餘檔案，僅保留目前有效的規格：`requirements/` 與 `spec/` 維持既有 Markdown/YAML，`turnkey/` 限縮為官方 PDF（`MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf`），`legacy-system-docs/` 全數檔案加上 `舊系統_` 前綴。  
 2. 在 `AGENTS.md §13` 與 `SRS §1.3` 登記最新清單與責任歸屬，並預留 `integration/`、`operations/` 未來目錄。  
 **影響**：部署/維運指引皆需引用新的檔案名稱；CI 應檢查文件引用是否與表列一致。  
-**進度**：2025-11-13 已建立 `docs/README.md`、`docs/integration/README.md`、`docs/operations/README.md`，並於 `AGENTS.md`/`SRS` 同步說明。  
-**後續**：搬遷 Turnkey/Webhook 深入內容至 `integration/`，撰寫 `operations/` Runbook，並導入文件引用檢核流程。
+**進度**：2025-11-13 建立 `docs/README.md`、`docs/integration/README.md`、`docs/operations/README.md`；2025-11-14 完成 `docs/integration/{turnkey-webhook.md,webhook-contract.md,turnkey-flow.yaml,turnkey-flow.md,test-scripts.md,e2e-scenarios.md,postman/*,scripts/newman-smoke.sh}` 與 `docs/operations/{monitoring.md,incident-playbook.md,manual-resend.md,turnkey-healthcheck.md}`，並在 `AGENTS`/`SRS` 連動更新。  
+**後續**：將 `turnkey-flow.yaml` 納入 IaC、建立 Newman/CI 自動化報告、導入文件引用檢核流程。
 
 ---
 
@@ -146,7 +146,7 @@
 | DEC-009 | 999 筆上限與切檔 | 🔴 High | Phase 1 | Backend | 2025-02-15 | 📋 Planned |
 | DEC-010 | Backend/Agent 分工 | 🟡 Medium | Phase 2 | Arch / Backend | 2025-03-15 | 📋 Planned |
 | DEC-011 | Turnkey 整合 | 🔴 High | Phase 1 | Arch / Backend | 2025-02-28 | ⏳ In Progress |
-| DEC-012 | `docs/` 結構治理 | 🟡 Medium | Phase 1 | DocOps / Arch | 2025-02-15 | ✅ Completed（清檔＋目錄）；內容搬遷進行中 |
+| DEC-012 | `docs/` 結構治理 | 🟡 Medium | Phase 1 | DocOps / Arch | 2025-02-15 | ✅ Completed（清檔＋目錄＋整合/運維初版）；待 YAML/測試腳本 |
 
 ---
 
