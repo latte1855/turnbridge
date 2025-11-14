@@ -12,8 +12,10 @@
 | --- | --- | --- |
 | `turnkey-webhook.md` | Turnkey 目錄責任、XML 產出、Webhook HMAC/Retry/監控指引 | ✅ 初版 |
 | `turnkey-flow.yaml` | Turnkey 目錄/排程設定範例（INBOX/OUTBOX/警報） | ✅ 初版 |
-| `turnkey-flow.md` | 如何將 YAML 套用於 Ansible/Systemd/K8s | ✅ 初版 |
+| `turnkey-flow.md` | 如何將 YAML 套用於 Ansible/Systemd/K8s | ✅ 初版（對應 `deploy/turnkey/ansible/`） |
+| `scripts/check-turnkey-flow.sh` | 驗證 IaC 是否引用 `turnkey-flow.yaml` | ✅ 初版 |
 | `webhook-contract.md` | Webhook 契約（事件、Header、Schema、錯誤碼） | ✅ 初版 |
+| `../../scripts/check-webhook-consistency.py` | 驗證 `webhook_spec.md` 與 `webhook-contract.md` 事件一致性（CI：Docs Quality workflow） | ✅ 初版 |
 | `test-scripts.md` | curl/CLI/Postman 測試腳本說明 | ✅ 初版 |
 | `scripts/newman-smoke.sh` | Newman smoke 測試腳本 | ✅ 初版 |
 | `ci-newman.md` | 在 CI Pipeline 執行 Newman smoke 測試的指引 | ✅ 初版 |
@@ -25,8 +27,8 @@
 | `docs/requirements/webhook_spec.md` | Webhook 契約與 API 片段 | 逐步拆分中 |
 
 ## TODO
-1. （下一步）將 `turnkey-flow.yaml` 納入 IaC Repo（Helm/Ansible）並設置自動檢查。
-2. 與 `webhook_spec.md` 保持同步（若官方規格更新，需更新 `webhook-contract.md`）。
+1. （進行中）Ansible Playbook 已引用 `turnkey-flow.yaml`（見 `deploy/turnkey/ansible/`）並可用 `scripts/check-turnkey-flow.sh` 驗證；下一步是與正式 IaC Repo 整合並於 CI 執行。
+2. 與 `webhook_spec.md` 保持同步（可執行 `python scripts/check-webhook-consistency.py`，CI Docs Quality 亦會檢查）。
 3. 依 `ci-newman.md` 實際將 `scripts/newman-smoke.sh` 納入 CI Pipeline，並收斂報告格式。
 4. 將 `e2e-scenarios.md` 的報告輸出自動化（例如 Jenkins stage）。
 

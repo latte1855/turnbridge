@@ -1,0 +1,23 @@
+name: Docs Quality
+
+on:
+  pull_request:
+    paths:
+      - "docs/requirements/webhook_spec.md"
+      - "docs/integration/webhook-contract.md"
+      - "scripts/check-webhook-consistency.py"
+      - ".github/workflows/docs-quality.yml"
+  push:
+    paths:
+      - "docs/requirements/webhook_spec.md"
+      - "docs/integration/webhook-contract.md"
+      - "scripts/check-webhook-consistency.py"
+      - ".github/workflows/docs-quality.yml"
+
+jobs:
+  webhook-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify webhook spec vs contract
+        run: python scripts/check-webhook-consistency.py

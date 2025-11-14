@@ -1,0 +1,65 @@
+- hosts: turnkey
+  gather_facts: false
+  become: true
+  vars_files:
+    - ../../docs/integration/turnkey-flow.yaml
+  vars:
+    service_user: "{{ directories.inbox.permissions.user }}"
+    service_group: "{{ directories.inbox.permissions.group }}"
+    restart_policy: "{{ turnkey_pickup.restart_policy | default('on-failure') }}"
+  tasks:
+    - name: Ensure base directory exists
+      file:
+        path: "{{ directories.base }}"
+        state: directory
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        mode: "{{ directories.inbox.permissions.mode }}"
+
+    - name: Ensure Turnkey sub-directories exist
+      loop:
+        - "{{ directories.inbox }}"
+        - "{{ directories.outbox }}"
+        - "{{ directories.error }}"
+      loop_control:
+        label: "{{ item.path }}"
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        mode: "{{ directories.inbox.permissions.mode }}"
+
+    - name: Copy canonical turnkey-flow.yaml for audit
+      copy:
+        src: "{{ playbook_dir }}/../../docs/integration/turnkey-flow.yaml"
+        dest: /etc/turnbridge/turnkey-flow.yaml
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Render pickup systemd service (skeleton)
+      template:
+        src: templates/turnkey-systemd.service.j2
+        dest: "/etc/systemd/system/{{ turnkey_pickup.service_name }}.service"
+        owner: root
+        group: root
+        mode: "0644"
+      vars:
+        description: "Turnkey pickup service (skeleton, fill ExecStart)"
+        exec_start: "/opt/turnkey/bin/pickup --inbox {{ directories.inbox.path }}"
+
+    - name: Render receive systemd service (skeleton)
+      template:
+        src: templates/turnkey-systemd.service.j2
+        dest: "/etc/systemd/system/{{ turnkey_receive.service_name }}.service"
+        owner: root
+        group: root
+        mode: "0644"
+      vars:
+        description: "Turnkey receive service (skeleton, fill ExecStart)"
+        exec_start: "/opt/turnkey/bin/receive --outbox {{ directories.outbox.path }}"
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+      changed_when: false

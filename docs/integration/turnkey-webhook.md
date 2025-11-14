@@ -5,7 +5,38 @@
 
 ---
 
-## 1. 整體流程概觀
+## 1. 環境需求與安裝重點
+
+### 1.1 官方硬體／系統需求（v3.9 摘要）
+
+| 項目 | 要求 |
+| --- | --- |
+| 作業系統 | Windows 10 / Windows Server 2016 以上，或 Ubuntu 18.04 / RHEL 7 / FreeBSD 12.2 以上（皆需 64-bit，Linux 需 XWindow 支援） |
+| CPU / RAM | 至少 4 核心 2.0GHz，32 GB RAM 以上 |
+| 儲存空間 | 可用空間 80 GB 以上（含運作空間） |
+| OpenJDK | 17（隨 Turnkey 提供或自備） |
+| 資料庫 | PostgreSQL ≥11.7、Oracle 19c/21c、MySQL ≥5.7、SQL Server 2014 以上、MariaDB ≥10.9.3，或使用 Turnkey 內建檔案系統 |
+
+> 若採用外部 DB，建議先建立獨立 schema/database，並於安裝前完成 DB 帳號與 schema 建置（Turnkey 也提供啟動後建立的精靈）。
+
+### 1.2 安裝模式
+
+| 平台 | 安裝方式 | 重點 |
+| --- | --- | --- |
+| Windows | 官方 Installer | 依精靈輸入 DB / 目錄 / 憑證路徑，完成後由 GUI 操作 |
+| Linux | 下載 `API_Linux_EINVturnkey_setup_X.X.X.tar.gz`，解壓後執行 `./run_ui.sh` 或 `./run_cmd.sh` | 需準備 XWindow（若使用 UI），並使用 OpenJDK 17；請在安裝目錄內執行腳本 |
+
+> Turnkey 本身沒有官方 Docker 映像。安裝參數（例如 MOF 位址、憑證、DB 連線）仍需透過 GUI/CLI 設定流程輸入，系統會寫入其內部 config/DB。建議：完成一次 GUI 設定後，備份安裝目錄與設定檔，以便複製到其他環境。
+
+### 1.3 無憑證時的開發策略
+
+- **模擬 Turnkey**：在 DEV 環境建立 `/INBOX`、`/OUTBOX` 目錄並以腳本模擬 Turnkey 行為，待取得財政部測試憑證後再切至正式 Turnkey。  
+- **外部流程自動化**：雖然安裝需人工，但目錄/排程/監控可透過 `turnkey-flow.yaml` + IaC（Ansible/Helm）自動化。  
+- **設定維護**：由於 GUI 內部設定無 API，可在 `turnkey-flow.md` 或 Runbook 中記錄操作步驟，確保每次重新安裝都可重現。
+
+---
+
+## 2. 整體流程概觀
 
 ```
 Client/Agent → REST Upload → Normalize/Validation → F/G XML → Turnkey /INBOX
@@ -21,7 +52,7 @@ Client/Agent → REST Upload → Normalize/Validation → F/G XML → Turnkey /I
 
 ---
 
-## 2. Turnkey 目錄與責任分工
+## 3. Turnkey 目錄與責任分工
 
 | 目錄 | Turnkey 責任 | 加值中心（Backend）責任 | 備註 |
 | --- | --- | --- | --- |
@@ -47,7 +78,7 @@ Client/Agent → REST Upload → Normalize/Validation → F/G XML → Turnkey /I
 
 ---
 
-## 3. Webhook 規格（實作版）
+## 4. Webhook 規格（實作版）
 
 ### 3.1 設計原則
 
@@ -133,7 +164,7 @@ Ops 可於 `docs/operations/manual-resend.md` 依指引重送。
 
 ---
 
-## 4. 測試與驗證建議
+## 5. 測試與驗證建議
 
 1. **Turnkey Sandbox**：建立模擬 `/INBOX`、`/OUTBOX` 目錄，使用 cron/腳本仿真。  
 2. **Webhook 自測**：利用 `ngrok` 或暫時的 mock server 驗證簽章與 retry。  
@@ -142,7 +173,7 @@ Ops 可於 `docs/operations/manual-resend.md` 依指引重送。
 
 ---
 
-## 5. 參考與後續
+## 6. 參考與後續
 
 - 官方 Turnkey 文件：`docs/turnkey/MIG4.1.pdf`、`docs/turnkey/Turnkey使用說明書 v3.9.pdf`。  
 - 若 Turnkey 版本升級或 Webhook 增加事件，請同步更新本檔與 `DECISION_LOG`。  

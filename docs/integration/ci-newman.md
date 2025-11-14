@@ -13,39 +13,14 @@
 
 ---
 
-## 2. GitHub Actions 範例
+## 2. GitHub Actions（已建立 `.github/workflows/newman-smoke.yml`）
 
-```yaml
-name: Smoke Tests
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+該 Workflow：
+- 於 `workflow_dispatch` 或 `docs/integration/**`/`scripts/**` 有變動時觸發。
+- 若 `TURNBRIDGE_TOKEN` secret 未設定，會提示並跳過測試（避免 CI 無條件失敗）。
+- 安裝 Newman 後執行 `docs/integration/scripts/newman-smoke.sh`，並上傳 JSON 報告。
 
-jobs:
-  newman-smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install -g newman
-      - name: Run smoke script
-        env:
-          TOKEN: ${{ secrets.TURNBRIDGE_TOKEN }}
-          base_url: https://turnbridge.example.com
-        run: |
-          export NEWMAN_GLOBALS_TOKEN="$TOKEN"
-          ./docs/integration/scripts/newman-smoke.sh
-      - name: Upload report
-        uses: actions/upload-artifact@v4
-        with:
-          name: newman-report
-          path: workspace/e2e-reports/newman-smoke-*.json
-```
-
-> 可於 Workflow 內加入條件，僅在 API/整合目錄變動時執行。
+> 若要實際對接測試環境，請於 GitHub 專案 Secrets 新增 `TURNBRIDGE_TOKEN`，必要時新增 `NEWMAN_BASE_URL` 等自訂變數。
 
 ---
 

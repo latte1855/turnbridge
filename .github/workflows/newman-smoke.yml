@@ -1,0 +1,45 @@
+name: Newman Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "docs/integration/**"
+      - "scripts/**"
+      - ".github/workflows/newman-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Check for token
+        id: token
+        run: |
+          if [ -z "${{ secrets.TURNBRIDGE_TOKEN }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "TURNBRIDGE_TOKEN not set; skipping smoke test."
+          fi
+
+      - name: Run smoke script
+        if: steps.token.outputs.skip != 'true'
+        env:
+          NEWMAN_TOKEN: ${{ secrets.TURNBRIDGE_TOKEN }}
+        run: ./docs/integration/scripts/newman-smoke.sh
+
+      - name: Upload report
+        if: steps.token.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-smoke
+          path: workspace/e2e-reports/newman-smoke-*.json

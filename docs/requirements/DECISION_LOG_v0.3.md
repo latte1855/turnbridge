@@ -126,8 +126,8 @@
 1. 清理冗餘檔案，僅保留目前有效的規格：`requirements/` 與 `spec/` 維持既有 Markdown/YAML，`turnkey/` 限縮為官方 PDF（`MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf`），`legacy-system-docs/` 全數檔案加上 `舊系統_` 前綴。  
 2. 在 `AGENTS.md §13` 與 `SRS §1.3` 登記最新清單與責任歸屬，並預留 `integration/`、`operations/` 未來目錄。  
 **影響**：部署/維運指引皆需引用新的檔案名稱；CI 應檢查文件引用是否與表列一致。  
-**進度**：2025-11-13 建立 `docs/README.md`、`docs/integration/README.md`、`docs/operations/README.md`；2025-11-14 完成 `docs/integration/{turnkey-webhook.md,webhook-contract.md,turnkey-flow.yaml,turnkey-flow.md,test-scripts.md,e2e-scenarios.md,postman/*,scripts/newman-smoke.sh}` 與 `docs/operations/{monitoring.md,incident-playbook.md,manual-resend.md,turnkey-healthcheck.md}`，並在 `AGENTS`/`SRS` 連動更新。  
-**後續**：將 `turnkey-flow.yaml` 納入 IaC、建立 Newman/CI 自動化報告、導入文件引用檢核流程。
+**進度**：2025-11-13 建立 `docs/README.md`、`docs/integration/README.md`、`docs/operations/README.md`；2025-11-14 完成 `docs/integration/{turnkey-webhook.md,webhook-contract.md,turnkey-flow.yaml,turnkey-flow.md,test-scripts.md,e2e-scenarios.md,postman/*,scripts/newman-smoke.sh,ci-newman.md}`、`deploy/turnkey/ansible/*`（引用 YAML 並可透過 `scripts/check-turnkey-flow.sh` 驗證）、`.github/workflows/{newman-smoke,docs-quality}.yml` 與 `scripts/check-webhook-consistency.py`，並在 `AGENTS`/`SRS` 連動更新；`docs/operations/{monitoring.md,incident-playbook.md,manual-resend.md,turnkey-healthcheck.md}` 亦補齊決策來源。  
+**後續**：將 Ansible playbook 納入正式 IaC Repo、在 CI 中提供合法 token/base URL 運行 smoke workflow、導入文件引用檢核流程。
 
 ---
 
