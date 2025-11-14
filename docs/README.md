@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | `requirements/` | 決策、容量、訪談、Webhook 契約 | `DECISION_LOG_v0.3.md`、`CAPACITY_AND_ARCHITECTURE.md`、`turnkey_system_interview_draft_v0.3.md`、`webhook_spec.md` | PO / 系統分析 |
 | `spec/` | SRS、API、RFP、MIG 對應 | `turnbridge-srs-v1.0.md`、`openapi-turnbridge-v1.yml`、`turnbridge-rfp-v1.0.md`、`mig-message-type-mapping.md` | 架構師 / Tech Lead |
-| `integration/` | 外部整合指南（Turnkey、Webhook、API 測試腳本） | `README.md`、`turnkey-webhook.md`、`turnkey-flow.yaml`、`turnkey-flow.md`、`webhook-contract.md`、`test-scripts.md`、`scripts/newman-smoke.sh`、`e2e-scenarios.md` | 整合工程師 |
+| `integration/` | 外部整合指南（Turnkey、Webhook、API 測試腳本） | `README.md`、`turnkey-webhook.md`、`turnkey-flow.yaml`、`turnkey-flow.md`、`webhook-contract.md`、`test-scripts.md`、`scripts/newman-smoke.sh`、`ci-newman.md`、`e2e-scenarios.md` | 整合工程師 |
 | `operations/` | Runbook、監控、人工流程、稽核證跡 | `README.md`、`monitoring.md`、`incident-playbook.md`、`manual-resend.md`、`turnkey-healthcheck.md` | SRE / Ops |
 | `turnkey/` | 官方 MIG / Turnkey 原廠文件（唯讀） | `MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf` | Turnkey 小組 |
 | `legacy-system-docs/` | 舊系統教材與模板（`舊系統_*` 前綴） | `舊系統_import-spec.md`、`舊系統_E0501_template.md` 等 | 知識轉移小組 |

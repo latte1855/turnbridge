@@ -16,6 +16,7 @@
 | `webhook-contract.md` | Webhook 契約（事件、Header、Schema、錯誤碼） | ✅ 初版 |
 | `test-scripts.md` | curl/CLI/Postman 測試腳本說明 | ✅ 初版 |
 | `scripts/newman-smoke.sh` | Newman smoke 測試腳本 | ✅ 初版 |
+| `ci-newman.md` | 在 CI Pipeline 執行 Newman smoke 測試的指引 | ✅ 初版 |
 | `e2e-scenarios.md` | Inbound→Turnkey→Feedback 實測案例 | ✅ 初版 |
 | `postman/turnbridge-api.postman_collection.json` | Postman Collection（上傳/查詢/註冊 Webhook） | ✅ 初版 |
 | `postman/turnbridge-env.postman_environment.json` | Postman Environment（base_url/token 等變數） | ✅ 初版 |
@@ -26,7 +27,7 @@
 ## TODO
 1. （下一步）將 `turnkey-flow.yaml` 納入 IaC Repo（Helm/Ansible）並設置自動檢查。
 2. 與 `webhook_spec.md` 保持同步（若官方規格更新，需更新 `webhook-contract.md`）。
-3. 將 `scripts/newman-smoke.sh` 納入 CI Pipeline，並收斂報告格式。
+3. 依 `ci-newman.md` 實際將 `scripts/newman-smoke.sh` 納入 CI Pipeline，並收斂報告格式。
 4. 將 `e2e-scenarios.md` 的報告輸出自動化（例如 Jenkins stage）。
 
 > 維護者：整合工程師（Integration Squad）。任何對外介面變更需在此留下測試證據。

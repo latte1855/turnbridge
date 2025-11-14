@@ -261,7 +261,7 @@ curl -fS -H "Authorization: Bearer $TOKEN" \
 | --- | --- | --- | --- |
 | 需求與決策 | `docs/requirements/` | `DECISION_LOG_v0.3.md`、`CAPACITY_AND_ARCHITECTURE.md`、`webhook_spec.md`、`turnkey_review_findings_v0.1.md`、`turnkey_system_interview_draft_v0.3.md` | 決策、容量、Webhook、訪談摘要；由 SA/PO 維護 |
 | 系統規格 | `docs/spec/` | `turnbridge-srs-v1.0.md`、`openapi-turnbridge-v1.yml`、`turnbridge-rfp-v1.0.md`、`mig-message-type-mapping.md`、`mig4.0-changelog.md`、`mig4.1-changelog.md`、`turnkey-mig41-integration.md` | SRS、API、MIG 變更、RFP；由 架構師/Tech Lead 維護 |
-| 整合指南 | `docs/integration/` | `README.md`、`turnkey-webhook.md`、`turnkey-flow.yaml`、`turnkey-flow.md`、`webhook-contract.md`、`test-scripts.md`、`scripts/newman-smoke.sh`、`e2e-scenarios.md` | 整合工程師；依 DEC-012 搬遷 |
+| 整合指南 | `docs/integration/` | `README.md`、`turnkey-webhook.md`、`turnkey-flow.yaml`、`turnkey-flow.md`、`webhook-contract.md`、`test-scripts.md`、`scripts/newman-smoke.sh`、`ci-newman.md`、`e2e-scenarios.md` | 整合工程師；依 DEC-012 搬遷 |
 | 運維流程 | `docs/operations/` | `README.md`、`monitoring.md`、`incident-playbook.md`、`manual-resend.md`、`turnkey-healthcheck.md` | SRE/Ops；對應 DEC-006、DEC-011 |
 | Turnkey 接軌 | `docs/turnkey/` | `MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf` | 官方 MIG 與 Turnkey 原廠手冊；由 Turnkey 專案小組維護 |
 | 舊系統教材 | `docs/legacy-system-docs/` | `舊系統_import-spec.md`、`舊系統_E0501_template.md`、`舊系統_Invoice_template.md`、`舊系統_BUSINESS_FLOW.md`、`舊系統_QUICK_REFERENCE.md` | 舊版操作與模板；作為轉換參考 |
