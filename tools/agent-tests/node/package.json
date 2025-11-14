@@ -1,0 +1,11 @@
+{
+  "name": "turnbridge-agent-tests",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "form-data": "^4.0.0",
+    "iconv-lite": "^0.6.3",
+    "fast-csv": "^5.0.1",
+    "crypto-js": "^4.2.0"
+  }
+}

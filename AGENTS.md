@@ -245,6 +245,14 @@ curl -fS -H "Authorization: Bearer $TOKEN" \
 
 ---
 
+## 12. 驗證工具與樣板
+
+- `docs/AGENTS_MAPPING_v1.md`：舊制（A/B/C/D）→ 新制（F/G）欄位對照與 CSV 標頭建議。
+- `tools/agent-tests/`：提供 Node/Java 自動化腳本（含繁中文註解、Javadoc），可驗證 999 不拆單、HMAC 簽章、上傳 API。
+- `docs/integration/scripts/mock-turnkey.py`：於 DEV/UAT 模擬 Turnkey `/INBOX`→`/OUTBOX` 流程。
+
+---
+
 ## 12. 版本與相容性
 
 * **輸出唯一**：Turnkey XML 僅 F/G 新制。
@@ -259,12 +267,12 @@ curl -fS -H "Authorization: Bearer $TOKEN" \
 
 | 範疇 | 目錄 | 代表文件 | 內容摘要 / 負責人 |
 | --- | --- | --- | --- |
-| 需求與決策 | `docs/requirements/` | `DECISION_LOG_v0.3.md`、`CAPACITY_AND_ARCHITECTURE.md`、`webhook_spec.md`、`turnkey_review_findings_v0.1.md`、`turnkey_system_interview_draft_v0.3.md` | 決策、容量、Webhook、訪談摘要；由 SA/PO 維護 |
+| 需求與決策 | `docs/requirements/` | `DECISION_LOG_v0.3.md`、`CAPACITY_AND_ARCHITECTURE.md`、`webhook_spec.md`、`turnkey_review_findings_v0.1.md`、`turnkey_system_interview_draft_v0.3.md`、`dev-readiness.md` | 決策、容量、Webhook、訪談摘要；由 SA/PO 維護 |
 | 系統規格 | `docs/spec/` | `turnbridge-srs-v1.0.md`、`openapi-turnbridge-v1.yml`、`turnbridge-rfp-v1.0.md`、`mig-message-type-mapping.md`、`mig4.0-changelog.md`、`mig4.1-changelog.md`、`turnkey-mig41-integration.md` | SRS、API、MIG 變更、RFP；由 架構師/Tech Lead 維護 |
 | 整合指南 | `docs/integration/` | `README.md`、`turnkey-webhook.md`、`turnkey-flow.yaml`、`turnkey-flow.md`、`webhook-contract.md`、`test-scripts.md`、`scripts/newman-smoke.sh`、`ci-newman.md`、`e2e-scenarios.md` | 整合工程師；依 DEC-012 搬遷 |
 | 運維流程 | `docs/operations/` | `README.md`、`monitoring.md`、`incident-playbook.md`、`manual-resend.md`、`turnkey-healthcheck.md` | SRE/Ops；對應 DEC-006、DEC-011 |
 | Turnkey 接軌 | `docs/turnkey/` | `MIG4.1.pdf`、`Turnkey使用說明書 v3.9.pdf` | 官方 MIG 與 Turnkey 原廠手冊；由 Turnkey 專案小組維護 |
-| 舊系統教材 | `docs/legacy-system-docs/` | `舊系統_import-spec.md`、`舊系統_E0501_template.md`、`舊系統_Invoice_template.md`、`舊系統_BUSINESS_FLOW.md`、`舊系統_QUICK_REFERENCE.md` | 舊版操作與模板；作為轉換參考 |
+| 映射與教材 | `docs/legacy-system-docs/`、`docs/AGENTS_MAPPING_v1.md` | 舊制→新制映射、舊版模板 | 知識轉移小組 |
 | JDL 模型 | `docs/jdl/` | `m0-upload-core.jdl` | JHipster/資料模型種子 |
 
 > 其他臨時筆記請移至 `workspace/` 或個人目錄，避免進入 `docs/` 正式結構。

@@ -7,6 +7,17 @@
 
 ## 1. 通用流程（Major Incident Flow）
 
+```mermaid
+flowchart LR
+  Detect[偵測：告警/客戶回報] --> Classify[分級：P1/P2/P3]
+  Classify --> Assign[指派 IC/CO，建立 Incident Channel]
+  Assign --> Contain[抑制：暫停批次/重送]
+  Contain --> Investigate[排查：Backend/Turnkey/DB/Infra]
+  Investigate --> Update[回報：每 30 分鐘同步]
+  Update --> Recover[恢復：修復 + 驗證]
+  Recover --> Postmortem[結案：24h 內產出報告/RCA]
+```
+
 1. **偵測**：告警（Prometheus/Grafana）、客戶回報或自動健康檢查觸發。  
 2. **分級**：依 Monitoring Runbook 的 P1/P2/P3 判定。  
 3. **指派**：值班 SRE 建立 Incident Channel（Slack/Teams），指派 Incident Commander (IC) 與 Communication Owner (CO)。  
@@ -82,3 +93,5 @@
 - P1 每半年演練一次（Turnkey 中斷 + Webhook 全停）；P2 每季挑選常見場景演練。  
 - 演練完成後需更新本 Playbook、Runbook 與監控門檻。  
 - 任何新的 Incident 類型需於本檔新增章節。
+
+> **審閱紀錄**：2025-11-14 初版（對應 DEC-006/DEC-011）。演練後若內容有調整，請更新日期與決策 ID。

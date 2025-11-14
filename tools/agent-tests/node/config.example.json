@@ -1,0 +1,5 @@
+{
+  "apiBase": "https://turnbridge.local/api/v1",
+  "token": "REPLACE_ME",
+  "webhookSecret": "REPLACE_SECRET"
+}

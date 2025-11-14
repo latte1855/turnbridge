@@ -58,14 +58,27 @@ pipeline {
 
 ---
 
-## 4. 報告與告警
+## 4. Secrets 與測試資料
+
+| 變數 | 說明 | 建議來源 |
+| --- | --- | --- |
+| `TURNBRIDGE_TOKEN` / `NEWMAN_TOKEN` | OAuth access token，用於呼叫 Upload/Import/Webhook API | GitHub Secrets / Jenkins Credentials |
+| `NEWMAN_BASE_URL` | API Base URL (`https://turnbridge.dev.example.com`) | CI 環境變數 |
+| `NEWMAN_IMPORT_ID` | 可選，若需直接查詢現有匯入 | CI 變數或 `test-scripts.md` 指引 | 
+| `NEWMAN_INVOICE_FILE` / `NEWMAN_INVOICE_MD5` | 若要上傳固定 ZIP，可於 CI 事前產生再覆蓋 | build 步驟 / Artifact |
+
+> **建議流程**：在 workflow 之前執行腳本產生測試 ZIP（或重複使用 sample），再以環境變數覆蓋給 `newman-smoke.sh`；Secrets 需於 GitHub/ Jenkins 中設定，避免出現在 repo。
+
+---
+
+## 5. 報告與告警
 - JSON 報告存放於 `workspace/e2e-reports/`；可透過 jq 解析並上傳至監控系統。
 - 若失敗，可連結到 `docs/integration/e2e-scenarios.md` 對應案例，快速排查。
 - 建議設置 Slack/Email 通知，並在 `DECISION_LOG` 中記錄重大失敗案例（關聯 DEC-011）。
 
 ---
 
-## 5. TODO
+## 6. TODO
 - 依 Pipeline 工具補充對應的變數覆蓋方式（例如 GitLab CI、Azure DevOps）。  
 - 若 Newman 報告需轉換為 HTML，可使用 `newman-reporter-htmlextra` 並附於 artifact。  
 - 之後可將 `turnkey-flow.yaml` 檢查也納入同一 Pipeline（IaC 檢核）。
