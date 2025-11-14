@@ -90,5 +90,7 @@ echo "sha256=$SIGNATURE"
   - 建議於 CI 前從 Vault 注入 token。
 - Newman：`newman run docs/integration/postman/turnbridge-api.postman_collection.json -e docs/integration/postman/turnbridge-env.postman_environment.json`
   - 可搭配 `--env-var import_id=imp_xxx` 覆蓋單次測試。
+  - CI 使用 `scripts/newman-smoke.sh`，並由 `.github/workflows/newman-smoke.yml` 自動執行（無 Token 時會自動略過）。
 
 > 若新增腳本或 CLI，請在此檔增列章節並附上執行步驟。
+> **環境變數覆寫**：`docs/integration/scripts/newman-smoke.sh` 會讀取下列變數覆蓋 Postman env：`NEWMAN_BASE_URL`、`NEWMAN_TOKEN`（或 `TOKEN`）、`NEWMAN_IMPORT_ID`、`NEWMAN_INVOICE_FILE`、`NEWMAN_INVOICE_MD5`。CI 可透過 Secrets 注入這些值。
