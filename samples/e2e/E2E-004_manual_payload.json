@@ -1,0 +1,5 @@
+{
+  "importId": "imp_20251103_error",
+  "xmlPath": "/turnkey/manual/imp_20251103_error/FG0401_retry.xml",
+  "reason": "manual resend after Turnkey error"
+}

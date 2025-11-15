@@ -1,0 +1,2 @@
+Type,InvoiceNo,InvoiceDateTime,BuyerId,BuyerName,SalesAmount,Tax,Total,TaxType,ItemName,ItemCount,ItemAmount,legacyType,rawLine
+INV,AB22345001,2025-11-02T09:00:00+08:00,,買受人三,100,5,105,1,測試品1,1,100,F0401,"AB22345001,2025-11-02,09:00:00,..."
