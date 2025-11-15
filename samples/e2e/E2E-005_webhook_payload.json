@@ -1,0 +1,10 @@
+{
+  "delivery_id": "mock-delivery-failed",
+  "event": "invoice.status.updated",
+  "timestamp": "2025-11-04T10:00:00Z",
+  "tenant_id": "TEN-001",
+  "invoice_no": "ABERROR1234",
+  "status": "ERROR",
+  "last_error": "HTTP 500",
+  "attempts": 3
+}

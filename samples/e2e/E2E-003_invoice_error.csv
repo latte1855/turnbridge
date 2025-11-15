@@ -1,0 +1,2 @@
+Type,InvoiceNo,InvoiceDateTime,BuyerId,BuyerName,SalesAmount,Tax,Total,TaxType,ItemName,ItemCount,ItemPrice,ItemAmount,legacyType,rawLine
+INV,ERROR1234001,2025-11-03T15:00:00+08:00,12312312,買受人四,300,15,315,1,測試品X,3,100,300,F0401,"ERROR1234001,2025-11-03,15:00:00,..."

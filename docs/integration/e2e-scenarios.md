@@ -1,48 +1,54 @@
 # Inbound → Turnkey → Feedback 實測案例
 
-> 目的：建立可重複的 E2E 測試清單，覆蓋匯入、Turnkey 轉拋、回饋解析與 Webhook 通知。
-
----
+> 目的：逐步驗證匯入 → Normalize → Turnkey → Webhook 全流程，並在完成後產生報告。
 
 ## 1. 案例矩陣
 
-| ID | 案例 | 輸入檔 | 預期 Turnkey 結果 | Webhook 事件 | 備註 |
+| ID | 案例 | 輸入資料 | 預期 Turnkey 結果 | Webhook 事件 | 備註 |
 | --- | --- | --- | --- | --- | --- |
-| E2E-001 | 正常 F0401 批次 | `samples/f0401_ok.csv` | `/OUTBOX` 產生 ACK，狀態 `ACKED` | `upload.completed`, `invoice.status.updated` | 999 筆內 |
-| E2E-002 | 含錯誤行（Normalize 失敗） | `samples/f0401_mix.csv` | Import 失敗筆數 >0，無 XML | `upload.completed`（errorCount>0） | 驗證 `ImportFileLog` |
-| E2E-003 | Turnkey ERROR | `samples/f0401_turnkey_error.csv` | `/OUTBOX` 產 ERROR XML | `invoice.status.updated`（status=ERROR） | 觸發 Manual Resend |
-| E2E-004 | 手動重送成功 | 以 E2E-003 的 importId | 手動 XML 產生後 Turnkey ACK | `invoice.status.updated`（status=ACKED） | 需審核流程 |
-| E2E-005 | Webhook 端點失敗 | 任一 import | Webhook 連續 3 次 500 → DLQ | `webhook.delivery.failed`（可選） | 驗證 `manual-resend.md` |
-| E2E-006 | Daily summary | 當日累積 50+ 筆 | `/OUTBOX` summary | `turnkey.feedback.daily-summary` | 與報表對帳 |
+| E2E-001 | 正常 F0401 批次 | `samples/e2e/E2E-001_invoice.csv` | `/OUTBOX` ACK | `upload.completed`、`invoice.status.updated (ACKED)` | 999 內，mock-turnkey 即可 |
+| E2E-002 | Normalize 錯誤（缺欄位） | `samples/e2e/E2E-002_invoice_missing.csv` | ImportFileLog ERROR | `upload.completed` (errorCount>0) | 檢查 ImportFileLog |
+| E2E-003 | Turnkey ERROR | `samples/e2e/E2E-003_invoice_error.csv` | `/OUTBOX` ERROR XML | `invoice.status.updated (ERROR)` | 觸發 manual-resend |
+| E2E-004 | Manual Resend 成功 | 取自 E2E-003 importId | 手動 XML 再投遞 ACK | `invoice.status.updated (ACKED)` | 驗證審核 + AuditLog |
+| E2E-005 | Webhook 端點故障 | 任一 import | Webhook 3 次 500 → DLQ | `webhook.delivery.failed`（選用） | 搭配 DLQ 重送 |
+| E2E-006 | Turnkey Summary | 多筆 import | `/OUTBOX` summary 檔 | `turnkey.feedback.daily-summary` | 與報表對帳 |
 
----
+## 2. 資料與腳本
 
-## 2. 操作步驟（示例：E2E-001）
+- `samples/e2e/E2E-001_invoice.csv`：含 300 筆 F0401（內附合法 A0401 格式做映射測試）。
+- `samples/e2e/E2E-002_invoice_missing.csv`：缺欄位、覆蓋 Normalize error。
+- `samples/e2e/E2E-003_invoice_error.csv`：合法檔案，但特定筆以 `.error` 命名，mock-turnkey 會產生 ERROR。
+- `samples/e2e/E2E-004_manual_payload.json`：Manual resend 用 payload（XML 路徑與原因）。
+- `samples/e2e/E2E-005_webhook_payload.json`：模擬 Webhook 送出/重送。
+- `docs/integration/scripts/mock-turnkey.py`：模擬 `/INBOX`→`/OUTBOX`。
+- `docs/integration/scripts/newman-smoke.sh`：驗證上傳/查詢/Webhook。
+- `samples/客戶提供測試資料/202212/轉出欄位訂定.txt`：客戶現行系統匯出格式（`|` 分隔、C0401/C0501/C0701 欄位說明），請針對實際測試時依此檔案產生輸入資料。
 
-1. 依 `docs/integration/test-scripts.md` 產生 ZIP 並上傳。  
-2. 於 DB 查詢 `importId` 狀態 = `UPLOADED`。  
-3. 確認 `/turnkey/INBOX` 出現 XML 並於 5 分鐘內消失。  
-4. 使用 `docs/operations/turnkey-healthcheck.md` 稽核 `/OUTBOX` 新增 ACK。  
-5. 驗證 `TurnkeyMessage` 與 `WebhookDeliveryLog`。  
-6. 將結果紀錄於 `workspace/e2e-reports/E2E-001_<date>.md`。
+> Sample CSV/XML/JSON 可放置於 `samples/e2e/`，由 `tools/agent-tests/` or CI 讀取。
 
----
+## 3. 執行流程（例：E2E-001）
 
-## 3. 報告模板
+1. 使用 `tools/agent-tests/node` 將 `E2E-001_invoice.csv` 切檔並上傳。
+2. 確認 ImportFile/Log 無錯誤（`status=UPLOADED`）。
+3. 透過 `mock-turnkey.py` 或實際 Turnkey 驗證 `/OUTBOX` 出現 ACK。
+4. 驗證 InvoiceStatus=ACKED，並檢查 Webhook Log。
+5. 填寫報告（見下一節）。
+
+## 4. 報告模板
 
 ```
-## 案例：E2E-001
-- Import: imp_20251114_0001
-- Turnkey MsgID: 2025111400012345
+## 案例：E2E-001（正常批次）
+- ImportId：imp_20251115_0001
+- Turnkey MessageID：2025111500001
+- Webhook Delivery IDs：...
 - 結果：PASS
-- Webhook Delivery IDs: [...]
-- 備註： ---
+- 異常/備註：無
 ```
 
----
+建議於 `workspace/e2e-reports/` 或專用資料夾保存報告，並在 PR/里程碑附上連結。
 
-## 4. 自動化建議
-
-* 將案例矩陣轉換為 CI Pipeline 的工作階段，引用 `test-scripts.md` 的 curl/Neuman 指令。  
-* 透過 `docs/integration/postman/*.json` 在 Newman 中跑 smoke test；再由 Ansible/SSH 執行 Turnkey 目錄檢查。  
-* 測試成果需回寫 `DECISION_LOG` 對應決策（例：DEC-011 整合）。*** End Patch
+## 5. TODO
+- 自動化：以 Jenkins/GitHub Actions 跑 `E2E-001` ~ `E2E-006`，並輸出報告。
+- Mock vs 實機：確定何時需切換至實際 Turnkey（取得憑證後）。
+- 轉接 `docs/requirements/dev-roadmap.md` 的 Phase 里程碑：M2/M3/M4 完成前需跑哪些案例。
+- 客戶實際檔案：若需與客戶資料完全一致，請以 `samples/客戶提供測試資料/202212` 內容產製測試檔，再用 `tools/agent-tests/` 轉成上傳格式。
