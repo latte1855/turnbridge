@@ -25,7 +25,7 @@ overrides = {
     "token": os.environ.get("NEWMAN_TOKEN") or os.environ.get("TOKEN"),
     "import_id": os.environ.get("NEWMAN_IMPORT_ID"),
     "invoice_file": os.environ.get("NEWMAN_INVOICE_FILE"),
-    "invoice_md5": os.environ.get("NEWMAN_INVOICE_MD5"),
+    "invoice_sha256": os.environ.get("NEWMAN_INVOICE_SHA256"),
 }
 with open(path, encoding="utf-8") as f:
     data = json.load(f)

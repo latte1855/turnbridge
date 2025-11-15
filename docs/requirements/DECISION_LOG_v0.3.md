@@ -111,7 +111,7 @@
 ### DEC-010：Backend / Agent 職責分工
 **背景**：降低 Backend 因客戶多樣性導致的複雜度，並支援無 IT 能力客戶。  
 **決定**：
-- **Agent**：收集原始資料、前置檢核、產生合規 CSV/ZIP+MD5、上傳 Backend。  
+- **Agent**：收集原始資料、前置檢核、產生合規 CSV/ZIP+SHA-256、上傳 Backend。  
 - **Backend**：接收、驗證、轉檔（MIG 4.1 XML）、與 Turnkey 目錄互動、回饋解析與通知。  
 **影響**：需規劃 Agent 部署/更新與版本管理；Backend 仍保留 API 直接上傳能力。
 

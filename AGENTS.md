@@ -20,7 +20,7 @@
 
 * **Agent（客戶端）**
 
-  * 蒐集 POS/ERP/3S 資料 → **本地前置檢核** → 輸出 **CSV/ZIP + MD5**。
+  * 蒐集 POS/ERP/3S 資料 → **本地前置檢核** → 輸出 **CSV/ZIP + SHA-256**。
   * 舊制 → 新制欄位映射（見 §6）。
   * 呼叫後端 API 上傳、記錄 `importId`、處理重試與離線補送。
 
@@ -32,7 +32,7 @@
 
 ## 2. 上傳規格（E0501 / Invoice）
 
-**共同：** `multipart/form-data`，欄位：`file` (`*.csv|*.zip`)、`md5`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。
+**共同：** `multipart/form-data`，欄位：`file` (`*.csv|*.zip`)、`sha256`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。
 **分檔：** 以**明細行數**計 `<= 999`；**不得拆單**；需附分割序號（splitSeq）。
 **多租戶：** 由 OAuth2 Client/Scope 與 Header 指示租戶；RLS 於 DB 端強制隔離。
 
@@ -145,12 +145,12 @@
 * [ ] 可將上游資料切檔為 `<= 999` **明細**且**不拆單**；分割序號正確遞增。
 * [ ] E0501 巻規則：**00/50 起、49/99 迄**；加油站客製 **250/卷** 可切換。
 * [ ] 舊制檔案：CSV 內 **保留 `legacyType` 與 `rawLine`**，並正確映射 **F/G 新制欄位**。
-* [ ] 上傳 API：`multipart` + `md5` 參數；成功回 `importId`。
+* [ ] 上傳 API：`multipart` + `sha256` 參數；成功回 `importId`。
 * [ ] 斷網重送：離線快取成功（IndexedDB/本機檔），恢復網路自動補送（指數退避）。
 
 **B. 效能/穩定**
 
-* [ ] 1MB/999 筆檔平均驗證 < 2 秒（含 CSV 解析 + MD5）。
+* [ ] 1MB/999 筆檔平均驗證 < 2 秒（含 CSV 解析 + SHA-256）。
 * [ ] 連續上傳 100 檔無明顯退化；失敗自動重試策略正確。
 
 **C. 安全/多租**
@@ -160,7 +160,7 @@
 
 **D. 可觀測性**
 
-* [ ] 代理端落地日誌：記錄 `fileName/md5/importId/httpStatus/retryCount/result`。
+* [ ] 代理端落地日誌：記錄 `fileName/sha256/importId/httpStatus/retryCount/result`。
 * [ ] 每日輸出 `YYYYMMDD_agent_upload_report.jsonl` 以供對帳。
 
 **E. 文件與程式碼規範**
@@ -174,7 +174,7 @@
 
 | 代碼                     | 說明       | 處置           |
 | ---------------------- | -------- | ------------ |
-| `MD5_MISMATCH`         | 檔案校驗失敗   | 重新計算 MD5 後再送 |
+| `SHA256_MISMATCH`      | 檔案校驗失敗   | 重新計算 SHA-256 後再送 |
 | `AMOUNT_MISMATCH`      | 金額/稅額不一致 | 修正資料重送       |
 | `ILLEGAL_MESSAGE_TYPE` | 不支援型別    | 轉為 F/G 新制    |
 | `E0501_RANGE_OVERLAP`  | 號段重疊     | 調整起訖或走人工審核   |
@@ -218,7 +218,7 @@ public Path generateNewSchemaXml(@Nonnull Invoice invoice) { ... }
 **upload log（JSONL）**
 
 ```json
-{"ts":"2025-11-12T08:35:02+08:00","tenant":"TEN-001","file":"invoice_20251112_0001.zip","md5":"0cc1...","importId":"imp_...42","http":200,"retry":0,"result":"OK"}
+{"ts":"2025-11-12T08:35:02+08:00","tenant":"TEN-001","file":"invoice_20251112_0001.zip","sha256":"0cc1...","importId":"imp_...42","http":200,"retry":0,"result":"OK"}
 ```
 
 **webhook log（JSONL）**
@@ -232,13 +232,13 @@ public Path generateNewSchemaXml(@Nonnull Invoice invoice) { ... }
 ## 11. 實作指令（示意）
 
 ```bash
-# 切檔（<=999 明細）、輸出 ZIP 與 MD5
-turnbridge-pack invoices.csv --max-lines 999 --zip --md5 -o out/
+# 切檔（<=999 明細）、輸出 ZIP 與 SHA-256
+turnbridge-pack invoices.csv --max-lines 999 --zip --sha256 -o out/
 
 # 上傳（multipart）
 curl -fS -H "Authorization: Bearer $TOKEN" \
   -F "file=@out/invoice_20251112_0001.zip" \
-  -F "md5=$(cat out/invoice_20251112_0001.zip.md5)" \
+  -F "sha256=$(cat out/invoice_20251112_0001.zip.sha256)" \
   -F "encoding=UTF-8" \
   https://turnbridge.example.com/api/v1/upload/invoice
 ```

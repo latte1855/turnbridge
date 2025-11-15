@@ -44,9 +44,9 @@ paths:
                 sellerId:
                   type: string
                   description: 賣方統編或客戶識別碼
-                md5:
+                sha256:
                   type: string
-                  description: 選填；檔案 MD5
+                  description: 選填；檔案 SHA-256
                 encoding:
                   type: string
                   enum: [UTF-8, BIG5]

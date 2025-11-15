@@ -40,7 +40,7 @@
    - Ops 於後台選擇執行方式：  
      - **Turnkey**：重新產生 XML → 放入 `/INBOX/manual/<date>/` → 觸發 Turnkey Pickup。  
      - **Webhook**：從 DLQ 撈出 payload，依序重送並記錄結果。  
-   - 執行結果（成功/失敗、時間、md5）回寫 `manual_resend_request`。
+   - 執行結果（成功/失敗、時間、sha256）回寫 `manual_resend_request`。
 
 4. **結案**  
    - 成功：狀態標記 `COMPLETED`，並於 `AuditLog` 紀錄。  
@@ -56,7 +56,7 @@
    ```
    /INBOX/manual/<YYYYMMDD>/<tenant>/<importId>/FG0401_<seq>.xml
    ```
-4. 記錄 `xml_path`、`md5` 至 `manual_resend_history`。  
+4. 記錄 `xml_path`、`sha256` 至 `manual_resend_history`。  
 5. 監控 Turnkey 回饋，確認狀態從 `ERROR` 轉為 `ACKED` 或輸出新的錯誤碼。
 
 ---

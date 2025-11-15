@@ -65,7 +65,7 @@ pipeline {
 | `TURNBRIDGE_TOKEN` / `NEWMAN_TOKEN` | OAuth access token，用於呼叫 Upload/Import/Webhook API | GitHub Secrets / Jenkins Credentials |
 | `NEWMAN_BASE_URL` | API Base URL (`https://turnbridge.dev.example.com`) | CI 環境變數 |
 | `NEWMAN_IMPORT_ID` | 可選，若需直接查詢現有匯入 | CI 變數或 `test-scripts.md` 指引 | 
-| `NEWMAN_INVOICE_FILE` / `NEWMAN_INVOICE_MD5` | 若要上傳固定 ZIP，可於 CI 事前產生再覆蓋 | build 步驟 / Artifact |
+| `NEWMAN_INVOICE_FILE` / `NEWMAN_INVOICE_SHA256` | 若要上傳固定 ZIP，可於 CI 事前產生再覆蓋 | build 步驟 / Artifact |
 
 > **建議流程**：在 workflow 之前執行腳本產生測試 ZIP（或重複使用 sample），再以環境變數覆蓋給 `newman-smoke.sh`；Secrets 需於 GitHub/ Jenkins 中設定，避免出現在 repo。
 

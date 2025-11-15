@@ -24,7 +24,7 @@
 
 | 模組                    | 子項                                                          | 依賴     | 輸入/產出                       |
 | --------------------- | ----------------------------------------------------------- | ------ | --------------------------- |
-| **上傳/驗證**             | `POST /upload/{type}`、MD5、ImportFile、999 不拆單、agent metadata | 無      | API Spec、Agent 測試集          |
+| **上傳/驗證**             | `POST /upload/{type}`、SHA-256、ImportFile、999 不拆單、agent metadata | 無      | API Spec、Agent 測試集          |
 | **Normalize 引擎**      | ABCD → FG、欄位映射、錯誤碼、rawLine/legacyType 保存                    | 上傳/驗證  | AGENTS_MAPPING_v1.md、MIG4.1 |
 | **RLS / 多租戶（Tenant）** | tenant_id、角色（加值中心/總公司/分公司）、RLS Policy                       | Domain | RLS Policy、Migration        |
 
@@ -205,4 +205,3 @@
 → 請新增 DECISION_LOG（例如 DEC-013：Roadmap 調整） 並同步更新本文件。
 
 ---
-

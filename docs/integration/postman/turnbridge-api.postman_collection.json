@@ -16,7 +16,7 @@
           "mode": "formdata",
           "formdata": [
             {"key": "file", "type": "file", "src": "{{invoice_file}}"},
-            {"key": "md5", "value": "{{invoice_md5}}"},
+            {"key": "sha256", "value": "{{invoice_sha256}}"},
             {"key": "encoding", "value": "UTF-8"}
           ]
         },
