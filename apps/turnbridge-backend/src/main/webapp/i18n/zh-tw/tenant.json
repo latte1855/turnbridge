@@ -1,0 +1,34 @@
+{
+  "turnbridgeBackendApp": {
+    "tenant": {
+      "home": {
+        "title": "Tenants",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "建立一筆新的 Tenant",
+        "createOrEditLabel": "建立或編輯 Tenant",
+        "notFound": "No Tenants found"
+      },
+      "created": "新的 Tenant 建立成功，識別碼為 {{ param }}",
+      "updated": "識別碼為 {{ param }} 的 Tenant 更新成功",
+      "deleted": "識別碼為 {{ param }} 的 Tenant 刪除成功",
+      "delete": {
+        "question": "您確定要刪除 Tenant {{ id }} 嗎?"
+      },
+      "detail": {
+        "title": "Tenant"
+      },
+      "id": "ID",
+      "name": "Name",
+      "code": "Code",
+      "status": "Status",
+      "importFiles": "Import Files",
+      "invoices": "Invoices",
+      "webhookEndpoints": "Webhook Endpoints",
+      "help": {
+        "name": "名稱",
+        "code": "唯一代碼",
+        "status": "狀態"
+      }
+    }
+  }
+}

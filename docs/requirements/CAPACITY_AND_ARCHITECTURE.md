@@ -112,7 +112,7 @@
   - Invoice：MessageType 分類、多明細聚合、金額驗證
   - 使用 InvoiceChecker 舊邏輯，重構成 Spring Validation Bean
 
-- **MD5 驗證**：上傳完成後立即驗證，快速回饋錯誤
+- **SHA-256 驗證**：上傳完成後立即驗證，快速回饋錯誤
 
 #### 轉檔與上傳層（Async Worker）
 - **排程**：Spring Scheduler 每 5 分鐘拉取待轉檔紀錄

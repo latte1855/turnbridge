@@ -1,0 +1,36 @@
+{
+  "turnbridgeBackendApp": {
+    "invoiceItem": {
+      "home": {
+        "title": "Invoice Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "建立一筆新的 Invoice Item",
+        "createOrEditLabel": "建立或編輯 Invoice Item",
+        "notFound": "No Invoice Items found"
+      },
+      "created": "新的 Invoice Item 建立成功，識別碼為 {{ param }}",
+      "updated": "識別碼為 {{ param }} 的 Invoice Item 更新成功",
+      "deleted": "識別碼為 {{ param }} 的 Invoice Item 刪除成功",
+      "delete": {
+        "question": "您確定要刪除 Invoice Item {{ id }} 嗎?"
+      },
+      "detail": {
+        "title": "Invoice Item"
+      },
+      "id": "ID",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "amount": "Amount",
+      "sequence": "Sequence",
+      "invoice": "Invoice",
+      "help": {
+        "description": "品名",
+        "quantity": "數量",
+        "unitPrice": "單價",
+        "amount": "金額",
+        "sequence": "序號"
+      }
+    }
+  }
+}

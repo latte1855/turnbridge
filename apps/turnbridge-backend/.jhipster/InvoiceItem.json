@@ -1,0 +1,53 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033154"
+  },
+  "applications": "*",
+  "documentation": "發票/折讓明細",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "品名",
+      "fieldName": "description",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "256"
+    },
+    {
+      "documentation": "數量",
+      "fieldName": "quantity",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "單價",
+      "fieldName": "unitPrice",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "金額",
+      "fieldName": "amount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "序號",
+      "fieldName": "sequence",
+      "fieldType": "Integer"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "InvoiceItem",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "發票主檔",
+      "otherEntityField": "invoiceNo",
+      "otherEntityName": "invoice",
+      "relationshipName": "invoice",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

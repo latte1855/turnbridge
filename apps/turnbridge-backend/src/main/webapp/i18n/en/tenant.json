@@ -1,0 +1,34 @@
+{
+  "turnbridgeBackendApp": {
+    "tenant": {
+      "home": {
+        "title": "Tenants",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Tenant",
+        "createOrEditLabel": "Create or edit a Tenant",
+        "notFound": "No Tenants found"
+      },
+      "created": "A new Tenant is created with identifier {{ param }}",
+      "updated": "A Tenant is updated with identifier {{ param }}",
+      "deleted": "A Tenant is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Tenant {{ id }}?"
+      },
+      "detail": {
+        "title": "Tenant"
+      },
+      "id": "ID",
+      "name": "Name",
+      "code": "Code",
+      "status": "Status",
+      "importFiles": "Import Files",
+      "invoices": "Invoices",
+      "webhookEndpoints": "Webhook Endpoints",
+      "help": {
+        "name": "名稱",
+        "code": "唯一代碼",
+        "status": "狀態"
+      }
+    }
+  }
+}

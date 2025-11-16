@@ -1,0 +1,347 @@
+/**
+ * Turnbridge Backend — Domain JDL v1.1
+ * - 依據 `turnbridge-srs-v1.0.md`、`docs/AGENTS_MAPPING_v1.md`、`dev-roadmap.md`
+ * - 全實體預計繼承 AbstractAuditingEntity（建立/修改資訊）
+ */
+
+//////////////////////////////////////////////////////
+// Enums（含繁中註解）
+//////////////////////////////////////////////////////
+
+enum ImportType { 
+  /** 發票/折讓 */ 
+  INVOICE("發票/折讓"), 
+  
+  /** 配號檔 */ 
+  E0501("配號檔") 
+}
+
+enum ImportStatus {
+  /** 已接收 */ 
+  RECEIVED("已接收"),
+
+  /** 上傳中 */  
+  UPLOADING("上傳中"),
+
+  /** 上傳完成 */  
+  UPLOADED("上傳完成"),
+
+  /** 已正規化 */ 
+  NORMALIZED("已正規化"), 
+
+  /** 失敗 */ 
+  FAILED("失敗")
+}
+
+enum InvoiceStatus {
+  /** 草稿 */ 
+  DRAFT("草稿"),
+
+  /** 已正規化 */ 
+  NORMALIZED("已正規化"),
+
+  /** 待產 XML */ 
+  PENDING_XML("待產 XML"),
+
+  /** Turnkey 處理中 */ 
+  IN_PICKUP("Turnkey 處理中"), 
+
+  /** ACK */ 
+  ACKED("ACK"),
+
+  /** 錯誤 */ 
+  ERROR("ERROR"), 
+
+  /** 作廢 */ 
+  VOIDED("作廢")
+}
+
+enum MessageFamily { F0401, F0501, F0701, G0401, G0501 }
+
+enum WebhookStatus { 
+  /** 啟用 */ 
+  ACTIVE("啟用"), 
+  
+  /** 停用 */ 
+  DISABLED("停用") 
+}
+
+enum DeliveryResult { 
+  
+  /** 成功 */ 
+  SUCCESS("成功"), 
+  
+  /** 失敗 */ 
+  FAILED("失敗"), 
+  
+  /** 重試中 */ 
+  RETRY("重試中") 
+}
+
+enum ApprovalStatus { 
+  /** 待審 */ 
+  PENDING("待審"), 
+  
+  /** 已核准 */ 
+  APPROVED("已核准"), 
+  
+  /** 已拒絕 */ 
+  REJECTED("已拒絕") 
+}
+
+enum ManualActionType { 
+  /** 重送 XML */ 
+  RESEND_XML("重送 XML"), 
+
+  /** 補派號段 */ 
+  ASSIGN_NO("補派號段") 
+}
+
+//////////////////////////////////////////////////////
+// Entities
+//////////////////////////////////////////////////////
+
+/** 租戶主檔：對應加值中心/客戶 */
+entity Tenant { // extends AbstractAuditingEntity
+  /** 名稱 */
+  name String required maxlength(128)
+  /** 唯一代碼 */
+  code String required unique maxlength(32)
+  /** 狀態 */
+  status String maxlength(32)
+}
+
+/** 匯入檔主檔（批次） */
+entity ImportFile { // extends AbstractAuditingEntity
+  /** 匯入類型 */
+  importType ImportType required
+  /** 原始檔名 */
+  originalFilename String required maxlength(255)
+  /** 檔案摘要（SHA-256） */
+  sha256 String required minlength(64) maxlength(64)
+  /** 總筆數 */
+  totalCount Integer required min(0)
+  /** 成功筆數 */
+  successCount Integer min(0)
+  /** 失敗筆數 */
+  errorCount Integer min(0)
+  /** 狀態 */
+  status ImportStatus required
+  /** 原訊息別 */
+  legacyType String maxlength(16)
+}
+
+/** 匯入錯誤/訊息紀錄 */
+entity ImportFileLog { // extends AbstractAuditingEntity
+  /** 行號 */
+  lineIndex Integer required min(1)
+  /** 欄位名稱 */
+  field String maxlength(64)
+  /** 錯誤碼 */
+  errorCode String required maxlength(32)
+  /** 錯誤訊息 */
+  message String maxlength(1024)
+  /** 原始行 */
+  rawLine TextBlob
+  /** 原訊息別 */
+  sourceFamily String maxlength(16)
+  /** 正規化訊息別 */
+  normalizedFamily String maxlength(16)
+}
+
+/** 發票/折讓資料主檔（Normalized） */
+entity Invoice { // extends AbstractAuditingEntity
+  /** 發票號碼 */
+  invoiceNo String required maxlength(20)
+  /** 訊息家族 */
+  messageFamily MessageFamily required
+  /** 買方識別碼（統編或載具） */
+  buyerId String maxlength(64)
+  /** 買方名稱 */
+  buyerName String maxlength(128)
+  /** 賣方統編 */
+  sellerId String maxlength(64)
+  /** 賣方名稱 */
+  sellerName String maxlength(128)
+  /** 銷售金額 */
+  salesAmount BigDecimal
+  /** 稅額 */
+  taxAmount BigDecimal
+  /** 含稅金額 */
+  totalAmount BigDecimal
+  /** 稅別 */
+  taxType String maxlength(16)
+  /** 正規化 JSON */
+  normalizedJson TextBlob
+  /** 原始 payload */
+  originalPayload TextBlob
+  /** 發票狀態 */
+  invoiceStatus InvoiceStatus required
+  /** 開立時間 */
+  issuedAt Instant
+  /** 原訊息別 */
+  legacyType String maxlength(16)
+}
+
+/** 發票/折讓明細 */
+entity InvoiceItem { // extends AbstractAuditingEntity
+  /** 品名 */
+  description String required maxlength(256)
+  /** 數量 */
+  quantity BigDecimal
+  /** 單價 */
+  unitPrice BigDecimal
+  /** 金額 */
+  amount BigDecimal
+  /** 序號 */
+  sequence Integer
+}
+
+/** 號段配號管理（E0401） */
+entity InvoiceAssignNo { // extends AbstractAuditingEntity
+  /** 字軌 */
+  track String required maxlength(2)
+  /** 期別 */
+  period String required pattern(/[0-9]{6}/)
+  /** 起號 */
+  fromNo String required maxlength(10)
+  /** 迄號 */
+  toNo String required maxlength(10)
+  /** 已用數 */
+  usedCount Integer min(0)
+  /** 卷大小 */
+  rollSize Integer min(0)
+  /** 狀態 */
+  status String maxlength(32)
+}
+
+/** Turnkey 回饋訊息（ACK/ERROR/SUMMARY） */
+entity TurnkeyMessage { // extends AbstractAuditingEntity
+  /** 訊息 ID */
+  messageId String required maxlength(64)
+  /** 訊息家族 */
+  messageFamily MessageFamily required
+  /** 種類 */
+  type String required maxlength(32)
+  /** 錯誤碼 */
+  code String maxlength(32)
+  /** 訊息內容 */
+  message TextBlob
+  /** XML 路徑 */
+  payloadPath String maxlength(512)
+  /** 接收時間 */
+  receivedAt Instant
+}
+
+/** Webhook 端點設定 */
+entity WebhookEndpoint { // extends AbstractAuditingEntity
+  /** 名稱 */
+  name String required maxlength(64)
+  /** 目標 URL */
+  targetUrl String required maxlength(512)
+  /** Secret */
+  secret String maxlength(128)
+  /** 訂閱事件 */
+  events String required maxlength(512)
+  /** 狀態 */
+  status WebhookStatus required
+}
+
+/** Webhook 投遞紀錄 */
+entity WebhookDeliveryLog { // extends AbstractAuditingEntity
+  /** 投遞 ID */
+  deliveryId String required maxlength(64)
+  /** 事件 */
+  event String required maxlength(128)
+  /** Payload */
+  payload TextBlob
+  /** 投遞狀態 */
+  status DeliveryResult required
+  /** HTTP 回應碼 */
+  httpStatus Integer
+  /** 嘗試次數 */
+  attempts Integer min(0)
+  /** 最後錯誤訊息 */
+  lastError String maxlength(1024)
+  /** 投遞完成時間 */
+  deliveredAt Instant
+}
+
+/** Manual Resend / AssignNo 審核 / 變更記錄 */
+entity ManualAction { // extends AbstractAuditingEntity
+  /** 操作類型 */
+  actionType ManualActionType required
+  /** 原因 */
+  reason String required maxlength(1024)
+  /** 審核狀態 */
+  status ApprovalStatus required
+  /** 申請人 */
+  requestedBy String maxlength(64)
+  /** 申請時間 */
+  requestedAt Instant
+  /** 核准人 */
+  approvedBy String maxlength(64)
+  /** 核准時間*/
+  approvedAt Instant
+  /** 結果說明 */
+  resultMessage TextBlob
+}
+
+//////////////////////////////////////////////////////
+// Relationships（定義 FK）
+//////////////////////////////////////////////////////
+
+relationship OneToMany {
+  /** 匯入檔主檔 */
+  Tenant{importFiles} to
+  /** 租戶 */
+  ImportFile{tenant(name)},
+
+  /** 發票主檔 */
+  Tenant{invoices} to
+  /** 租戶 */
+  Invoice{tenant(name)},
+
+  /** Webhook 端點設定 */
+  Tenant{webhookEndpoints} to
+  /** 租戶 */
+  WebhookEndpoint{tenant(name)}
+}
+
+relationship ManyToOne {
+  /** 匯入檔主檔 */
+  ImportFileLog{importFile(originalFilename) required} to ImportFile,
+
+  /** 匯入檔主檔 */
+  Invoice{importFile(originalFilename) required } to ImportFile,
+
+  /** 發票主檔 */
+  InvoiceItem{invoice(invoiceNo)  required} to Invoice,
+
+  /** 發票主檔 */
+  TurnkeyMessage{invoice(invoiceNo) } to Invoice,
+
+  /** 租戶 */
+  InvoiceAssignNo{tenant(name) required} to Tenant,
+
+  /** Webhook 端點設定 */
+  WebhookDeliveryLog{webhookEndpoint(name) required} to WebhookEndpoint,
+
+  /** 租戶 */
+  ManualAction{tenant(name) required} to Tenant,
+
+  /** 發票主檔 */
+  ManualAction{invoice(invoiceNo)} to Invoice,
+
+  /** 匯入檔主檔 */
+  ManualAction{importFile(originalFilename)} to ImportFile
+}
+
+//////////////////////////////////////////////////////
+// Options
+//////////////////////////////////////////////////////
+
+dto * with mapstruct
+service * with serviceClass
+paginate ImportFile, ImportFileLog, Invoice, InvoiceItem, TurnkeyMessage, WebhookEndpoint, WebhookDeliveryLog with pagination
+filter *

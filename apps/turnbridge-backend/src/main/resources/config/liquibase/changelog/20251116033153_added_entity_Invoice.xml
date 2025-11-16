@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity Invoice.
+    -->
+    <changeSet id="20251116033153-1" author="jhipster">
+        <createTable tableName="invoice" remarks="發票/折讓資料主檔（Normalized）">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="invoice_no" type="varchar(20)" remarks="發票號碼">
+                <constraints nullable="false" />
+            </column>
+            <column name="message_family" type="varchar(255)" remarks="訊息家族">
+                <constraints nullable="false" />
+            </column>
+            <column name="buyer_id" type="varchar(64)" remarks="買方識別碼（統編或載具）">
+                <constraints nullable="true" />
+            </column>
+            <column name="buyer_name" type="varchar(128)" remarks="買方名稱">
+                <constraints nullable="true" />
+            </column>
+            <column name="seller_id" type="varchar(64)" remarks="賣方統編">
+                <constraints nullable="true" />
+            </column>
+            <column name="seller_name" type="varchar(128)" remarks="賣方名稱">
+                <constraints nullable="true" />
+            </column>
+            <column name="sales_amount" type="decimal(21,2)" remarks="銷售金額">
+                <constraints nullable="true" />
+            </column>
+            <column name="tax_amount" type="decimal(21,2)" remarks="稅額">
+                <constraints nullable="true" />
+            </column>
+            <column name="total_amount" type="decimal(21,2)" remarks="含稅金額">
+                <constraints nullable="true" />
+            </column>
+            <column name="tax_type" type="varchar(16)" remarks="稅別">
+                <constraints nullable="true" />
+            </column>
+            <column name="normalized_json" type="${clobType}" remarks="正規化 JSON">
+                <constraints nullable="true" />
+            </column>
+            <column name="original_payload" type="${clobType}" remarks="原始 payload">
+                <constraints nullable="true" />
+            </column>
+            <column name="invoice_status" type="varchar(255)" remarks="發票狀態">
+                <constraints nullable="false" />
+            </column>
+            <column name="issued_at" type="${datetimeType}" remarks="開立時間">
+                <constraints nullable="true" />
+            </column>
+            <column name="legacy_type" type="varchar(16)" remarks="原訊息別">
+                <constraints nullable="true" />
+            </column>
+            <column name="import_file_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="tenant_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+        <dropDefaultValue tableName="invoice" columnName="issued_at" columnDataType="${datetimeType}"/>
+    </changeSet>
+
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+
+    <!--
+        Load sample data generated with Faker.js
+        - This data can be easily edited using a CSV editor (or even MS Excel) and
+          is located in the 'src/main/resources/config/liquibase/fake-data' directory
+        - By default this data is applied when running with the JHipster 'dev' profile.
+          This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
+          Spring Boot configuration key.
+    -->
+    <changeSet id="20251116033153-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/invoice.csv"
+                  separator=";"
+                  tableName="invoice"
+                  usePreparedStatements="true">
+            <column name="id" type="numeric"/>
+            <column name="invoice_no" type="string"/>
+            <column name="message_family" type="string"/>
+            <column name="buyer_id" type="string"/>
+            <column name="buyer_name" type="string"/>
+            <column name="seller_id" type="string"/>
+            <column name="seller_name" type="string"/>
+            <column name="sales_amount" type="numeric"/>
+            <column name="tax_amount" type="numeric"/>
+            <column name="total_amount" type="numeric"/>
+            <column name="tax_type" type="string"/>
+            <column name="normalized_json" type="string"/>
+            <column name="original_payload" type="string"/>
+            <column name="invoice_status" type="string"/>
+            <column name="issued_at" type="date"/>
+            <column name="legacy_type" type="string"/>
+            <column name="tenant_id" type="numeric"/>
+            <column name="import_file_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

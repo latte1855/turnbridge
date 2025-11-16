@@ -1,0 +1,6 @@
+id;line_index;field;error_code;message;raw_line;source_family;normalized_family;import_file_id
+1;25;BuyerId;"ERR_MISSING_BUYER";"買受人缺漏";"line25 data";"C0401";"F0401";1
+2;40;TotalAmount;"ERR_TOTAL";"金額不符";"line40 data";"C0401";"F0401";1
+3;12;InvoiceNo;"ERR_DUPLICATE";"重複發票";"line12 data";"C0401";"F0401";2
+4;5;Track;"ERR_TRACK_RANGE";"字軌範圍不足";"line5 data";"E0501";"E0501";3
+5;18;SellerId;"ERR_SELLER";"賣方不符";"line18 data";"C0401";"F0401";5

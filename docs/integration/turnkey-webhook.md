@@ -44,7 +44,7 @@ Client/Agent → REST Upload → Normalize/Validation → F/G XML → Turnkey /I
                                 Webhook 推播 ← State Engine ← Turnkey /OUTBOX
 ```
 
-1. 客戶/Agent 依 999 筆規格上傳 CSV/ZIP（含 MD5 與 legacy metadata）。
+1. 客戶/Agent 依 999 筆規格上傳 CSV/ZIP（含 SHA-256 與 legacy metadata）。
 2. 後端進行 Raw persistence → Normalize（A/B/C/D → F/G）→ Validation。
 3. 通過驗證後，以 F/G 結構產出 XML，置於 Turnkey `/INBOX`（Pickup）。
 4. Turnkey 既有排程負責簽章、加密、上拋 MOF；回饋（ACK/ERROR）置於 `/OUTBOX`。
@@ -66,7 +66,7 @@ Client/Agent → REST Upload → Normalize/Validation → F/G XML → Turnkey /I
 2. **檔案結構**：遵循 MIG 4.1 XSD；若來源為舊制，Normalize 後再生成。  
 3. **附件**：簽章、加密由 Turnkey 處理，Backend 不需自行簽章。  
 4. **權限**：寫入 `/INBOX` 需具備適當 OS/網路權限；建議使用專屬 service account。  
-5. **日誌**：輸出時記錄 `xml_path`、`message_type`、`tenant_id`、`md5`。
+5. **日誌**：輸出時記錄 `xml_path`、`message_type`、`tenant_id`、`sha256`。
 
 ### 2.2 回饋解析
 

@@ -1,0 +1,42 @@
+{
+  "turnbridgeBackendApp": {
+    "webhookDeliveryLog": {
+      "home": {
+        "title": "Webhook Delivery Logs",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "建立一筆新的 Webhook Delivery Log",
+        "createOrEditLabel": "建立或編輯 Webhook Delivery Log",
+        "notFound": "No Webhook Delivery Logs found"
+      },
+      "created": "新的 Webhook Delivery Log 建立成功，識別碼為 {{ param }}",
+      "updated": "識別碼為 {{ param }} 的 Webhook Delivery Log 更新成功",
+      "deleted": "識別碼為 {{ param }} 的 Webhook Delivery Log 刪除成功",
+      "delete": {
+        "question": "您確定要刪除 Webhook Delivery Log {{ id }} 嗎?"
+      },
+      "detail": {
+        "title": "Webhook Delivery Log"
+      },
+      "id": "ID",
+      "deliveryId": "Delivery Id",
+      "event": "Event",
+      "payload": "Payload",
+      "status": "Status",
+      "httpStatus": "Http Status",
+      "attempts": "Attempts",
+      "lastError": "Last Error",
+      "deliveredAt": "Delivered At",
+      "webhookEndpoint": "Webhook Endpoint",
+      "help": {
+        "deliveryId": "投遞 ID",
+        "event": "事件",
+        "payload": "Payload",
+        "status": "投遞狀態",
+        "httpStatus": "HTTP 回應碼",
+        "attempts": "嘗試次數",
+        "lastError": "最後錯誤訊息",
+        "deliveredAt": "投遞完成時間"
+      }
+    }
+  }
+}

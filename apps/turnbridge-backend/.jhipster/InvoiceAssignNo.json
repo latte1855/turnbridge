@@ -1,0 +1,74 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033155"
+  },
+  "applications": "*",
+  "documentation": "號段配號管理（E0401）",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "字軌",
+      "fieldName": "track",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "2"
+    },
+    {
+      "documentation": "期別",
+      "fieldName": "period",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "pattern"],
+      "fieldValidateRulesPattern": "[0-9]{6}"
+    },
+    {
+      "documentation": "起號",
+      "fieldName": "fromNo",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "10"
+    },
+    {
+      "documentation": "迄號",
+      "fieldName": "toNo",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "10"
+    },
+    {
+      "documentation": "已用數",
+      "fieldName": "usedCount",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "卷大小",
+      "fieldName": "rollSize",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "狀態",
+      "fieldName": "status",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "InvoiceAssignNo",
+  "relationships": [
+    {
+      "documentation": "租戶",
+      "otherEntityField": "name",
+      "otherEntityName": "tenant",
+      "relationshipName": "tenant",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

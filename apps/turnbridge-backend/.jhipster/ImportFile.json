@@ -1,0 +1,95 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033151"
+  },
+  "applications": "*",
+  "documentation": "匯入檔主檔（批次）",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "匯入類型",
+      "fieldName": "importType",
+      "fieldType": "ImportType",
+      "fieldTypeDocumentation": "Turnbridge Backend — Domain JDL v1.1\\n- 依據 `turnbridge-srs-v1.0.md`、`docs/AGENTS_MAPPING_v1.md`、`dev-roadmap.md`\\n- 全實體預計繼承 AbstractAuditingEntity（建立/修改資訊）",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "INVOICE (發票/折讓),E0501 (配號檔)",
+      "fieldValuesJavadocs": {
+        "E0501": "配號檔",
+        "INVOICE": "發票/折讓"
+      }
+    },
+    {
+      "documentation": "原始檔名",
+      "fieldName": "originalFilename",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "255"
+    },
+    {
+      "documentation": "檔案摘要（SHA-256）",
+      "fieldName": "sha256",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "64",
+      "fieldValidateRulesMinlength": "64"
+    },
+    {
+      "documentation": "總筆數",
+      "fieldName": "totalCount",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "成功筆數",
+      "fieldName": "successCount",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "失敗筆數",
+      "fieldName": "errorCount",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "狀態",
+      "fieldName": "status",
+      "fieldType": "ImportStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "RECEIVED (已接收),UPLOADING (上傳中),UPLOADED (上傳完成),NORMALIZED (已正規化),FAILED (失敗)",
+      "fieldValuesJavadocs": {
+        "FAILED": "失敗",
+        "NORMALIZED": "已正規化",
+        "RECEIVED": "已接收",
+        "UPLOADED": "上傳完成",
+        "UPLOADING": "上傳中"
+      }
+    },
+    {
+      "documentation": "原訊息別",
+      "fieldName": "legacyType",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "ImportFile",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "租戶",
+      "otherEntityField": "name",
+      "otherEntityName": "tenant",
+      "otherEntityRelationshipName": "importFiles",
+      "relationshipName": "tenant",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

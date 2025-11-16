@@ -43,7 +43,7 @@
 ```mermaid
 flowchart LR
   subgraph ClientEdge[Client / Agent]
-    A["Client/Agent<br/>CSV/ZIP + MD5"]
+    A["Client/Agent<br/>CSV/ZIP + SHA-256"]
   end
   subgraph APILayer[API & Gateway]
     B["REST API / Upload Gateway"]
@@ -177,7 +177,7 @@ flowchart LR
 
 ### 5.1 上傳與驗證（E0501 / Invoice）
 
-* **檔案**：CSV（建議 UTF-8；E0501 允許 BIG5），可 ZIP；需附 **MD5**。
+* **檔案**：CSV（建議 UTF-8；E0501 允許 BIG5），可 ZIP；需附 **SHA-256**。
 * **999 筆上限**：以「**明細行數**」計算；若最後一張發票跨越 999，**整張移至下一檔**（不得拆單）。
 * **格式偵測**：逐筆依 `MessageType` 或欄位特徵判定 A/B/C/D/F/G。
 * **原文保存**：每一筆（行）保存 `source_family (A/B/C/D/F/G)`、`source_message_type`、`raw_line` 或原始 JSON。
@@ -211,7 +211,7 @@ flowchart LR
 | DEPRECATED_MESSAGE_TYPE | 400 | 收到已棄用訊息（例如 A0601） | 記錄並回傳明確錯誤，提供升級建議或 mapping 建議 |
 | IMPORT_FILE_TOO_LARGE | 413 | 檔案大小超出上限 | 建議分割或使用 SFTP/Agent 上傳 |
 | IDEMPOTENCY_CONFLICT | 409 | Idempotency key 使用衝突 | 回傳 409 並提供已綁定的 importId 與差異摘要 |
-| INVALID_MD5 | 400 | MD5 驗證失敗 | 拒收並回傳錯誤訊息，要求重新上傳 |
+| INVALID_SHA256 | 400 | SHA-256 驗證失敗 | 拒收並回傳錯誤訊息，要求重新上傳 |
 | WEBHOOK_SIGNATURE_INVALID | 401 | Webhook 簽章驗證失敗 | 記錄並丟棄該投遞（或回傳 401） |
 | WEBHOOK_DELIVERY_FAILED | 503 | Webhook 目的端暫不可用 | 重試（1m/5m/15m），達上限進 DLQ |
 
@@ -291,7 +291,7 @@ flowchart LR
 
 | Entity            | 主鍵/關聯                                    | 重點欄位（節錄）                                                                                                                                                                                                                   |
 | ----------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ImportFile`      | PK、tenant_id                             | fileName、md5、type(E0501/Invoice)、status、totalCount、successCount、errorCount、splitSeq、**source_family**、**normalized_family**、createdAt                                                                                      |
+| `ImportFile`      | PK、tenant_id                             | fileName、sha256、type(E0501/Invoice)、status、totalCount、successCount、errorCount、splitSeq、**source_family**、**normalized_family**、createdAt                                                                                      |
 | `ImportFileLog`   | FK(importFileId)                         | lineNo、field、errorCode、message、**source_family**、**normalized_family**、rawLine                                                                                                                                             |
 | `InvoiceAssignNo` | tenant_id + period + track + fromNo-toNo | period、track、rollSize(50/250)、usedCount、status                                                                                                                                                                             |
 | `Invoice`         | PK、tenant_id                             | invoiceNo、buyerId、date、**source_family(A/B/C/D/F/G)**、**source_message_type**、**normalized_family(F/G)**、**normalized_message_type(F0401/G0401...)**、total、tax、status、**original_payload_path**、**normalized_json(JSONB)** |
@@ -337,19 +337,19 @@ flowchart LR
 }
 ```
 
-### Idempotency 與 MD5 合約
+### Idempotency 與 SHA-256 合約
 
 - Idempotency-Key：若客戶端在 header 提供 `Idempotency-Key`，伺服器須保證在 **同一 tenant** 與 **相同 key** 的情況下，對應相同上傳行為會回傳相同 `importId`（或相同 job result），避免重複建立批次。Idempotency-Key 的保留期限為 24 小時（configurable）；超過期限將視為新的請求。
-- 若同一 Idempotency-Key 對應不同 payload（MD5 或 file bytes 不同），伺服器應回傳 `409 Conflict` 並以 `Problem` body 說明差異（例如："Idempotency key reuse with different payload").
-- MD5：若 request body 含 `md5` 欄位，伺服器應驗證上傳檔案的 MD5 值；若不符，回傳 400（`Problem`）並拒收。
-- Idempotency-key 與 MD5 共存時：伺服器以 `Idempotency-Key` 為主索引，但會同時驗證 MD5；若 key 存在且 MD5 不同，回 409；若 key 不存在且 MD5 相同，仍建立新批次（但系統可選擇以 md5 快取避免重複處理，為 implementation detail）。
+- 若同一 Idempotency-Key 對應不同 payload（SHA-256 或 file bytes 不同），伺服器應回傳 `409 Conflict` 並以 `Problem` body 說明差異。
+- SHA-256：若 request body 含 `sha256` 欄位，伺服器應驗證上傳檔案的 SHA-256 值；若不符，回傳 400 (`Problem`) 並拒收。
+- Idempotency-key 與 SHA-256 共存時：伺服器以 `Idempotency-Key` 為主索引，但會同時驗證 SHA-256；若 key 存在且摘要不同，回 409；若 key 不存在且摘要相同，仍建立新批次（是否以摘要快取避免重複處理視實作而定）。
 
 ### 7.2 上傳請求（範例）
 
 * **multipart/form-data**
 
   * `file`: `*.csv` 或 `*.zip`
-  * `md5`: 檔案 MD5
+  * `sha256`: 檔案 SHA-256
   * `encoding`: `UTF-8` / `BIG5`（E0501 可）
   * `profile`: 客製型態（例如加油站卷規則）
 

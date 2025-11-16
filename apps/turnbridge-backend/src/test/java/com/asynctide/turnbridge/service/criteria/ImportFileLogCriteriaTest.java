@@ -1,0 +1,123 @@
+package com.asynctide.turnbridge.service.criteria;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.Test;
+
+class ImportFileLogCriteriaTest {
+
+    @Test
+    void newImportFileLogCriteriaHasAllFiltersNullTest() {
+        var importFileLogCriteria = new ImportFileLogCriteria();
+        assertThat(importFileLogCriteria).is(criteriaFiltersAre(Objects::isNull));
+    }
+
+    @Test
+    void importFileLogCriteriaFluentMethodsCreatesFiltersTest() {
+        var importFileLogCriteria = new ImportFileLogCriteria();
+
+        setAllFilters(importFileLogCriteria);
+
+        assertThat(importFileLogCriteria).is(criteriaFiltersAre(Objects::nonNull));
+    }
+
+    @Test
+    void importFileLogCriteriaCopyCreatesNullFilterTest() {
+        var importFileLogCriteria = new ImportFileLogCriteria();
+        var copy = importFileLogCriteria.copy();
+
+        assertThat(importFileLogCriteria).satisfies(
+            criteria ->
+                assertThat(criteria).is(
+                    copyFiltersAre(copy, (a, b) -> (a == null || a instanceof Boolean) ? a == b : (a != b && a.equals(b)))
+                ),
+            criteria -> assertThat(criteria).isEqualTo(copy),
+            criteria -> assertThat(criteria).hasSameHashCodeAs(copy)
+        );
+
+        assertThat(copy).satisfies(
+            criteria -> assertThat(criteria).is(criteriaFiltersAre(Objects::isNull)),
+            criteria -> assertThat(criteria).isEqualTo(importFileLogCriteria)
+        );
+    }
+
+    @Test
+    void importFileLogCriteriaCopyDuplicatesEveryExistingFilterTest() {
+        var importFileLogCriteria = new ImportFileLogCriteria();
+        setAllFilters(importFileLogCriteria);
+
+        var copy = importFileLogCriteria.copy();
+
+        assertThat(importFileLogCriteria).satisfies(
+            criteria ->
+                assertThat(criteria).is(
+                    copyFiltersAre(copy, (a, b) -> (a == null || a instanceof Boolean) ? a == b : (a != b && a.equals(b)))
+                ),
+            criteria -> assertThat(criteria).isEqualTo(copy),
+            criteria -> assertThat(criteria).hasSameHashCodeAs(copy)
+        );
+
+        assertThat(copy).satisfies(
+            criteria -> assertThat(criteria).is(criteriaFiltersAre(Objects::nonNull)),
+            criteria -> assertThat(criteria).isEqualTo(importFileLogCriteria)
+        );
+    }
+
+    @Test
+    void toStringVerifier() {
+        var importFileLogCriteria = new ImportFileLogCriteria();
+
+        assertThat(importFileLogCriteria).hasToString("ImportFileLogCriteria{}");
+    }
+
+    private static void setAllFilters(ImportFileLogCriteria importFileLogCriteria) {
+        importFileLogCriteria.id();
+        importFileLogCriteria.lineIndex();
+        importFileLogCriteria.field();
+        importFileLogCriteria.errorCode();
+        importFileLogCriteria.message();
+        importFileLogCriteria.sourceFamily();
+        importFileLogCriteria.normalizedFamily();
+        importFileLogCriteria.importFileId();
+        importFileLogCriteria.distinct();
+    }
+
+    private static Condition<ImportFileLogCriteria> criteriaFiltersAre(Function<Object, Boolean> condition) {
+        return new Condition<>(
+            criteria ->
+                condition.apply(criteria.getId()) &&
+                condition.apply(criteria.getLineIndex()) &&
+                condition.apply(criteria.getField()) &&
+                condition.apply(criteria.getErrorCode()) &&
+                condition.apply(criteria.getMessage()) &&
+                condition.apply(criteria.getSourceFamily()) &&
+                condition.apply(criteria.getNormalizedFamily()) &&
+                condition.apply(criteria.getImportFileId()) &&
+                condition.apply(criteria.getDistinct()),
+            "every filter matches"
+        );
+    }
+
+    private static Condition<ImportFileLogCriteria> copyFiltersAre(
+        ImportFileLogCriteria copy,
+        BiFunction<Object, Object, Boolean> condition
+    ) {
+        return new Condition<>(
+            criteria ->
+                condition.apply(criteria.getId(), copy.getId()) &&
+                condition.apply(criteria.getLineIndex(), copy.getLineIndex()) &&
+                condition.apply(criteria.getField(), copy.getField()) &&
+                condition.apply(criteria.getErrorCode(), copy.getErrorCode()) &&
+                condition.apply(criteria.getMessage(), copy.getMessage()) &&
+                condition.apply(criteria.getSourceFamily(), copy.getSourceFamily()) &&
+                condition.apply(criteria.getNormalizedFamily(), copy.getNormalizedFamily()) &&
+                condition.apply(criteria.getImportFileId(), copy.getImportFileId()) &&
+                condition.apply(criteria.getDistinct(), copy.getDistinct()),
+            "every filter matches"
+        );
+    }
+}

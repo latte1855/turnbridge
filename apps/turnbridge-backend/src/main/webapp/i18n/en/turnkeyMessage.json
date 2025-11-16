@@ -1,0 +1,40 @@
+{
+  "turnbridgeBackendApp": {
+    "turnkeyMessage": {
+      "home": {
+        "title": "Turnkey Messages",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Turnkey Message",
+        "createOrEditLabel": "Create or edit a Turnkey Message",
+        "notFound": "No Turnkey Messages found"
+      },
+      "created": "A new Turnkey Message is created with identifier {{ param }}",
+      "updated": "A Turnkey Message is updated with identifier {{ param }}",
+      "deleted": "A Turnkey Message is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Turnkey Message {{ id }}?"
+      },
+      "detail": {
+        "title": "Turnkey Message"
+      },
+      "id": "ID",
+      "messageId": "Message Id",
+      "messageFamily": "Message Family",
+      "type": "Type",
+      "code": "Code",
+      "message": "Message",
+      "payloadPath": "Payload Path",
+      "receivedAt": "Received At",
+      "invoice": "Invoice",
+      "help": {
+        "messageId": "訊息 ID",
+        "messageFamily": "訊息家族",
+        "type": "種類",
+        "code": "錯誤碼",
+        "message": "訊息內容",
+        "payloadPath": "XML 路徑",
+        "receivedAt": "接收時間"
+      }
+    }
+  }
+}

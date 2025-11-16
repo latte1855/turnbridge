@@ -1,0 +1,70 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033156"
+  },
+  "applications": "*",
+  "documentation": "Turnkey 回饋訊息（ACK/ERROR/SUMMARY）",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "訊息 ID",
+      "fieldName": "messageId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "訊息家族",
+      "fieldName": "messageFamily",
+      "fieldType": "MessageFamily",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "F0401,F0501,F0701,G0401,G0501"
+    },
+    {
+      "documentation": "種類",
+      "fieldName": "type",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "錯誤碼",
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "訊息內容",
+      "fieldName": "message",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "XML 路徑",
+      "fieldName": "payloadPath",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "512"
+    },
+    {
+      "documentation": "接收時間",
+      "fieldName": "receivedAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "TurnkeyMessage",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "發票主檔",
+      "otherEntityField": "invoiceNo",
+      "otherEntityName": "invoice",
+      "relationshipName": "invoice",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -13,7 +13,7 @@
 - [V] Webhook 契約：`webhook-contract.md` 與 `webhook_spec.md` 已同步，是否需要最終審閱/簽核？
 
 ## 3. 測試與驗證
-- [pending] Newman Smoke：CI secrets（`TURNBRIDGE_TOKEN` 等）何時配置？測試資料（ZIP/MD5）由誰產生？
+- [pending] Newman Smoke：CI secrets（`TURNBRIDGE_TOKEN` 等）何時配置？測試資料（ZIP/SHA-256）由誰產生？
 - [pending] E2E 案例：`docs/integration/e2e-scenarios.md` 預計何時寫入實際報告？是否需要自動化腳本？
 - [pending] Turnkey 模擬 vs 實機：切換到正式 Turnkey 前需哪些驗收（憑證測試、MOF 連線、/INBOX 權限）？
 

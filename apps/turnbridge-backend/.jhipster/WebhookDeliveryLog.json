@@ -1,0 +1,81 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033158"
+  },
+  "applications": "*",
+  "documentation": "Webhook 投遞紀錄",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "投遞 ID",
+      "fieldName": "deliveryId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "事件",
+      "fieldName": "event",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "Payload",
+      "fieldName": "payload",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "投遞狀態",
+      "fieldName": "status",
+      "fieldType": "DeliveryResult",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "SUCCESS (成功),FAILED (失敗),RETRY (重試中)",
+      "fieldValuesJavadocs": {
+        "FAILED": "失敗",
+        "RETRY": "重試中",
+        "SUCCESS": "成功"
+      }
+    },
+    {
+      "documentation": "HTTP 回應碼",
+      "fieldName": "httpStatus",
+      "fieldType": "Integer"
+    },
+    {
+      "documentation": "嘗試次數",
+      "fieldName": "attempts",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "documentation": "最後錯誤訊息",
+      "fieldName": "lastError",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "documentation": "投遞完成時間",
+      "fieldName": "deliveredAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "WebhookDeliveryLog",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "Webhook 端點設定",
+      "otherEntityField": "name",
+      "otherEntityName": "webhookEndpoint",
+      "relationshipName": "webhookEndpoint",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

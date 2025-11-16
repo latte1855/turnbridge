@@ -1,0 +1,9 @@
+{
+  "turnbridgeBackendApp": {
+    "ManualActionType": {
+      "null": "",
+      "RESEND_XML": "重送 XML",
+      "ASSIGN_NO": "補派號段"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "turnbridgeBackendApp": {
+    "webhookEndpoint": {
+      "home": {
+        "title": "Webhook Endpoints",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Webhook Endpoint",
+        "createOrEditLabel": "Create or edit a Webhook Endpoint",
+        "notFound": "No Webhook Endpoints found"
+      },
+      "created": "A new Webhook Endpoint is created with identifier {{ param }}",
+      "updated": "A Webhook Endpoint is updated with identifier {{ param }}",
+      "deleted": "A Webhook Endpoint is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Webhook Endpoint {{ id }}?"
+      },
+      "detail": {
+        "title": "Webhook Endpoint"
+      },
+      "id": "ID",
+      "name": "Name",
+      "targetUrl": "Target Url",
+      "secret": "Secret",
+      "events": "Events",
+      "status": "Status",
+      "tenant": "Tenant",
+      "help": {
+        "name": "名稱",
+        "targetUrl": "目標 URL",
+        "secret": "Secret",
+        "events": "訂閱事件",
+        "status": "狀態"
+      }
+    }
+  }
+}

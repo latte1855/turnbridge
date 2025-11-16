@@ -4,6 +4,7 @@ import path from "path";
 import axios from "axios";
 import FormData from "form-data";
 import { parse } from "fast-csv";
+import { createHash } from "crypto";
 
 const API = process.env.API_BASE || "https://turnbridge.local/api/v1";
 const TOKEN = process.env.TOKEN || "REPLACE_ME";
@@ -44,6 +45,16 @@ async function splitCsvNotBreakingInvoice(inPath) {
 }
 
 /** 以上傳 API 進行測試（回傳 importId） */
+function fileSha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+    stream.on("data", chunk => hash.update(chunk));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
 async function uploadCsvRows(rows, splitSeq = 1) {
   const tmp = path.join(process.cwd(), `tmp_${Date.now()}_${splitSeq}.csv`);
   const headers = Object.keys(rows[0] || {});
@@ -53,9 +64,10 @@ async function uploadCsvRows(rows, splitSeq = 1) {
     .join("\n");
   fs.writeFileSync(tmp, csv);
 
+  const digest = await fileSha256(tmp);
   const fd = new FormData();
   fd.append("file", fs.createReadStream(tmp));
-  fd.append("md5", "");
+  fd.append("sha256", digest);
   fd.append("encoding", "UTF-8");
   fd.append("profile", "default");
 

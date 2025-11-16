@@ -1,0 +1,40 @@
+{
+  "turnbridgeBackendApp": {
+    "importFileLog": {
+      "home": {
+        "title": "Import File Logs",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Import File Log",
+        "createOrEditLabel": "Create or edit a Import File Log",
+        "notFound": "No Import File Logs found"
+      },
+      "created": "A new Import File Log is created with identifier {{ param }}",
+      "updated": "A Import File Log is updated with identifier {{ param }}",
+      "deleted": "A Import File Log is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Import File Log {{ id }}?"
+      },
+      "detail": {
+        "title": "Import File Log"
+      },
+      "id": "ID",
+      "lineIndex": "Line Index",
+      "field": "Field",
+      "errorCode": "Error Code",
+      "message": "Message",
+      "rawLine": "Raw Line",
+      "sourceFamily": "Source Family",
+      "normalizedFamily": "Normalized Family",
+      "importFile": "Import File",
+      "help": {
+        "lineIndex": "行號",
+        "field": "欄位名稱",
+        "errorCode": "錯誤碼",
+        "message": "錯誤訊息",
+        "rawLine": "原始行",
+        "sourceFamily": "原訊息別",
+        "normalizedFamily": "正規化訊息別"
+      }
+    }
+  }
+}

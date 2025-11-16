@@ -1,0 +1,61 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033150"
+  },
+  "applications": "*",
+  "documentation": "租戶主檔：對應加值中心/客戶",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "名稱",
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "唯一代碼",
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "狀態",
+      "fieldName": "status",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Tenant",
+  "relationships": [
+    {
+      "documentation": "匯入檔主檔",
+      "otherEntityName": "importFile",
+      "otherEntityRelationshipName": "tenant",
+      "relationshipName": "importFiles",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "documentation": "發票主檔",
+      "otherEntityName": "invoice",
+      "otherEntityRelationshipName": "tenant",
+      "relationshipName": "invoices",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "documentation": "Webhook 端點設定",
+      "otherEntityName": "webhookEndpoint",
+      "otherEntityRelationshipName": "tenant",
+      "relationshipName": "webhookEndpoints",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -1,0 +1,9 @@
+{
+  "turnbridgeBackendApp": {
+    "WebhookStatus": {
+      "null": "",
+      "ACTIVE": "啟用",
+      "DISABLED": "停用"
+    }
+  }
+}

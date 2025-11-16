@@ -3,10 +3,16 @@ import { Route } from 'react-router'; // eslint-disable-line
 
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 
-import UploadJob from './upload-job';
-import UploadJobItem from './upload-job-item';
-import StoredObject from './stored-object';
-import TrackRange from './track-range';
+import Tenant from './tenant';
+import ImportFile from './import-file';
+import ImportFileLog from './import-file-log';
+import Invoice from './invoice';
+import InvoiceItem from './invoice-item';
+import InvoiceAssignNo from './invoice-assign-no';
+import TurnkeyMessage from './turnkey-message';
+import WebhookEndpoint from './webhook-endpoint';
+import WebhookDeliveryLog from './webhook-delivery-log';
+import ManualAction from './manual-action';
 /* jhipster-needle-add-route-import - JHipster will add routes here */
 
 export default () => {
@@ -14,10 +20,16 @@ export default () => {
     <div>
       <ErrorBoundaryRoutes>
         {/* prettier-ignore */}
-        <Route path="upload-job/*" element={<UploadJob />} />
-        <Route path="upload-job-item/*" element={<UploadJobItem />} />
-        <Route path="stored-object/*" element={<StoredObject />} />
-        <Route path="track-range/*" element={<TrackRange />} />
+        <Route path="tenant/*" element={<Tenant />} />
+        <Route path="import-file/*" element={<ImportFile />} />
+        <Route path="import-file-log/*" element={<ImportFileLog />} />
+        <Route path="invoice/*" element={<Invoice />} />
+        <Route path="invoice-item/*" element={<InvoiceItem />} />
+        <Route path="invoice-assign-no/*" element={<InvoiceAssignNo />} />
+        <Route path="turnkey-message/*" element={<TurnkeyMessage />} />
+        <Route path="webhook-endpoint/*" element={<WebhookEndpoint />} />
+        <Route path="webhook-delivery-log/*" element={<WebhookDeliveryLog />} />
+        <Route path="manual-action/*" element={<ManualAction />} />
         {/* jhipster-needle-add-route-path - JHipster will add routes here */}
       </ErrorBoundaryRoutes>
     </div>

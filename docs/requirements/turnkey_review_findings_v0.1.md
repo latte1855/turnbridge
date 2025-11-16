@@ -52,7 +52,7 @@
    - **建議**：分兩檔 SLO：**批次檔**（分鐘級）、**POS/即時 API**（秒級），並分別訂 P95/P99。  （來源：CAPACITY；INTERVIEW DRAFT）
 
 3. **重送與冪等**  
-   - 需確保同一檔/同一張發票多次送達時不重複入帳（檔案 MD5、發票鍵、idempotency-key）。  
+   - 需確保同一檔/同一張發票多次送達時不重複入帳（檔案 SHA-256、發票鍵、idempotency-key）。  
    - **建議**：補「冪等鍵策略」與「去重索引（tenant_id + invoice_no + period）」；Webhook 亦需 delivery 去重窗口。  （來源：INTERVIEW DRAFT；WEBHOOK）
 
    4. **Backend 線上單張發票建立與即時處理**
@@ -131,4 +131,3 @@
 > - DECISION_LOG.md（既有架構決策）  
 > - turnkey_system_interview_draft.md（業務流程與現行作業）  
 > - webhook_spec.md（事件推播與驗證）
-

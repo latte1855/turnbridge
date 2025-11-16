@@ -83,11 +83,19 @@ public class CacheConfiguration {
             createCache(cm, com.asynctide.turnbridge.domain.User.class.getName(), jcacheConfiguration);
             createCache(cm, com.asynctide.turnbridge.domain.Authority.class.getName(), jcacheConfiguration);
             createCache(cm, com.asynctide.turnbridge.domain.User.class.getName() + ".authorities", jcacheConfiguration);
-            createCache(cm, com.asynctide.turnbridge.domain.UploadJob.class.getName(), jcacheConfiguration);
-            createCache(cm, com.asynctide.turnbridge.domain.UploadJob.class.getName() + ".items", jcacheConfiguration);
-            createCache(cm, com.asynctide.turnbridge.domain.UploadJobItem.class.getName(), jcacheConfiguration);
-            createCache(cm, com.asynctide.turnbridge.domain.StoredObject.class.getName(), jcacheConfiguration);
-            createCache(cm, com.asynctide.turnbridge.domain.TrackRange.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.Tenant.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.Tenant.class.getName() + ".importFiles", jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.Tenant.class.getName() + ".invoices", jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.Tenant.class.getName() + ".webhookEndpoints", jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.ImportFile.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.ImportFileLog.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.Invoice.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.InvoiceItem.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.InvoiceAssignNo.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.TurnkeyMessage.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.WebhookEndpoint.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.WebhookDeliveryLog.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.ManualAction.class.getName(), jcacheConfiguration);
             // jhipster-needle-redis-add-entry
         };
     }

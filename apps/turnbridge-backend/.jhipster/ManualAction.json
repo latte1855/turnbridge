@@ -1,0 +1,100 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033159"
+  },
+  "applications": "*",
+  "documentation": "Manual Resend / AssignNo 審核 / 變更記錄",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "操作類型",
+      "fieldName": "actionType",
+      "fieldType": "ManualActionType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "RESEND_XML (重送 XML),ASSIGN_NO (補派號段)",
+      "fieldValuesJavadocs": {
+        "ASSIGN_NO": "補派號段",
+        "RESEND_XML": "重送 XML"
+      }
+    },
+    {
+      "documentation": "原因",
+      "fieldName": "reason",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "documentation": "審核狀態",
+      "fieldName": "status",
+      "fieldType": "ApprovalStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "PENDING (待審),APPROVED (已核准),REJECTED (已拒絕)",
+      "fieldValuesJavadocs": {
+        "APPROVED": "已核准",
+        "PENDING": "待審",
+        "REJECTED": "已拒絕"
+      }
+    },
+    {
+      "documentation": "申請人",
+      "fieldName": "requestedBy",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "申請時間",
+      "fieldName": "requestedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "documentation": "核准人",
+      "fieldName": "approvedBy",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "核准時間",
+      "fieldName": "approvedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "documentation": "結果說明",
+      "fieldName": "resultMessage",
+      "fieldType": "TextBlob"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "ManualAction",
+  "relationships": [
+    {
+      "documentation": "租戶",
+      "otherEntityField": "name",
+      "otherEntityName": "tenant",
+      "relationshipName": "tenant",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "documentation": "發票主檔",
+      "otherEntityField": "invoiceNo",
+      "otherEntityName": "invoice",
+      "relationshipName": "invoice",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "documentation": "匯入檔主檔",
+      "otherEntityField": "originalFilename",
+      "otherEntityName": "importFile",
+      "relationshipName": "importFile",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

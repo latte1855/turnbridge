@@ -1,0 +1,6 @@
+id;message_id;message_family;type;code;message;payload_path;received_at;invoice_id
+1;"MSG-ACK-001";F0401;"ACK";000;MOF 已確認;/turnkey/outbox/ack001.xml;"2025-11-01 11:00:00";1
+2;"MSG-ACK-002";F0401;"ACK";000;MOF 已確認;/turnkey/outbox/ack002.xml;"2025-11-01 11:10:00";2
+3;"MSG-ERR-003";F0401;"ERROR";E200;買受人缺漏;/turnkey/outbox/err003.xml;"2025-11-02 10:00:00";3
+4;"MSG-ACK-004";F0401;"ACK";000;MOF 已確認;/turnkey/outbox/ack004.xml;"2025-11-03 09:30:00";4
+5;"MSG-ERR-005";F0401;"ERROR";E410;金額不符;/turnkey/outbox/err005.xml;"2025-11-03 10:00:00";5

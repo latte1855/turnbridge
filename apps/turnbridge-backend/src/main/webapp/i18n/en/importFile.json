@@ -1,0 +1,42 @@
+{
+  "turnbridgeBackendApp": {
+    "importFile": {
+      "home": {
+        "title": "Import Files",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Import File",
+        "createOrEditLabel": "Create or edit a Import File",
+        "notFound": "No Import Files found"
+      },
+      "created": "A new Import File is created with identifier {{ param }}",
+      "updated": "A Import File is updated with identifier {{ param }}",
+      "deleted": "A Import File is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Import File {{ id }}?"
+      },
+      "detail": {
+        "title": "Import File"
+      },
+      "id": "ID",
+      "importType": "Import Type",
+      "originalFilename": "Original Filename",
+      "sha256": "Sha 256",
+      "totalCount": "Total Count",
+      "successCount": "Success Count",
+      "errorCount": "Error Count",
+      "status": "Status",
+      "legacyType": "Legacy Type",
+      "tenant": "Tenant",
+      "help": {
+        "importType": "匯入類型",
+        "originalFilename": "原始檔名",
+        "sha256": "檔案摘要（SHA-256）",
+        "totalCount": "總筆數",
+        "successCount": "成功筆數",
+        "errorCount": "失敗筆數",
+        "status": "狀態",
+        "legacyType": "原訊息別"
+      }
+    }
+  }
+}

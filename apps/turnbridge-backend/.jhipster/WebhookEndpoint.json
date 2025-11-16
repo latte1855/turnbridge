@@ -1,0 +1,65 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033157"
+  },
+  "applications": "*",
+  "documentation": "Webhook 端點設定",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "名稱",
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "目標 URL",
+      "fieldName": "targetUrl",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "512"
+    },
+    {
+      "documentation": "Secret",
+      "fieldName": "secret",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "訂閱事件",
+      "fieldName": "events",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "512"
+    },
+    {
+      "documentation": "狀態",
+      "fieldName": "status",
+      "fieldType": "WebhookStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "ACTIVE (啟用),DISABLED (停用)",
+      "fieldValuesJavadocs": {
+        "ACTIVE": "啟用",
+        "DISABLED": "停用"
+      }
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "WebhookEndpoint",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "租戶",
+      "otherEntityField": "name",
+      "otherEntityName": "tenant",
+      "otherEntityRelationshipName": "webhookEndpoints",
+      "relationshipName": "tenant",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}
