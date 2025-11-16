@@ -250,6 +250,12 @@ curl -fS -H "Authorization: Bearer $TOKEN" \
 - `docs/AGENTS_MAPPING_v1.md`：舊制（A/B/C/D）→ 新制（F/G）欄位對照與 CSV 標頭建議。
 - `tools/agent-tests/`：提供 Node/Java 自動化腳本（含繁中文註解、Javadoc），可驗證 999 不拆單、HMAC 簽章、上傳 API。
 - `docs/integration/scripts/mock-turnkey.py`：於 DEV/UAT 模擬 Turnkey `/INBOX`→`/OUTBOX` 流程。
+- **後端測試套件**：統一放在 `com.asynctide.turnbridge.my` package 下，建議依模組細分子 package，如：
+  - `com.asynctide.turnbridge.my.upload`（上傳/Normalize 測試）
+  - `com.asynctide.turnbridge.my.turnkey`（XML Builder、Turnkey 模擬測試）
+  - `com.asynctide.turnbridge.my.webhook`（Webhook HMAC、DLQ 測試）
+  - `com.asynctide.turnbridge.my.portal`（Portal/Manual Resend/AssignNo 測試）
+  所有測試程式需含繁體中文註解與 Javadoc，並涵蓋正向與負向案例。
 
 ---
 
