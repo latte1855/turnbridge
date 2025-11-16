@@ -1,0 +1,4 @@
+id;action_type;reason;status;requested_by;requested_at;approved_by;approved_at;result_message;tenant_id;invoice_id;import_file_id
+"1";"RESEND_XML";"Turnkey ERROR 手動重送";"APPROVED";"ops_a";"2025-11-02 10:10:00";"lead_a";"2025-11-02 10:20:00";"重新產出 XML 置入 inbox";1;3;2
+"2";"ASSIGN_NO";"補派 2 張號段";"PENDING";"ops_b";"2025-11-03 08:00:00";;;"等待審核";2;;4
+"3";"RESEND_XML";"Webhook DLQ 重送";"APPROVED";"ops_a";"2025-11-03 12:00:00";"lead_a";"2025-11-03 12:15:00";"已推播成功";1;5;5

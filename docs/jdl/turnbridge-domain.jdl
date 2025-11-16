@@ -1,8 +1,7 @@
 /**
- * Turnbridge Backend — Domain JDL v1.0
+ * Turnbridge Backend — Domain JDL v1.1
  * - 依據 `turnbridge-srs-v1.0.md`、`docs/AGENTS_MAPPING_v1.md`、`dev-roadmap.md`
- * - 目的：用 JHipster 8.11.0 產生 Monolith (React + Spring Boot) CRUD + DTO + Service
- * - 全實體預計繼承 AbstractAuditingEntity（建立/修改人員與時間）
+ * - 全實體預計繼承 AbstractAuditingEntity（建立/修改資訊）
  */
 
 //////////////////////////////////////////////////////
@@ -60,8 +59,8 @@ enum InvoiceStatus {
 enum MessageFamily { F0401, F0501, F0701, G0401, G0501 }
 
 enum WebhookStatus { 
-  /** 成功 */ 
-  ACTIVE("成功"), 
+  /** 啟用 */ 
+  ACTIVE("啟用"), 
   
   /** 停用 */ 
   DISABLED("停用") 
@@ -116,8 +115,6 @@ entity Tenant { // extends AbstractAuditingEntity
 entity ImportFile { // extends AbstractAuditingEntity
   /** 匯入類型 */
   importType ImportType required
-  /** 租戶 ID */
-  tenantId Long required
   /** 原始檔名 */
   originalFilename String required maxlength(255)
   /** 檔案摘要（SHA-256） */
@@ -154,21 +151,25 @@ entity ImportFileLog { // extends AbstractAuditingEntity
 
 /** 發票/折讓資料主檔（Normalized） */
 entity Invoice { // extends AbstractAuditingEntity
-  /** 租戶 ID */
-  tenantId Long required
-  /** 匯入檔 ID */
-  importId Long required
   /** 發票號碼 */
   invoiceNo String required maxlength(20)
   /** 訊息家族 */
   messageFamily MessageFamily required
+  /** 買方識別碼（統編或載具） */
   buyerId String maxlength(64)
+  /** 買方名稱 */
   buyerName String maxlength(128)
+  /** 賣方統編 */
   sellerId String maxlength(64)
+  /** 賣方名稱 */
   sellerName String maxlength(128)
+  /** 銷售金額 */
   salesAmount BigDecimal
+  /** 稅額 */
   taxAmount BigDecimal
+  /** 含稅金額 */
   totalAmount BigDecimal
+  /** 稅別 */
   taxType String maxlength(16)
   /** 正規化 JSON */
   normalizedJson TextBlob
@@ -198,8 +199,6 @@ entity InvoiceItem { // extends AbstractAuditingEntity
 
 /** 號段配號管理（E0401） */
 entity InvoiceAssignNo { // extends AbstractAuditingEntity
-  /** 租戶 ID */
-  tenantId Long required
   /** 字軌 */
   track String required maxlength(2)
   /** 期別 */
@@ -218,14 +217,10 @@ entity InvoiceAssignNo { // extends AbstractAuditingEntity
 
 /** Turnkey 回饋訊息（ACK/ERROR/SUMMARY） */
 entity TurnkeyMessage { // extends AbstractAuditingEntity
-  /** 租戶 ID */
-  tenantId Long required
-  /** 發票 ID */
-  invoiceId Long
-  /** 訊息家族 */
-  messageFamily MessageFamily required
   /** 訊息 ID */
   messageId String required maxlength(64)
+  /** 訊息家族 */
+  messageFamily MessageFamily required
   /** 種類 */
   type String required maxlength(32)
   /** 錯誤碼 */
@@ -240,8 +235,6 @@ entity TurnkeyMessage { // extends AbstractAuditingEntity
 
 /** Webhook 端點設定 */
 entity WebhookEndpoint { // extends AbstractAuditingEntity
-  /** 租戶 ID */
-  tenantId Long required
   /** 名稱 */
   name String required maxlength(64)
   /** 目標 URL */
@@ -258,60 +251,90 @@ entity WebhookEndpoint { // extends AbstractAuditingEntity
 entity WebhookDeliveryLog { // extends AbstractAuditingEntity
   /** 投遞 ID */
   deliveryId String required maxlength(64)
-  /** Webhook ID */
-  webhookId Long required
   /** 事件 */
   event String required maxlength(128)
   /** Payload */
   payload TextBlob
   /** 投遞狀態 */
   status DeliveryResult required
+  /** HTTP 回應碼 */
   httpStatus Integer
+  /** 嘗試次數 */
   attempts Integer min(0)
-  lastError TextBlob
+  /** 最後錯誤訊息 */
+  lastError String maxlength(1024)
+  /** 投遞完成時間 */
   deliveredAt Instant
 }
 
-/** Manual Resend / AssignNo 審核 \/ 變更記錄 */
+/** Manual Resend / AssignNo 審核 / 變更記錄 */
 entity ManualAction { // extends AbstractAuditingEntity
-  /** 租戶 ID */
-  tenantId Long required
   /** 操作類型 */
   actionType ManualActionType required
-  /** 目標發票 */
-  targetInvoiceId Long
-  /** 目標匯入 */
-  targetImportId Long
   /** 原因 */
   reason String required maxlength(1024)
   /** 審核狀態 */
   status ApprovalStatus required
   /** 申請人 */
   requestedBy String maxlength(64)
+  /** 申請時間 */
   requestedAt Instant
   /** 核准人 */
   approvedBy String maxlength(64)
+  /** 核准時間*/
   approvedAt Instant
   /** 結果說明 */
   resultMessage TextBlob
 }
 
 //////////////////////////////////////////////////////
-// Relationships
+// Relationships（定義 FK）
 //////////////////////////////////////////////////////
 
-relationship ManyToOne {
-  ImportFileLog{importFile required} to ImportFile,
-  Invoice{importFile(importId) required} to ImportFile,
-  InvoiceItem{invoice required} to Invoice,
-  TurnkeyMessage{invoice} to Invoice,
-  WebhookDeliveryLog{webhookEndpoint(webhookId) required} to WebhookEndpoint
+relationship OneToMany {
+  /** 匯入檔主檔 */
+  Tenant{importFiles} to
+  /** 租戶 */
+  ImportFile{tenant(name)},
+
+  /** 發票主檔 */
+  Tenant{invoices} to
+  /** 租戶 */
+  Invoice{tenant(name)},
+
+  /** Webhook 端點設定 */
+  Tenant{webhookEndpoints} to
+  /** 租戶 */
+  WebhookEndpoint{tenant(name)}
 }
 
-relationship OneToMany {
-  Tenant{importFiles} to ImportFile{tenant},
-  Tenant{invoices} to Invoice{tenant},
-  Tenant{webhookEndpoints} to WebhookEndpoint{tenant}
+relationship ManyToOne {
+  /** 匯入檔主檔 */
+  ImportFileLog{importFile(originalFilename) required} to ImportFile,
+
+  /** 匯入檔主檔 */
+  Invoice{importFile(originalFilename) required } to ImportFile,
+
+  /** 發票主檔 */
+  InvoiceItem{invoice(invoiceNo)  required} to Invoice,
+
+  /** 發票主檔 */
+  TurnkeyMessage{invoice(invoiceNo) } to Invoice,
+
+  /** 租戶 */
+  InvoiceAssignNo{tenant(name) required} to Tenant,
+
+  /** Webhook 端點設定 */
+  WebhookDeliveryLog{webhookEndpoint(name) required} to WebhookEndpoint,
+
+  /** 租戶 */
+  ManualAction{tenant(name) required} to Tenant,
+
+  /** 發票主檔 */
+  ManualAction{invoice(invoiceNo)} to Invoice,
+
+  /** 匯入檔主檔 */
+  ManualAction{importFile(originalFilename)} to ImportFile
 }
 
 //////////////////////////////////////////////////////
@@ -320,5 +343,5 @@ relationship OneToMany {
 
 dto * with mapstruct
 service * with serviceClass
-paginate ImportFile, ImportFileLog, Invoice, InvoiceItem, TurnkeyMessage, WebhookEndpoint with pagination
+paginate ImportFile, ImportFileLog, Invoice, InvoiceItem, TurnkeyMessage, WebhookEndpoint, WebhookDeliveryLog with pagination
 filter *

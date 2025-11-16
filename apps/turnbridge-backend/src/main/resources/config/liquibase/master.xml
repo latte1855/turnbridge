@@ -12,7 +12,26 @@
     <property name="timeType" value="time(6)" dbms="postgresql"/>
 
     <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033150_added_entity_Tenant.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033151_added_entity_ImportFile.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033152_added_entity_ImportFileLog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033153_added_entity_Invoice.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033154_added_entity_InvoiceItem.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033155_added_entity_InvoiceAssignNo.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033156_added_entity_TurnkeyMessage.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033157_added_entity_WebhookEndpoint.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033158_added_entity_WebhookDeliveryLog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033159_added_entity_ManualAction.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
+    <include file="config/liquibase/changelog/20251116033151_added_entity_constraints_ImportFile.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033152_added_entity_constraints_ImportFileLog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033153_added_entity_constraints_Invoice.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033154_added_entity_constraints_InvoiceItem.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033155_added_entity_constraints_InvoiceAssignNo.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033156_added_entity_constraints_TurnkeyMessage.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033157_added_entity_constraints_WebhookEndpoint.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033158_added_entity_constraints_WebhookDeliveryLog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251116033159_added_entity_constraints_ManualAction.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>

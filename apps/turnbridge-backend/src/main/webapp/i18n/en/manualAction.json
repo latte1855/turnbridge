@@ -1,0 +1,44 @@
+{
+  "turnbridgeBackendApp": {
+    "manualAction": {
+      "home": {
+        "title": "Manual Actions",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Manual Action",
+        "createOrEditLabel": "Create or edit a Manual Action",
+        "notFound": "No Manual Actions found"
+      },
+      "created": "A new Manual Action is created with identifier {{ param }}",
+      "updated": "A Manual Action is updated with identifier {{ param }}",
+      "deleted": "A Manual Action is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Manual Action {{ id }}?"
+      },
+      "detail": {
+        "title": "Manual Action"
+      },
+      "id": "ID",
+      "actionType": "Action Type",
+      "reason": "Reason",
+      "status": "Status",
+      "requestedBy": "Requested By",
+      "requestedAt": "Requested At",
+      "approvedBy": "Approved By",
+      "approvedAt": "Approved At",
+      "resultMessage": "Result Message",
+      "tenant": "Tenant",
+      "invoice": "Invoice",
+      "importFile": "Import File",
+      "help": {
+        "actionType": "操作類型",
+        "reason": "原因",
+        "status": "審核狀態",
+        "requestedBy": "申請人",
+        "requestedAt": "申請時間",
+        "approvedBy": "核准人",
+        "approvedAt": "核准時間",
+        "resultMessage": "結果說明"
+      }
+    }
+  }
+}

@@ -7,7 +7,17 @@
       "jhipster-needle-menu-add-element": "JHipster will add additional menu entries here (do not translate!)",
       "entities": {
         "main": "Entities",
-        "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
+        "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)",
+        "tenant": "Tenant",
+        "importFile": "Import File",
+        "importFileLog": "Import File Log",
+        "invoice": "Invoice",
+        "invoiceItem": "Invoice Item",
+        "invoiceAssignNo": "Invoice Assign No",
+        "turnkeyMessage": "Turnkey Message",
+        "webhookEndpoint": "Webhook Endpoint",
+        "webhookDeliveryLog": "Webhook Delivery Log",
+        "manualAction": "Manual Action"
       },
       "account": {
         "main": "Account",

@@ -1,0 +1,73 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033152"
+  },
+  "applications": "*",
+  "documentation": "匯入錯誤/訊息紀錄",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "行號",
+      "fieldName": "lineIndex",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "documentation": "欄位名稱",
+      "fieldName": "field",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "錯誤碼",
+      "fieldName": "errorCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "錯誤訊息",
+      "fieldName": "message",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "documentation": "原始行",
+      "fieldName": "rawLine",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "原訊息別",
+      "fieldName": "sourceFamily",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "正規化訊息別",
+      "fieldName": "normalizedFamily",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "ImportFileLog",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "匯入檔主檔",
+      "otherEntityField": "originalFilename",
+      "otherEntityName": "importFile",
+      "relationshipName": "importFile",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

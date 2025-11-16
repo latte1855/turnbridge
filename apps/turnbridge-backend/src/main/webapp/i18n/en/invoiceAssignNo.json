@@ -1,0 +1,40 @@
+{
+  "turnbridgeBackendApp": {
+    "invoiceAssignNo": {
+      "home": {
+        "title": "Invoice Assign Nos",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Invoice Assign No",
+        "createOrEditLabel": "Create or edit a Invoice Assign No",
+        "notFound": "No Invoice Assign Nos found"
+      },
+      "created": "A new Invoice Assign No is created with identifier {{ param }}",
+      "updated": "A Invoice Assign No is updated with identifier {{ param }}",
+      "deleted": "A Invoice Assign No is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Invoice Assign No {{ id }}?"
+      },
+      "detail": {
+        "title": "Invoice Assign No"
+      },
+      "id": "ID",
+      "track": "Track",
+      "period": "Period",
+      "fromNo": "From No",
+      "toNo": "To No",
+      "usedCount": "Used Count",
+      "rollSize": "Roll Size",
+      "status": "Status",
+      "tenant": "Tenant",
+      "help": {
+        "track": "字軌",
+        "period": "期別",
+        "fromNo": "起號",
+        "toNo": "迄號",
+        "usedCount": "已用數",
+        "rollSize": "卷大小",
+        "status": "狀態"
+      }
+    }
+  }
+}

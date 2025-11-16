@@ -1,0 +1,137 @@
+{
+  "annotations": {
+    "changelogDate": "20251116033153"
+  },
+  "applications": "*",
+  "documentation": "發票/折讓資料主檔（Normalized）",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "發票號碼",
+      "fieldName": "invoiceNo",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "documentation": "訊息家族",
+      "fieldName": "messageFamily",
+      "fieldType": "MessageFamily",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "F0401,F0501,F0701,G0401,G0501"
+    },
+    {
+      "documentation": "買方識別碼（統編或載具）",
+      "fieldName": "buyerId",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "買方名稱",
+      "fieldName": "buyerName",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "賣方統編",
+      "fieldName": "sellerId",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "賣方名稱",
+      "fieldName": "sellerName",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "銷售金額",
+      "fieldName": "salesAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "稅額",
+      "fieldName": "taxAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "含稅金額",
+      "fieldName": "totalAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "documentation": "稅別",
+      "fieldName": "taxType",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "正規化 JSON",
+      "fieldName": "normalizedJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "原始 payload",
+      "fieldName": "originalPayload",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "發票狀態",
+      "fieldName": "invoiceStatus",
+      "fieldType": "InvoiceStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "DRAFT (草稿),NORMALIZED (已正規化),PENDING_XML (待產 XML),IN_PICKUP (Turnkey 處理中),ACKED (ACK),ERROR (ERROR),VOIDED (作廢)",
+      "fieldValuesJavadocs": {
+        "ACKED": "ACK",
+        "DRAFT": "草稿",
+        "ERROR": "錯誤",
+        "IN_PICKUP": "Turnkey 處理中",
+        "NORMALIZED": "已正規化",
+        "PENDING_XML": "待產 XML",
+        "VOIDED": "作廢"
+      }
+    },
+    {
+      "documentation": "開立時間",
+      "fieldName": "issuedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "documentation": "原訊息別",
+      "fieldName": "legacyType",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Invoice",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "匯入檔主檔",
+      "otherEntityField": "originalFilename",
+      "otherEntityName": "importFile",
+      "relationshipName": "importFile",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "documentation": "租戶",
+      "otherEntityField": "name",
+      "otherEntityName": "tenant",
+      "otherEntityRelationshipName": "invoices",
+      "relationshipName": "tenant",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

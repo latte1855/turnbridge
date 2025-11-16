@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <!--
+        Added the constraints for entity ManualAction.
+    -->
+    <changeSet id="20251116033159-2" author="jhipster">
+
+        <addForeignKeyConstraint baseColumnNames="tenant_id"
+                                 baseTableName="manual_action"
+                                 constraintName="fk_manual_action__tenant_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="tenant"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="invoice_id"
+                                 baseTableName="manual_action"
+                                 constraintName="fk_manual_action__invoice_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="invoice"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="import_file_id"
+                                 baseTableName="manual_action"
+                                 constraintName="fk_manual_action__import_file_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="import_file"
+                                 />
+    </changeSet>
+</databaseChangeLog>

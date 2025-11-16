@@ -1,0 +1,6 @@
+id;delivery_id;event;payload;status;http_status;attempts;last_error;delivered_at;webhook_endpoint_id
+1;DELIV-001;upload.completed;""{""importId"":""imp_001""}"";"SUCCESS";200;1;;"2025-11-01 11:05:00";1
+2;DELIV-002;invoice.status.updated;""{""invoiceNo"":""AB12345001"",""status"":""ACKED""}"";"SUCCESS";200;1;;"2025-11-01 11:06:00";1
+3;DELIV-003;invoice.status.updated;""{""invoiceNo"":""AB22345001"",""status"":""ERROR""}"";"FAILED";500;3;HTTP 500;"2025-11-02 10:05:00";1
+4;DELIV-004;invoice.status.updated;""{""invoiceNo"":""CD12345001"",""status"":""PENDING_XML""}"";"SUCCESS";200;1;;"2025-11-03 09:40:00";2
+5;DELIV-005;turnkey.feedback.daily-summary;""{""date"":""2025-11-03""}"";"SUCCESS";200;1;;"2025-11-03 11:00:00";2

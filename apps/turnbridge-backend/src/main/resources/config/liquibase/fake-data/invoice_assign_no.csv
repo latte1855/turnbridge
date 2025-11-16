@@ -1,0 +1,3 @@
+id;track;period;from_no;to_no;used_count;roll_size;status;tenant_id
+1;"AB";"202511";1;500;320;500;"ACTIVE";1
+2;"CD";"202511";1;300;210;300;"ACTIVE";2
