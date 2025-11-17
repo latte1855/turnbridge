@@ -4,46 +4,38 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
  * A DTO for the {@link com.asynctide.turnbridge.domain.ImportFileLog} entity.
  */
-@Schema(description = "匯入錯誤/訊息紀錄")
+@Schema(description = "匯入批次事件紀錄（非逐行）")
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class ImportFileLogDTO implements Serializable {
 
     private Long id;
 
     @NotNull
-    @Min(value = 1)
-    @Schema(description = "行號", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Integer lineIndex;
-
     @Size(max = 64)
-    @Schema(description = "欄位名稱")
-    private String field;
+    @Schema(description = "事件代碼（如 PARSE_ERROR/NORMALIZE_SUMMARY）", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String eventCode;
 
     @NotNull
-    @Size(max = 32)
-    @Schema(description = "錯誤碼", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String errorCode;
+    @Size(max = 16)
+    @Schema(description = "層級（INFO/WARN/ERROR）", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String level;
 
     @Size(max = 1024)
-    @Schema(description = "錯誤訊息")
+    @Schema(description = "訊息摘要")
     private String message;
 
-    @Schema(description = "原始行")
+    @Schema(description = "詳細內容（JSON 或堆疊）")
     @Lob
-    private String rawLine;
+    private String detail;
 
-    @Size(max = 16)
-    @Schema(description = "原訊息別")
-    private String sourceFamily;
-
-    @Size(max = 16)
-    @Schema(description = "正規化訊息別")
-    private String normalizedFamily;
+    @Schema(description = "發生時間")
+    private Instant occurredAt;
 
     @NotNull
     @Schema(description = "匯入檔主檔")
@@ -57,28 +49,20 @@ public class ImportFileLogDTO implements Serializable {
         this.id = id;
     }
 
-    public Integer getLineIndex() {
-        return lineIndex;
+    public String getEventCode() {
+        return eventCode;
     }
 
-    public void setLineIndex(Integer lineIndex) {
-        this.lineIndex = lineIndex;
+    public void setEventCode(String eventCode) {
+        this.eventCode = eventCode;
     }
 
-    public String getField() {
-        return field;
+    public String getLevel() {
+        return level;
     }
 
-    public void setField(String field) {
-        this.field = field;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public String getMessage() {
@@ -89,28 +73,20 @@ public class ImportFileLogDTO implements Serializable {
         this.message = message;
     }
 
-    public String getRawLine() {
-        return rawLine;
+    public String getDetail() {
+        return detail;
     }
 
-    public void setRawLine(String rawLine) {
-        this.rawLine = rawLine;
+    public void setDetail(String detail) {
+        this.detail = detail;
     }
 
-    public String getSourceFamily() {
-        return sourceFamily;
+    public Instant getOccurredAt() {
+        return occurredAt;
     }
 
-    public void setSourceFamily(String sourceFamily) {
-        this.sourceFamily = sourceFamily;
-    }
-
-    public String getNormalizedFamily() {
-        return normalizedFamily;
-    }
-
-    public void setNormalizedFamily(String normalizedFamily) {
-        this.normalizedFamily = normalizedFamily;
+    public void setOccurredAt(Instant occurredAt) {
+        this.occurredAt = occurredAt;
     }
 
     public ImportFileDTO getImportFile() {
@@ -147,13 +123,11 @@ public class ImportFileLogDTO implements Serializable {
     public String toString() {
         return "ImportFileLogDTO{" +
             "id=" + getId() +
-            ", lineIndex=" + getLineIndex() +
-            ", field='" + getField() + "'" +
-            ", errorCode='" + getErrorCode() + "'" +
+            ", eventCode='" + getEventCode() + "'" +
+            ", level='" + getLevel() + "'" +
             ", message='" + getMessage() + "'" +
-            ", rawLine='" + getRawLine() + "'" +
-            ", sourceFamily='" + getSourceFamily() + "'" +
-            ", normalizedFamily='" + getNormalizedFamily() + "'" +
+            ", detail='" + getDetail() + "'" +
+            ", occurredAt='" + getOccurredAt() + "'" +
             ", importFile=" + getImportFile() +
             "}";
     }

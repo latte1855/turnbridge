@@ -22,6 +22,8 @@
     <include file="config/liquibase/changelog/20251116033157_added_entity_WebhookEndpoint.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20251116033158_added_entity_WebhookDeliveryLog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20251116033159_added_entity_ManualAction.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251117000502_added_entity_ImportFileItem.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251117043016_added_entity_ImportFileItemError.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20251116033151_added_entity_constraints_ImportFile.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20251116033152_added_entity_constraints_ImportFileLog.xml" relativeToChangelogFile="false"/>
@@ -32,6 +34,8 @@
     <include file="config/liquibase/changelog/20251116033157_added_entity_constraints_WebhookEndpoint.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20251116033158_added_entity_constraints_WebhookDeliveryLog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20251116033159_added_entity_constraints_ManualAction.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251117000502_added_entity_constraints_ImportFileItem.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251117043016_added_entity_constraints_ImportFileItemError.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>

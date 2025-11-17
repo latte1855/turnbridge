@@ -68,13 +68,11 @@ public class ImportFileLogGatlingTest extends Simulation {
                         .body(
                             StringBody(
                                 "{" +
-                                "\"lineIndex\": 0" +
-                                ", \"field\": \"SAMPLE_TEXT\"" +
-                                ", \"errorCode\": \"SAMPLE_TEXT\"" +
+                                "\"eventCode\": \"SAMPLE_TEXT\"" +
+                                ", \"level\": \"SAMPLE_TEXT\"" +
                                 ", \"message\": \"SAMPLE_TEXT\"" +
-                                ", \"rawLine\": null" +
-                                ", \"sourceFamily\": \"SAMPLE_TEXT\"" +
-                                ", \"normalizedFamily\": \"SAMPLE_TEXT\"" +
+                                ", \"detail\": null" +
+                                ", \"occurredAt\": \"2020-01-01T00:00:00.000Z\"" +
                                 "}"
                             )
                         )

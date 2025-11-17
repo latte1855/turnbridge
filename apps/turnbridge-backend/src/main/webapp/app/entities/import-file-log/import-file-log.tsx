@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Table } from 'reactstrap';
-import { JhiItemCount, JhiPagination, Translate, getPaginationState } from 'react-jhipster';
+import { JhiItemCount, JhiPagination, TextFormat, Translate, getPaginationState } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
+import { APP_DATE_FORMAT } from 'app/config/constants';
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
@@ -113,33 +114,25 @@ export const ImportFileLog = () => {
                   <Translate contentKey="turnbridgeBackendApp.importFileLog.id">ID</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('id')} />
                 </th>
-                <th className="hand" onClick={sort('lineIndex')}>
-                  <Translate contentKey="turnbridgeBackendApp.importFileLog.lineIndex">Line Index</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('lineIndex')} />
+                <th className="hand" onClick={sort('eventCode')}>
+                  <Translate contentKey="turnbridgeBackendApp.importFileLog.eventCode">Event Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('eventCode')} />
                 </th>
-                <th className="hand" onClick={sort('field')}>
-                  <Translate contentKey="turnbridgeBackendApp.importFileLog.field">Field</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('field')} />
-                </th>
-                <th className="hand" onClick={sort('errorCode')}>
-                  <Translate contentKey="turnbridgeBackendApp.importFileLog.errorCode">Error Code</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('errorCode')} />
+                <th className="hand" onClick={sort('level')}>
+                  <Translate contentKey="turnbridgeBackendApp.importFileLog.level">Level</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('level')} />
                 </th>
                 <th className="hand" onClick={sort('message')}>
                   <Translate contentKey="turnbridgeBackendApp.importFileLog.message">Message</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('message')} />
                 </th>
-                <th className="hand" onClick={sort('rawLine')}>
-                  <Translate contentKey="turnbridgeBackendApp.importFileLog.rawLine">Raw Line</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('rawLine')} />
+                <th className="hand" onClick={sort('detail')}>
+                  <Translate contentKey="turnbridgeBackendApp.importFileLog.detail">Detail</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('detail')} />
                 </th>
-                <th className="hand" onClick={sort('sourceFamily')}>
-                  <Translate contentKey="turnbridgeBackendApp.importFileLog.sourceFamily">Source Family</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('sourceFamily')} />
-                </th>
-                <th className="hand" onClick={sort('normalizedFamily')}>
-                  <Translate contentKey="turnbridgeBackendApp.importFileLog.normalizedFamily">Normalized Family</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('normalizedFamily')} />
+                <th className="hand" onClick={sort('occurredAt')}>
+                  <Translate contentKey="turnbridgeBackendApp.importFileLog.occurredAt">Occurred At</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('occurredAt')} />
                 </th>
                 <th>
                   <Translate contentKey="turnbridgeBackendApp.importFileLog.importFile">Import File</Translate>{' '}
@@ -156,13 +149,13 @@ export const ImportFileLog = () => {
                       {importFileLog.id}
                     </Button>
                   </td>
-                  <td>{importFileLog.lineIndex}</td>
-                  <td>{importFileLog.field}</td>
-                  <td>{importFileLog.errorCode}</td>
+                  <td>{importFileLog.eventCode}</td>
+                  <td>{importFileLog.level}</td>
                   <td>{importFileLog.message}</td>
-                  <td>{importFileLog.rawLine}</td>
-                  <td>{importFileLog.sourceFamily}</td>
-                  <td>{importFileLog.normalizedFamily}</td>
+                  <td>{importFileLog.detail}</td>
+                  <td>
+                    {importFileLog.occurredAt ? <TextFormat type="date" value={importFileLog.occurredAt} format={APP_DATE_FORMAT} /> : null}
+                  </td>
                   <td>
                     {importFileLog.importFile ? (
                       <Link to={`/import-file/${importFileLog.importFile.id}`}>{importFileLog.importFile.originalFilename}</Link>

@@ -74,12 +74,10 @@ public class ImportFileLogQueryService extends QueryService<ImportFileLog> {
             specification = Specification.allOf(
                 Boolean.TRUE.equals(criteria.getDistinct()) ? distinct(criteria.getDistinct()) : null,
                 buildRangeSpecification(criteria.getId(), ImportFileLog_.id),
-                buildRangeSpecification(criteria.getLineIndex(), ImportFileLog_.lineIndex),
-                buildStringSpecification(criteria.getField(), ImportFileLog_.field),
-                buildStringSpecification(criteria.getErrorCode(), ImportFileLog_.errorCode),
+                buildStringSpecification(criteria.getEventCode(), ImportFileLog_.eventCode),
+                buildStringSpecification(criteria.getLevel(), ImportFileLog_.level),
                 buildStringSpecification(criteria.getMessage(), ImportFileLog_.message),
-                buildStringSpecification(criteria.getSourceFamily(), ImportFileLog_.sourceFamily),
-                buildStringSpecification(criteria.getNormalizedFamily(), ImportFileLog_.normalizedFamily),
+                buildRangeSpecification(criteria.getOccurredAt(), ImportFileLog_.occurredAt),
                 buildSpecification(criteria.getImportFileId(), root ->
                     root.join(ImportFileLog_.importFile, JoinType.LEFT).get(ImportFile_.id)
                 )

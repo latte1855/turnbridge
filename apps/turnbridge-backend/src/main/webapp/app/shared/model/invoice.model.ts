@@ -17,7 +17,6 @@ export interface IInvoice {
   totalAmount?: number | null;
   taxType?: string | null;
   normalizedJson?: string | null;
-  originalPayload?: string | null;
   invoiceStatus?: keyof typeof InvoiceStatus;
   issuedAt?: dayjs.Dayjs | null;
   legacyType?: string | null;

@@ -24,17 +24,13 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
 
     private LongFilter id;
 
-    private IntegerFilter lineIndex;
+    private StringFilter eventCode;
 
-    private StringFilter field;
-
-    private StringFilter errorCode;
+    private StringFilter level;
 
     private StringFilter message;
 
-    private StringFilter sourceFamily;
-
-    private StringFilter normalizedFamily;
+    private InstantFilter occurredAt;
 
     private LongFilter importFileId;
 
@@ -44,12 +40,10 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
 
     public ImportFileLogCriteria(ImportFileLogCriteria other) {
         this.id = other.optionalId().map(LongFilter::copy).orElse(null);
-        this.lineIndex = other.optionalLineIndex().map(IntegerFilter::copy).orElse(null);
-        this.field = other.optionalField().map(StringFilter::copy).orElse(null);
-        this.errorCode = other.optionalErrorCode().map(StringFilter::copy).orElse(null);
+        this.eventCode = other.optionalEventCode().map(StringFilter::copy).orElse(null);
+        this.level = other.optionalLevel().map(StringFilter::copy).orElse(null);
         this.message = other.optionalMessage().map(StringFilter::copy).orElse(null);
-        this.sourceFamily = other.optionalSourceFamily().map(StringFilter::copy).orElse(null);
-        this.normalizedFamily = other.optionalNormalizedFamily().map(StringFilter::copy).orElse(null);
+        this.occurredAt = other.optionalOccurredAt().map(InstantFilter::copy).orElse(null);
         this.importFileId = other.optionalImportFileId().map(LongFilter::copy).orElse(null);
         this.distinct = other.distinct;
     }
@@ -78,61 +72,42 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
         this.id = id;
     }
 
-    public IntegerFilter getLineIndex() {
-        return lineIndex;
+    public StringFilter getEventCode() {
+        return eventCode;
     }
 
-    public Optional<IntegerFilter> optionalLineIndex() {
-        return Optional.ofNullable(lineIndex);
+    public Optional<StringFilter> optionalEventCode() {
+        return Optional.ofNullable(eventCode);
     }
 
-    public IntegerFilter lineIndex() {
-        if (lineIndex == null) {
-            setLineIndex(new IntegerFilter());
+    public StringFilter eventCode() {
+        if (eventCode == null) {
+            setEventCode(new StringFilter());
         }
-        return lineIndex;
+        return eventCode;
     }
 
-    public void setLineIndex(IntegerFilter lineIndex) {
-        this.lineIndex = lineIndex;
+    public void setEventCode(StringFilter eventCode) {
+        this.eventCode = eventCode;
     }
 
-    public StringFilter getField() {
-        return field;
+    public StringFilter getLevel() {
+        return level;
     }
 
-    public Optional<StringFilter> optionalField() {
-        return Optional.ofNullable(field);
+    public Optional<StringFilter> optionalLevel() {
+        return Optional.ofNullable(level);
     }
 
-    public StringFilter field() {
-        if (field == null) {
-            setField(new StringFilter());
+    public StringFilter level() {
+        if (level == null) {
+            setLevel(new StringFilter());
         }
-        return field;
+        return level;
     }
 
-    public void setField(StringFilter field) {
-        this.field = field;
-    }
-
-    public StringFilter getErrorCode() {
-        return errorCode;
-    }
-
-    public Optional<StringFilter> optionalErrorCode() {
-        return Optional.ofNullable(errorCode);
-    }
-
-    public StringFilter errorCode() {
-        if (errorCode == null) {
-            setErrorCode(new StringFilter());
-        }
-        return errorCode;
-    }
-
-    public void setErrorCode(StringFilter errorCode) {
-        this.errorCode = errorCode;
+    public void setLevel(StringFilter level) {
+        this.level = level;
     }
 
     public StringFilter getMessage() {
@@ -154,42 +129,23 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
         this.message = message;
     }
 
-    public StringFilter getSourceFamily() {
-        return sourceFamily;
+    public InstantFilter getOccurredAt() {
+        return occurredAt;
     }
 
-    public Optional<StringFilter> optionalSourceFamily() {
-        return Optional.ofNullable(sourceFamily);
+    public Optional<InstantFilter> optionalOccurredAt() {
+        return Optional.ofNullable(occurredAt);
     }
 
-    public StringFilter sourceFamily() {
-        if (sourceFamily == null) {
-            setSourceFamily(new StringFilter());
+    public InstantFilter occurredAt() {
+        if (occurredAt == null) {
+            setOccurredAt(new InstantFilter());
         }
-        return sourceFamily;
+        return occurredAt;
     }
 
-    public void setSourceFamily(StringFilter sourceFamily) {
-        this.sourceFamily = sourceFamily;
-    }
-
-    public StringFilter getNormalizedFamily() {
-        return normalizedFamily;
-    }
-
-    public Optional<StringFilter> optionalNormalizedFamily() {
-        return Optional.ofNullable(normalizedFamily);
-    }
-
-    public StringFilter normalizedFamily() {
-        if (normalizedFamily == null) {
-            setNormalizedFamily(new StringFilter());
-        }
-        return normalizedFamily;
-    }
-
-    public void setNormalizedFamily(StringFilter normalizedFamily) {
-        this.normalizedFamily = normalizedFamily;
+    public void setOccurredAt(InstantFilter occurredAt) {
+        this.occurredAt = occurredAt;
     }
 
     public LongFilter getImportFileId() {
@@ -241,12 +197,10 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
         final ImportFileLogCriteria that = (ImportFileLogCriteria) o;
         return (
             Objects.equals(id, that.id) &&
-            Objects.equals(lineIndex, that.lineIndex) &&
-            Objects.equals(field, that.field) &&
-            Objects.equals(errorCode, that.errorCode) &&
+            Objects.equals(eventCode, that.eventCode) &&
+            Objects.equals(level, that.level) &&
             Objects.equals(message, that.message) &&
-            Objects.equals(sourceFamily, that.sourceFamily) &&
-            Objects.equals(normalizedFamily, that.normalizedFamily) &&
+            Objects.equals(occurredAt, that.occurredAt) &&
             Objects.equals(importFileId, that.importFileId) &&
             Objects.equals(distinct, that.distinct)
         );
@@ -254,7 +208,7 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lineIndex, field, errorCode, message, sourceFamily, normalizedFamily, importFileId, distinct);
+        return Objects.hash(id, eventCode, level, message, occurredAt, importFileId, distinct);
     }
 
     // prettier-ignore
@@ -262,12 +216,10 @@ public class ImportFileLogCriteria implements Serializable, Criteria {
     public String toString() {
         return "ImportFileLogCriteria{" +
             optionalId().map(f -> "id=" + f + ", ").orElse("") +
-            optionalLineIndex().map(f -> "lineIndex=" + f + ", ").orElse("") +
-            optionalField().map(f -> "field=" + f + ", ").orElse("") +
-            optionalErrorCode().map(f -> "errorCode=" + f + ", ").orElse("") +
+            optionalEventCode().map(f -> "eventCode=" + f + ", ").orElse("") +
+            optionalLevel().map(f -> "level=" + f + ", ").orElse("") +
             optionalMessage().map(f -> "message=" + f + ", ").orElse("") +
-            optionalSourceFamily().map(f -> "sourceFamily=" + f + ", ").orElse("") +
-            optionalNormalizedFamily().map(f -> "normalizedFamily=" + f + ", ").orElse("") +
+            optionalOccurredAt().map(f -> "occurredAt=" + f + ", ").orElse("") +
             optionalImportFileId().map(f -> "importFileId=" + f + ", ").orElse("") +
             optionalDistinct().map(f -> "distinct=" + f + ", ").orElse("") +
         "}";

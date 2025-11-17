@@ -1,0 +1,45 @@
+{
+  "turnbridgeBackendApp": {
+    "importFileItem": {
+      "home": {
+        "title": "Import File Items",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Import File Item",
+        "createOrEditLabel": "Create or edit a Import File Item",
+        "notFound": "No Import File Items found"
+      },
+      "created": "A new Import File Item is created with identifier {{ param }}",
+      "updated": "A Import File Item is updated with identifier {{ param }}",
+      "deleted": "A Import File Item is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Import File Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Import File Item"
+      },
+      "id": "ID",
+      "lineIndex": "Line Index",
+      "rawData": "Raw Data",
+      "rawHash": "Raw Hash",
+      "sourceFamily": "Source Family",
+      "normalizedFamily": "Normalized Family",
+      "normalizedJson": "Normalized Json",
+      "status": "Status",
+      "errorCode": "Error Code",
+      "errorMessage": "Error Message",
+      "importFile": "Import File",
+      "invoice": "Invoice",
+      "help": {
+        "lineIndex": "行號（1-based）",
+        "rawData": "原始資料（JSON 或原始 CSV 行）",
+        "rawHash": "原始資料 SHA-256（利於去重、結果 append）",
+        "sourceFamily": "來源訊息別（A0401/B0401…）",
+        "normalizedFamily": "目標訊息別（F/G 系）",
+        "normalizedJson": "正規化 JSON（成功時保留）",
+        "status": "處理狀態",
+        "errorCode": "錯誤碼（失敗時）",
+        "errorMessage": "錯誤訊息（失敗時）"
+      }
+    }
+  }
+}

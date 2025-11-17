@@ -1,6 +1,6 @@
-id;invoice_no;message_family;buyer_id;buyer_name;seller_id;seller_name;sales_amount;tax_amount;total_amount;tax_type;normalized_json;original_payload;invoice_status;issued_at;legacy_type;tenant_id;import_file_id
-1;AB12345001;"F0401";15888888;榮光股份有限公司;24556677;嘉誠加值中心;1000;50;1050;TX;""{""amount"":1000}"";""{""legacy"": ""line1""}"";"ACKED";"2025-11-01 10:00:00";"C0401";1;1
-2;AB12345002;"F0401";22001122;華盛科技;24556677;嘉誠加值中心;800;40;840;TX;""{""amount"":800}"";""{""legacy"": ""line2""}"";"ACKED";"2025-11-01 10:05:00";"C0401";1;1
-3;AB22345001;"F0401";55667788;協隆能源;24556677;嘉誠加值中心;1200;60;1260;TX;""{""amount"":1200}"";""{""legacy"": ""line3""}"";"ERROR";"2025-11-02 09:00:00";"C0401";1;2
-4;CD12345001;"F0401";44668822;德鑫實業;67889900;弘達加值中心;950;47.5;997.5;TX;""{""amount"":950}"";""{""legacy"": ""line4""}"";"PENDING_XML";"2025-11-03 08:30:00";"C0401";2;4
-5;CD12345002;"F0401";88997766;翔宇百貨;67889900;弘達加值中心;640;32;672;TX;""{""amount"":640}"";""{""legacy"": ""line5""}"";"ERROR";"2025-11-03 08:45:00";"C0401";2;5
+id;invoice_no;message_family;buyer_id;buyer_name;seller_id;seller_name;sales_amount;tax_amount;total_amount;tax_type;normalized_json;invoice_status;issued_at;legacy_type;tenant_id;import_file_id
+1;AB12345001;"F0401";15888888;榮光股份有限公司;24556677;嘉誠加值中心;1000;50;1050;TX;"{""amount"":1000}";"ACKED";"2025-11-01 10:00:00";"C0401";1;1
+2;AB12345002;"F0401";22001122;華盛科技;24556677;嘉誠加值中心;800;40;840;TX;"{""amount"":800}";"ACKED";"2025-11-01 10:05:00";"C0401";1;1
+3;AB22345001;"F0401";55667788;協隆能源;24556677;嘉誠加值中心;1200;60;1260;TX;"{""amount"":1200}";"ERROR";"2025-11-02 09:00:00";"C0401";1;2
+4;CD12345001;"F0401";44668822;德鑫實業;67889900;弘達加值中心;950;47.5;997.5;TX;"{""amount"":950}";"PENDING_XML";"2025-11-03 08:30:00";"C0401";2;4
+5;CD12345002;"F0401";88997766;翔宇百貨;67889900;弘達加值中心;640;32;672;TX;"{""amount"":640}";"ERROR";"2025-11-03 08:45:00";"C0401";2;5

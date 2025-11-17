@@ -17,7 +17,9 @@
         "turnkeyMessage": "Turnkey Message",
         "webhookEndpoint": "Webhook Endpoint",
         "webhookDeliveryLog": "Webhook Delivery Log",
-        "manualAction": "Manual Action"
+        "manualAction": "Manual Action",
+        "importFileItem": "Import File Item",
+        "importFileItemError": "Import File Item Error"
       },
       "account": {
         "main": "Account",

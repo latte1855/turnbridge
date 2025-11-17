@@ -730,7 +730,7 @@ class WebhookEndpointResourceIT {
         WebhookEndpoint partialUpdatedWebhookEndpoint = new WebhookEndpoint();
         partialUpdatedWebhookEndpoint.setId(webhookEndpoint.getId());
 
-        partialUpdatedWebhookEndpoint.name(UPDATED_NAME).targetUrl(UPDATED_TARGET_URL).events(UPDATED_EVENTS).status(UPDATED_STATUS);
+        partialUpdatedWebhookEndpoint.name(UPDATED_NAME).secret(UPDATED_SECRET).events(UPDATED_EVENTS);
 
         restWebhookEndpointMockMvc
             .perform(

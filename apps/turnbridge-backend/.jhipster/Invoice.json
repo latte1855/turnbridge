@@ -76,11 +76,6 @@
       "fieldType": "TextBlob"
     },
     {
-      "documentation": "原始 payload",
-      "fieldName": "originalPayload",
-      "fieldType": "TextBlob"
-    },
-    {
       "documentation": "發票狀態",
       "fieldName": "invoiceStatus",
       "fieldType": "InvoiceStatus",

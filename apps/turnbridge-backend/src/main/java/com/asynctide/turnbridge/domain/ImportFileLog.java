@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.time.Instant;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
- * 匯入錯誤/訊息紀錄
+ * 匯入批次事件紀錄（非逐行）
  */
 @Entity
 @Table(name = "import_file_log")
@@ -25,54 +26,39 @@ public class ImportFileLog implements Serializable {
     private Long id;
 
     /**
-     * 行號
+     * 事件代碼（如 PARSE_ERROR/NORMALIZE_SUMMARY）
      */
     @NotNull
-    @Min(value = 1)
-    @Column(name = "line_index", nullable = false)
-    private Integer lineIndex;
-
-    /**
-     * 欄位名稱
-     */
     @Size(max = 64)
-    @Column(name = "field", length = 64)
-    private String field;
+    @Column(name = "event_code", length = 64, nullable = false)
+    private String eventCode;
 
     /**
-     * 錯誤碼
+     * 層級（INFO/WARN/ERROR）
      */
     @NotNull
-    @Size(max = 32)
-    @Column(name = "error_code", length = 32, nullable = false)
-    private String errorCode;
+    @Size(max = 16)
+    @Column(name = "level", length = 16, nullable = false)
+    private String level;
 
     /**
-     * 錯誤訊息
+     * 訊息摘要
      */
     @Size(max = 1024)
     @Column(name = "message", length = 1024)
     private String message;
 
     /**
-     * 原始行
+     * 詳細內容（JSON 或堆疊）
      */
-    @Column(name = "raw_line")
-    private String rawLine;
+    @Column(name = "detail")
+    private String detail;
 
     /**
-     * 原訊息別
+     * 發生時間
      */
-    @Size(max = 16)
-    @Column(name = "source_family", length = 16)
-    private String sourceFamily;
-
-    /**
-     * 正規化訊息別
-     */
-    @Size(max = 16)
-    @Column(name = "normalized_family", length = 16)
-    private String normalizedFamily;
+    @Column(name = "occurred_at")
+    private Instant occurredAt;
 
     /**
      * 匯入檔主檔
@@ -97,43 +83,30 @@ public class ImportFileLog implements Serializable {
         this.id = id;
     }
 
-    public Integer getLineIndex() {
-        return this.lineIndex;
+    public String getEventCode() {
+        return this.eventCode;
     }
 
-    public ImportFileLog lineIndex(Integer lineIndex) {
-        this.setLineIndex(lineIndex);
+    public ImportFileLog eventCode(String eventCode) {
+        this.setEventCode(eventCode);
         return this;
     }
 
-    public void setLineIndex(Integer lineIndex) {
-        this.lineIndex = lineIndex;
+    public void setEventCode(String eventCode) {
+        this.eventCode = eventCode;
     }
 
-    public String getField() {
-        return this.field;
+    public String getLevel() {
+        return this.level;
     }
 
-    public ImportFileLog field(String field) {
-        this.setField(field);
+    public ImportFileLog level(String level) {
+        this.setLevel(level);
         return this;
     }
 
-    public void setField(String field) {
-        this.field = field;
-    }
-
-    public String getErrorCode() {
-        return this.errorCode;
-    }
-
-    public ImportFileLog errorCode(String errorCode) {
-        this.setErrorCode(errorCode);
-        return this;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public String getMessage() {
@@ -149,43 +122,30 @@ public class ImportFileLog implements Serializable {
         this.message = message;
     }
 
-    public String getRawLine() {
-        return this.rawLine;
+    public String getDetail() {
+        return this.detail;
     }
 
-    public ImportFileLog rawLine(String rawLine) {
-        this.setRawLine(rawLine);
+    public ImportFileLog detail(String detail) {
+        this.setDetail(detail);
         return this;
     }
 
-    public void setRawLine(String rawLine) {
-        this.rawLine = rawLine;
+    public void setDetail(String detail) {
+        this.detail = detail;
     }
 
-    public String getSourceFamily() {
-        return this.sourceFamily;
+    public Instant getOccurredAt() {
+        return this.occurredAt;
     }
 
-    public ImportFileLog sourceFamily(String sourceFamily) {
-        this.setSourceFamily(sourceFamily);
+    public ImportFileLog occurredAt(Instant occurredAt) {
+        this.setOccurredAt(occurredAt);
         return this;
     }
 
-    public void setSourceFamily(String sourceFamily) {
-        this.sourceFamily = sourceFamily;
-    }
-
-    public String getNormalizedFamily() {
-        return this.normalizedFamily;
-    }
-
-    public ImportFileLog normalizedFamily(String normalizedFamily) {
-        this.setNormalizedFamily(normalizedFamily);
-        return this;
-    }
-
-    public void setNormalizedFamily(String normalizedFamily) {
-        this.normalizedFamily = normalizedFamily;
+    public void setOccurredAt(Instant occurredAt) {
+        this.occurredAt = occurredAt;
     }
 
     public ImportFile getImportFile() {
@@ -225,13 +185,11 @@ public class ImportFileLog implements Serializable {
     public String toString() {
         return "ImportFileLog{" +
             "id=" + getId() +
-            ", lineIndex=" + getLineIndex() +
-            ", field='" + getField() + "'" +
-            ", errorCode='" + getErrorCode() + "'" +
+            ", eventCode='" + getEventCode() + "'" +
+            ", level='" + getLevel() + "'" +
             ", message='" + getMessage() + "'" +
-            ", rawLine='" + getRawLine() + "'" +
-            ", sourceFamily='" + getSourceFamily() + "'" +
-            ", normalizedFamily='" + getNormalizedFamily() + "'" +
+            ", detail='" + getDetail() + "'" +
+            ", occurredAt='" + getOccurredAt() + "'" +
             "}";
     }
 }

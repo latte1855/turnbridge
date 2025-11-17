@@ -1,0 +1,7 @@
+id;column_index;field_name;error_code;message;severity;occurred_at;import_file_item_id
+1;5;"Amount";"AMOUNT_MISMATCH";"含稅金額與明細加總不一致";"ERROR";"2025-11-01 10:06:00";3
+2;6;"Tax";"TAX_TOTAL_INVALID";"稅額與金額不符";"ERROR";"2025-11-01 10:06:00";3
+3;3;"BuyerId";"BUYER_INVALID";"買方統編須為 8 碼數字";"ERROR";"2025-11-01 10:07:30";4
+4;7;"Carrier";"CARRIER_REQUIRED";"B2C 買方需提供載具或手機條碼";"WARN";"2025-11-02 09:15:00";7
+5;6;"Tax";"TAX_MISSING";"未填稅額";"ERROR";"2025-11-02 12:00:00";9
+6;1;"Type";"UNSUPPORTED_MESSAGE";"收到未支援的訊息別，需補齊 MIG 映射";"ERROR";"2025-11-02 12:05:00";10

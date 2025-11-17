@@ -27,12 +27,14 @@
 * **Backend（主機端）**
 
   * 驗證/入庫 → 轉檔（XML 以 F/G 新制）→ 投遞 Turnkey → 解析回饋 → 狀態更新 + Webhook。
+  * Phase 1 起，上傳 API 會立即啟動 `NormalizationService`：解析單一 CSV、逐行寫入 `ImportFileItem`（保留原始欄位與狀態），每個欄位的錯誤再拆為 `ImportFileItemError` 供 UI 檢視；通過者才生成 `Invoice/InvoiceItem`。每筆失敗僅更新該行，不得回滾整批 ImportFile；回應會透過 ProblemDetail（`errorCode/field/normalizedFamily`）與結果檔告知。
 
 ---
 
 ## 2. 上傳規格（E0501 / Invoice）
 
-**共同：** `multipart/form-data`，欄位：`file` (`*.csv|*.zip`)、`sha256`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。
+**共同：** `multipart/form-data`，欄位：`file` (`*.csv` 單一檔案)、`sha256`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。  
+> 不再接受 ZIP 上傳；若需一次下載多個結果檔，後端會在下載階段自動將多個 CSV 壓成 ZIP 回傳。
 **分檔：** 以**明細行數**計 `<= 999`；**不得拆單**；需附分割序號（splitSeq）。
 **多租戶：** 由 OAuth2 Client/Scope 與 Header 指示租戶；RLS 於 DB 端強制隔離。
 

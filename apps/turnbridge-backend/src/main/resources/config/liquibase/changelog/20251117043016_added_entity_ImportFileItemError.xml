@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity ImportFileItemError.
+    -->
+    <changeSet id="20251117043016-1" author="jhipster">
+        <createTable tableName="import_file_item_error" remarks="匯入檔明細欄位錯誤（供 UI 詳細檢視）">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="column_index" type="integer" remarks="欄位號（1-based）">
+                <constraints nullable="false" />
+            </column>
+            <column name="field_name" type="varchar(128)" remarks="欄位名稱（如 BuyerId/Amount）">
+                <constraints nullable="false" />
+            </column>
+            <column name="error_code" type="varchar(64)" remarks="錯誤碼（LENGTH_INVALID、NUMBER_FORMAT 等）">
+                <constraints nullable="false" />
+            </column>
+            <column name="message" type="varchar(1024)" remarks="錯誤訊息">
+                <constraints nullable="true" />
+            </column>
+            <column name="severity" type="varchar(16)" remarks="嚴重度（INFO/WARN/ERROR）">
+                <constraints nullable="true" />
+            </column>
+            <column name="occurred_at" type="${datetimeType}" remarks="發生時間（可選）">
+                <constraints nullable="true" />
+            </column>
+            <column name="import_file_item_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+        <dropDefaultValue tableName="import_file_item_error" columnName="occurred_at" columnDataType="${datetimeType}"/>
+    </changeSet>
+
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+
+    <!--
+        Load sample data generated with Faker.js
+        - This data can be easily edited using a CSV editor (or even MS Excel) and
+          is located in the 'src/main/resources/config/liquibase/fake-data' directory
+        - By default this data is applied when running with the JHipster 'dev' profile.
+          This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
+          Spring Boot configuration key.
+    -->
+    <changeSet id="20251117043016-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/import_file_item_error.csv"
+                  separator=";"
+                  tableName="import_file_item_error"
+                  usePreparedStatements="true">
+            <column name="id" type="numeric"/>
+            <column name="column_index" type="numeric"/>
+            <column name="field_name" type="string"/>
+            <column name="error_code" type="string"/>
+            <column name="message" type="string"/>
+            <column name="severity" type="string"/>
+            <column name="occurred_at" type="date"/>
+            <column name="import_file_item_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

@@ -18,15 +18,29 @@
 
 ---
 
+## **最新進度（Phase 1 / 目前 Sprint）**
+
+- ✅ `POST /api/upload/invoice|e0501` 已可驗證 SHA-256 並建立 `ImportFile`，同時把 `legacyType`/`rawLine` 保存（對應 DEV-001、DEV-002）。
+- ✅ `NormalizationService` 已上線：上傳後立即解析 CSV/ZIP → 寫入 `Invoice/InvoiceItem`、錯誤寫入 `ImportFileLog`，金額/訊息別驗證依 `docs/AGENTS_MAPPING_v1.md`、`docs/turnkey/mig41/CSV_FG_MAPPING.md`（DEV-003、DEV-004）。
+- ⚠️ 待辦：補齊 `com.asynctide.turnbridge.my.upload` 底下的 Normalize 成功/失敗測試案例，驗證 ProblemDetail、ImportFileLog（本回合完成後更新 DEV-003 驗收）。
+
+---
+
 # **1. 模組拆解（Modules Overview）**
 
 ## **1.1. 匯入 / Normalize**
 
 | 模組                    | 子項                                                          | 依賴     | 輸入/產出                       |
 | --------------------- | ----------------------------------------------------------- | ------ | --------------------------- |
-| **上傳/驗證**             | `POST /upload/{type}`、SHA-256、ImportFile、999 不拆單、agent metadata | 無      | API Spec、Agent 測試集          |
-| **Normalize 引擎**      | ABCD → FG、欄位映射、錯誤碼、rawLine/legacyType 保存                    | 上傳/驗證  | AGENTS_MAPPING_v1.md、MIG4.1 |
+| **上傳/驗證**             | `POST /upload/{type}`、**僅允許單一 CSV**、SHA-256、ImportFile、999 不拆單、agent metadata | 無      | API Spec、Agent 測試集          |
+| **ImportFileItem**    | *每一行* 上傳資料都落地，含 `rawData/hash/result` 與錯誤摘要，後續下載結果檔直接引用；使用者可選擇多筆批次下載，系統再自動壓縮為 ZIP | 上傳/驗證  | 原始 CSV、結果 CSV/ZIP         |
+| **ImportFileItemError** | 一行資料可對應多個欄位錯誤（欄位名、錯誤碼、訊息、嚴重度），供 UI 詳細檢視／下載結果時附上 | ImportFileItem | 多欄位錯誤報表、結果檔附註            |
+| **Normalize 引擎**      | ABCD → FG、欄位映射、錯誤碼、rawLine/legacyType 保存；<br/>逐行處理，成功才寫 Invoice，失敗僅更新 ImportFileItem + ImportFileItemError | 上傳/驗證  | AGENTS_MAPPING_v1.md、MIG4.1 |
 | **RLS / 多租戶（Tenant）** | tenant_id、角色（加值中心/總公司/分公司）、RLS Policy                       | Domain | RLS Policy、Migration        |
+
+> **交易規範：** Normalize 進行時不得因單筆失敗回滾整批 ImportFile。ImportFileItem 必須先寫入後再進一步產生 Invoice/InvoiceItem；就算全部失敗，也能透過 ImportFile + ImportFileItem 查詢與下載錯誤結果。
+
+> **ImportFileLog 角色：** 自本版起作為「批次事件/稽核紀錄」，僅記錄 `UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等事件（含層級、訊息、細節 JSON）；逐行錯誤改由 ImportFileItem + ImportFileItemError 儲存。
 
 ---
 

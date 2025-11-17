@@ -3,55 +3,39 @@
     "changelogDate": "20251116033152"
   },
   "applications": "*",
-  "documentation": "匯入錯誤/訊息紀錄",
+  "documentation": "匯入批次事件紀錄（非逐行）",
   "dto": "mapstruct",
   "fields": [
     {
-      "documentation": "行號",
-      "fieldName": "lineIndex",
-      "fieldType": "Integer",
-      "fieldValidateRules": ["required", "min"],
-      "fieldValidateRulesMin": "1"
-    },
-    {
-      "documentation": "欄位名稱",
-      "fieldName": "field",
+      "documentation": "事件代碼（如 PARSE_ERROR/NORMALIZE_SUMMARY）",
+      "fieldName": "eventCode",
       "fieldType": "String",
-      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRules": ["required", "maxlength"],
       "fieldValidateRulesMaxlength": "64"
     },
     {
-      "documentation": "錯誤碼",
-      "fieldName": "errorCode",
+      "documentation": "層級（INFO/WARN/ERROR）",
+      "fieldName": "level",
       "fieldType": "String",
       "fieldValidateRules": ["required", "maxlength"],
-      "fieldValidateRulesMaxlength": "32"
+      "fieldValidateRulesMaxlength": "16"
     },
     {
-      "documentation": "錯誤訊息",
+      "documentation": "訊息摘要",
       "fieldName": "message",
       "fieldType": "String",
       "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "1024"
     },
     {
-      "documentation": "原始行",
-      "fieldName": "rawLine",
+      "documentation": "詳細內容（JSON 或堆疊）",
+      "fieldName": "detail",
       "fieldType": "TextBlob"
     },
     {
-      "documentation": "原訊息別",
-      "fieldName": "sourceFamily",
-      "fieldType": "String",
-      "fieldValidateRules": ["maxlength"],
-      "fieldValidateRulesMaxlength": "16"
-    },
-    {
-      "documentation": "正規化訊息別",
-      "fieldName": "normalizedFamily",
-      "fieldType": "String",
-      "fieldValidateRules": ["maxlength"],
-      "fieldValidateRulesMaxlength": "16"
+      "documentation": "發生時間",
+      "fieldName": "occurredAt",
+      "fieldType": "Instant"
     }
   ],
   "jpaMetamodelFiltering": true,

@@ -1013,13 +1013,7 @@ class ImportFileResourceIT {
         ImportFile partialUpdatedImportFile = new ImportFile();
         partialUpdatedImportFile.setId(importFile.getId());
 
-        partialUpdatedImportFile
-            .importType(UPDATED_IMPORT_TYPE)
-            .sha256(UPDATED_SHA_256)
-            .totalCount(UPDATED_TOTAL_COUNT)
-            .successCount(UPDATED_SUCCESS_COUNT)
-            .errorCount(UPDATED_ERROR_COUNT)
-            .status(UPDATED_STATUS);
+        partialUpdatedImportFile.importType(UPDATED_IMPORT_TYPE).sha256(UPDATED_SHA_256).errorCount(UPDATED_ERROR_COUNT);
 
         restImportFileMockMvc
             .perform(

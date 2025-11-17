@@ -1,0 +1,7 @@
+export enum ImportItemStatus {
+  PENDING = '待處理',
+
+  NORMALIZED = '已正規化',
+
+  FAILED = '檢核失敗',
+}

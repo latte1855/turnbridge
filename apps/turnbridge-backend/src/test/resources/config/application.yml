@@ -13,6 +13,13 @@
 # http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
 
+logging:
+  level:
+    root: INFO
+    #org.hibernate.SQL: DEBUG
+    #org.hibernate.orm.jdbc.bind: TRACE
+
+
 spring:
   application:
     name: turnbridgeBackend

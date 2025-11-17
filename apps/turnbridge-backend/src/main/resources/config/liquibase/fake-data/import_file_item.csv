@@ -1,0 +1,11 @@
+id;line_index;raw_data;raw_hash;source_family;normalized_family;normalized_json;status;error_code;error_message;import_file_id
+1;1;"{""InvoiceNo"":""AB12345678"",""Amount"":1050,""BuyerId"":""15888888""}";"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";"C0401";"F0401";"{""invoiceNo"":""AB12345678"",""amount"":1050,""buyerId"":""15888888""}";"NORMALIZED";;;1
+2;2;"{""InvoiceNo"":""AB12345679"",""Amount"":980,""BuyerId"":""15888888""}";"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";"C0401";"F0401";"{""invoiceNo"":""AB12345679"",""amount"":980}";"NORMALIZED";;;1
+3;3;"{""InvoiceNo"":""AB12345680"",""Amount"":500,""BuyerId"":""15888888""}";"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc";"C0401";"F0401";;"FAILED";"AMOUNT_MISMATCH";"未稅金額與總額不一致";1
+4;10;"{""InvoiceNo"":""AB12345690"",""Amount"":1500,""BuyerId"":""00000000""}";"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd";"C0401";"F0401";;"FAILED";"BUYER_INVALID";"買方統編格式錯誤";1
+5;1;"{""InvoiceNo"":""BC98765431"",""Amount"":2200,""BuyerId"":""24556677""}";"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";"C0401";"F0401";"{""invoiceNo"":""BC98765431"",""amount"":2200}";"NORMALIZED";;;2
+6;2;"{""InvoiceNo"":""BC98765432"",""Amount"":150,""BuyerId"":""00000000"",""Carrier"":""/ABCD123""}";"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";"C0401";"F0401";"{""invoiceNo"":""BC98765432"",""amount"":150}";"NORMALIZED";;;2
+7;3;"{""InvoiceNo"":""BC98765433"",""Amount"":300,""BuyerId"":""00000000"",""Carrier"":""""}";"9999999999999999999999999999999999999999999999999999999999999999";"C0401";"F0401";;"FAILED";"CARRIER_REQUIRED";"載具資訊缺漏";2
+8;5;"{""InvoiceNo"":""DE44556677"",""Amount"":880,""BuyerId"":""15888888""}";"1212121212121212121212121212121212121212121212121212121212121212";"C0401";"F0401";"{""invoiceNo"":""DE44556677"",""amount"":880}";"NORMALIZED";;;5
+9;6;"{""InvoiceNo"":""DE44556678"",""Amount"":1200,""BuyerId"":""15888888""}";"3434343434343434343434343434343434343434343434343434343434343434";"C0401";"F0401";;"FAILED";"TAX_MISSING";"稅額缺漏";5
+10;7;"{""Type"":""B0401"",""AllowanceNo"":""AL20251118001"",""Amount"":200}";"5656565656565656565656565656565656565656565656565656565656565656";"B0401";"G0401";;"PENDING";;;5

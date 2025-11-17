@@ -775,10 +775,7 @@ class TurnkeyMessageResourceIT {
         TurnkeyMessage partialUpdatedTurnkeyMessage = new TurnkeyMessage();
         partialUpdatedTurnkeyMessage.setId(turnkeyMessage.getId());
 
-        partialUpdatedTurnkeyMessage
-            .messageFamily(UPDATED_MESSAGE_FAMILY)
-            .payloadPath(UPDATED_PAYLOAD_PATH)
-            .receivedAt(UPDATED_RECEIVED_AT);
+        partialUpdatedTurnkeyMessage.messageId(UPDATED_MESSAGE_ID).type(UPDATED_TYPE).message(UPDATED_MESSAGE);
 
         restTurnkeyMessageMockMvc
             .perform(

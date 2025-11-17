@@ -17,6 +17,8 @@ import com.asynctide.turnbridge.service.dto.ImportFileLogDTO;
 import com.asynctide.turnbridge.service.mapper.ImportFileLogMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,27 +46,20 @@ import org.springframework.transaction.annotation.Transactional;
 @WithMockUser
 class ImportFileLogResourceIT {
 
-    private static final Integer DEFAULT_LINE_INDEX = 1;
-    private static final Integer UPDATED_LINE_INDEX = 2;
-    private static final Integer SMALLER_LINE_INDEX = 1 - 1;
+    private static final String DEFAULT_EVENT_CODE = "AAAAAAAAAA";
+    private static final String UPDATED_EVENT_CODE = "BBBBBBBBBB";
 
-    private static final String DEFAULT_FIELD = "AAAAAAAAAA";
-    private static final String UPDATED_FIELD = "BBBBBBBBBB";
-
-    private static final String DEFAULT_ERROR_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_ERROR_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_LEVEL = "AAAAAAAAAA";
+    private static final String UPDATED_LEVEL = "BBBBBBBBBB";
 
     private static final String DEFAULT_MESSAGE = "AAAAAAAAAA";
     private static final String UPDATED_MESSAGE = "BBBBBBBBBB";
 
-    private static final String DEFAULT_RAW_LINE = "AAAAAAAAAA";
-    private static final String UPDATED_RAW_LINE = "BBBBBBBBBB";
+    private static final String DEFAULT_DETAIL = "AAAAAAAAAA";
+    private static final String UPDATED_DETAIL = "BBBBBBBBBB";
 
-    private static final String DEFAULT_SOURCE_FAMILY = "AAAAAAAAAA";
-    private static final String UPDATED_SOURCE_FAMILY = "BBBBBBBBBB";
-
-    private static final String DEFAULT_NORMALIZED_FAMILY = "AAAAAAAAAA";
-    private static final String UPDATED_NORMALIZED_FAMILY = "BBBBBBBBBB";
+    private static final Instant DEFAULT_OCCURRED_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_OCCURRED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String ENTITY_API_URL = "/api/import-file-logs";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -105,13 +100,11 @@ class ImportFileLogResourceIT {
      */
     public static ImportFileLog createEntity(EntityManager em) {
         ImportFileLog importFileLog = new ImportFileLog()
-            .lineIndex(DEFAULT_LINE_INDEX)
-            .field(DEFAULT_FIELD)
-            .errorCode(DEFAULT_ERROR_CODE)
+            .eventCode(DEFAULT_EVENT_CODE)
+            .level(DEFAULT_LEVEL)
             .message(DEFAULT_MESSAGE)
-            .rawLine(DEFAULT_RAW_LINE)
-            .sourceFamily(DEFAULT_SOURCE_FAMILY)
-            .normalizedFamily(DEFAULT_NORMALIZED_FAMILY);
+            .detail(DEFAULT_DETAIL)
+            .occurredAt(DEFAULT_OCCURRED_AT);
         // Add required entity
         ImportFile importFile;
         if (TestUtil.findAll(em, ImportFile.class).isEmpty()) {
@@ -133,13 +126,11 @@ class ImportFileLogResourceIT {
      */
     public static ImportFileLog createUpdatedEntity(EntityManager em) {
         ImportFileLog updatedImportFileLog = new ImportFileLog()
-            .lineIndex(UPDATED_LINE_INDEX)
-            .field(UPDATED_FIELD)
-            .errorCode(UPDATED_ERROR_CODE)
+            .eventCode(UPDATED_EVENT_CODE)
+            .level(UPDATED_LEVEL)
             .message(UPDATED_MESSAGE)
-            .rawLine(UPDATED_RAW_LINE)
-            .sourceFamily(UPDATED_SOURCE_FAMILY)
-            .normalizedFamily(UPDATED_NORMALIZED_FAMILY);
+            .detail(UPDATED_DETAIL)
+            .occurredAt(UPDATED_OCCURRED_AT);
         // Add required entity
         ImportFile importFile;
         if (TestUtil.findAll(em, ImportFile.class).isEmpty()) {
@@ -210,10 +201,10 @@ class ImportFileLogResourceIT {
 
     @Test
     @Transactional
-    void checkLineIndexIsRequired() throws Exception {
+    void checkEventCodeIsRequired() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
         // set the field null
-        importFileLog.setLineIndex(null);
+        importFileLog.setEventCode(null);
 
         // Create the ImportFileLog, which fails.
         ImportFileLogDTO importFileLogDTO = importFileLogMapper.toDto(importFileLog);
@@ -227,10 +218,10 @@ class ImportFileLogResourceIT {
 
     @Test
     @Transactional
-    void checkErrorCodeIsRequired() throws Exception {
+    void checkLevelIsRequired() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
         // set the field null
-        importFileLog.setErrorCode(null);
+        importFileLog.setLevel(null);
 
         // Create the ImportFileLog, which fails.
         ImportFileLogDTO importFileLogDTO = importFileLogMapper.toDto(importFileLog);
@@ -254,13 +245,11 @@ class ImportFileLogResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(importFileLog.getId().intValue())))
-            .andExpect(jsonPath("$.[*].lineIndex").value(hasItem(DEFAULT_LINE_INDEX)))
-            .andExpect(jsonPath("$.[*].field").value(hasItem(DEFAULT_FIELD)))
-            .andExpect(jsonPath("$.[*].errorCode").value(hasItem(DEFAULT_ERROR_CODE)))
+            .andExpect(jsonPath("$.[*].eventCode").value(hasItem(DEFAULT_EVENT_CODE)))
+            .andExpect(jsonPath("$.[*].level").value(hasItem(DEFAULT_LEVEL)))
             .andExpect(jsonPath("$.[*].message").value(hasItem(DEFAULT_MESSAGE)))
-            .andExpect(jsonPath("$.[*].rawLine").value(hasItem(DEFAULT_RAW_LINE)))
-            .andExpect(jsonPath("$.[*].sourceFamily").value(hasItem(DEFAULT_SOURCE_FAMILY)))
-            .andExpect(jsonPath("$.[*].normalizedFamily").value(hasItem(DEFAULT_NORMALIZED_FAMILY)));
+            .andExpect(jsonPath("$.[*].detail").value(hasItem(DEFAULT_DETAIL)))
+            .andExpect(jsonPath("$.[*].occurredAt").value(hasItem(DEFAULT_OCCURRED_AT.toString())));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -292,13 +281,11 @@ class ImportFileLogResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(importFileLog.getId().intValue()))
-            .andExpect(jsonPath("$.lineIndex").value(DEFAULT_LINE_INDEX))
-            .andExpect(jsonPath("$.field").value(DEFAULT_FIELD))
-            .andExpect(jsonPath("$.errorCode").value(DEFAULT_ERROR_CODE))
+            .andExpect(jsonPath("$.eventCode").value(DEFAULT_EVENT_CODE))
+            .andExpect(jsonPath("$.level").value(DEFAULT_LEVEL))
             .andExpect(jsonPath("$.message").value(DEFAULT_MESSAGE))
-            .andExpect(jsonPath("$.rawLine").value(DEFAULT_RAW_LINE))
-            .andExpect(jsonPath("$.sourceFamily").value(DEFAULT_SOURCE_FAMILY))
-            .andExpect(jsonPath("$.normalizedFamily").value(DEFAULT_NORMALIZED_FAMILY));
+            .andExpect(jsonPath("$.detail").value(DEFAULT_DETAIL))
+            .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString()));
     }
 
     @Test
@@ -318,181 +305,105 @@ class ImportFileLogResourceIT {
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsEqualToSomething() throws Exception {
+    void getAllImportFileLogsByEventCodeIsEqualToSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex equals to
-        defaultImportFileLogFiltering("lineIndex.equals=" + DEFAULT_LINE_INDEX, "lineIndex.equals=" + UPDATED_LINE_INDEX);
+        // Get all the importFileLogList where eventCode equals to
+        defaultImportFileLogFiltering("eventCode.equals=" + DEFAULT_EVENT_CODE, "eventCode.equals=" + UPDATED_EVENT_CODE);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsInShouldWork() throws Exception {
+    void getAllImportFileLogsByEventCodeIsInShouldWork() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex in
+        // Get all the importFileLogList where eventCode in
         defaultImportFileLogFiltering(
-            "lineIndex.in=" + DEFAULT_LINE_INDEX + "," + UPDATED_LINE_INDEX,
-            "lineIndex.in=" + UPDATED_LINE_INDEX
+            "eventCode.in=" + DEFAULT_EVENT_CODE + "," + UPDATED_EVENT_CODE,
+            "eventCode.in=" + UPDATED_EVENT_CODE
         );
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsNullOrNotNull() throws Exception {
+    void getAllImportFileLogsByEventCodeIsNullOrNotNull() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex is not null
-        defaultImportFileLogFiltering("lineIndex.specified=true", "lineIndex.specified=false");
+        // Get all the importFileLogList where eventCode is not null
+        defaultImportFileLogFiltering("eventCode.specified=true", "eventCode.specified=false");
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsGreaterThanOrEqualToSomething() throws Exception {
+    void getAllImportFileLogsByEventCodeContainsSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex is greater than or equal to
-        defaultImportFileLogFiltering(
-            "lineIndex.greaterThanOrEqual=" + DEFAULT_LINE_INDEX,
-            "lineIndex.greaterThanOrEqual=" + UPDATED_LINE_INDEX
-        );
+        // Get all the importFileLogList where eventCode contains
+        defaultImportFileLogFiltering("eventCode.contains=" + DEFAULT_EVENT_CODE, "eventCode.contains=" + UPDATED_EVENT_CODE);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsLessThanOrEqualToSomething() throws Exception {
+    void getAllImportFileLogsByEventCodeNotContainsSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex is less than or equal to
-        defaultImportFileLogFiltering("lineIndex.lessThanOrEqual=" + DEFAULT_LINE_INDEX, "lineIndex.lessThanOrEqual=" + SMALLER_LINE_INDEX);
+        // Get all the importFileLogList where eventCode does not contain
+        defaultImportFileLogFiltering("eventCode.doesNotContain=" + UPDATED_EVENT_CODE, "eventCode.doesNotContain=" + DEFAULT_EVENT_CODE);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsLessThanSomething() throws Exception {
+    void getAllImportFileLogsByLevelIsEqualToSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex is less than
-        defaultImportFileLogFiltering("lineIndex.lessThan=" + UPDATED_LINE_INDEX, "lineIndex.lessThan=" + DEFAULT_LINE_INDEX);
+        // Get all the importFileLogList where level equals to
+        defaultImportFileLogFiltering("level.equals=" + DEFAULT_LEVEL, "level.equals=" + UPDATED_LEVEL);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByLineIndexIsGreaterThanSomething() throws Exception {
+    void getAllImportFileLogsByLevelIsInShouldWork() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where lineIndex is greater than
-        defaultImportFileLogFiltering("lineIndex.greaterThan=" + SMALLER_LINE_INDEX, "lineIndex.greaterThan=" + DEFAULT_LINE_INDEX);
+        // Get all the importFileLogList where level in
+        defaultImportFileLogFiltering("level.in=" + DEFAULT_LEVEL + "," + UPDATED_LEVEL, "level.in=" + UPDATED_LEVEL);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByFieldIsEqualToSomething() throws Exception {
+    void getAllImportFileLogsByLevelIsNullOrNotNull() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where field equals to
-        defaultImportFileLogFiltering("field.equals=" + DEFAULT_FIELD, "field.equals=" + UPDATED_FIELD);
+        // Get all the importFileLogList where level is not null
+        defaultImportFileLogFiltering("level.specified=true", "level.specified=false");
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByFieldIsInShouldWork() throws Exception {
+    void getAllImportFileLogsByLevelContainsSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where field in
-        defaultImportFileLogFiltering("field.in=" + DEFAULT_FIELD + "," + UPDATED_FIELD, "field.in=" + UPDATED_FIELD);
+        // Get all the importFileLogList where level contains
+        defaultImportFileLogFiltering("level.contains=" + DEFAULT_LEVEL, "level.contains=" + UPDATED_LEVEL);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsByFieldIsNullOrNotNull() throws Exception {
+    void getAllImportFileLogsByLevelNotContainsSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where field is not null
-        defaultImportFileLogFiltering("field.specified=true", "field.specified=false");
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByFieldContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where field contains
-        defaultImportFileLogFiltering("field.contains=" + DEFAULT_FIELD, "field.contains=" + UPDATED_FIELD);
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByFieldNotContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where field does not contain
-        defaultImportFileLogFiltering("field.doesNotContain=" + UPDATED_FIELD, "field.doesNotContain=" + DEFAULT_FIELD);
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByErrorCodeIsEqualToSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where errorCode equals to
-        defaultImportFileLogFiltering("errorCode.equals=" + DEFAULT_ERROR_CODE, "errorCode.equals=" + UPDATED_ERROR_CODE);
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByErrorCodeIsInShouldWork() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where errorCode in
-        defaultImportFileLogFiltering(
-            "errorCode.in=" + DEFAULT_ERROR_CODE + "," + UPDATED_ERROR_CODE,
-            "errorCode.in=" + UPDATED_ERROR_CODE
-        );
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByErrorCodeIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where errorCode is not null
-        defaultImportFileLogFiltering("errorCode.specified=true", "errorCode.specified=false");
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByErrorCodeContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where errorCode contains
-        defaultImportFileLogFiltering("errorCode.contains=" + DEFAULT_ERROR_CODE, "errorCode.contains=" + UPDATED_ERROR_CODE);
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByErrorCodeNotContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where errorCode does not contain
-        defaultImportFileLogFiltering("errorCode.doesNotContain=" + UPDATED_ERROR_CODE, "errorCode.doesNotContain=" + DEFAULT_ERROR_CODE);
+        // Get all the importFileLogList where level does not contain
+        defaultImportFileLogFiltering("level.doesNotContain=" + UPDATED_LEVEL, "level.doesNotContain=" + DEFAULT_LEVEL);
     }
 
     @Test
@@ -547,120 +458,35 @@ class ImportFileLogResourceIT {
 
     @Test
     @Transactional
-    void getAllImportFileLogsBySourceFamilyIsEqualToSomething() throws Exception {
+    void getAllImportFileLogsByOccurredAtIsEqualToSomething() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where sourceFamily equals to
-        defaultImportFileLogFiltering("sourceFamily.equals=" + DEFAULT_SOURCE_FAMILY, "sourceFamily.equals=" + UPDATED_SOURCE_FAMILY);
+        // Get all the importFileLogList where occurredAt equals to
+        defaultImportFileLogFiltering("occurredAt.equals=" + DEFAULT_OCCURRED_AT, "occurredAt.equals=" + UPDATED_OCCURRED_AT);
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsBySourceFamilyIsInShouldWork() throws Exception {
+    void getAllImportFileLogsByOccurredAtIsInShouldWork() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where sourceFamily in
+        // Get all the importFileLogList where occurredAt in
         defaultImportFileLogFiltering(
-            "sourceFamily.in=" + DEFAULT_SOURCE_FAMILY + "," + UPDATED_SOURCE_FAMILY,
-            "sourceFamily.in=" + UPDATED_SOURCE_FAMILY
+            "occurredAt.in=" + DEFAULT_OCCURRED_AT + "," + UPDATED_OCCURRED_AT,
+            "occurredAt.in=" + UPDATED_OCCURRED_AT
         );
     }
 
     @Test
     @Transactional
-    void getAllImportFileLogsBySourceFamilyIsNullOrNotNull() throws Exception {
+    void getAllImportFileLogsByOccurredAtIsNullOrNotNull() throws Exception {
         // Initialize the database
         insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
 
-        // Get all the importFileLogList where sourceFamily is not null
-        defaultImportFileLogFiltering("sourceFamily.specified=true", "sourceFamily.specified=false");
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsBySourceFamilyContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where sourceFamily contains
-        defaultImportFileLogFiltering("sourceFamily.contains=" + DEFAULT_SOURCE_FAMILY, "sourceFamily.contains=" + UPDATED_SOURCE_FAMILY);
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsBySourceFamilyNotContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where sourceFamily does not contain
-        defaultImportFileLogFiltering(
-            "sourceFamily.doesNotContain=" + UPDATED_SOURCE_FAMILY,
-            "sourceFamily.doesNotContain=" + DEFAULT_SOURCE_FAMILY
-        );
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByNormalizedFamilyIsEqualToSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where normalizedFamily equals to
-        defaultImportFileLogFiltering(
-            "normalizedFamily.equals=" + DEFAULT_NORMALIZED_FAMILY,
-            "normalizedFamily.equals=" + UPDATED_NORMALIZED_FAMILY
-        );
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByNormalizedFamilyIsInShouldWork() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where normalizedFamily in
-        defaultImportFileLogFiltering(
-            "normalizedFamily.in=" + DEFAULT_NORMALIZED_FAMILY + "," + UPDATED_NORMALIZED_FAMILY,
-            "normalizedFamily.in=" + UPDATED_NORMALIZED_FAMILY
-        );
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByNormalizedFamilyIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where normalizedFamily is not null
-        defaultImportFileLogFiltering("normalizedFamily.specified=true", "normalizedFamily.specified=false");
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByNormalizedFamilyContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where normalizedFamily contains
-        defaultImportFileLogFiltering(
-            "normalizedFamily.contains=" + DEFAULT_NORMALIZED_FAMILY,
-            "normalizedFamily.contains=" + UPDATED_NORMALIZED_FAMILY
-        );
-    }
-
-    @Test
-    @Transactional
-    void getAllImportFileLogsByNormalizedFamilyNotContainsSomething() throws Exception {
-        // Initialize the database
-        insertedImportFileLog = importFileLogRepository.saveAndFlush(importFileLog);
-
-        // Get all the importFileLogList where normalizedFamily does not contain
-        defaultImportFileLogFiltering(
-            "normalizedFamily.doesNotContain=" + UPDATED_NORMALIZED_FAMILY,
-            "normalizedFamily.doesNotContain=" + DEFAULT_NORMALIZED_FAMILY
-        );
+        // Get all the importFileLogList where occurredAt is not null
+        defaultImportFileLogFiltering("occurredAt.specified=true", "occurredAt.specified=false");
     }
 
     @Test
@@ -699,13 +525,11 @@ class ImportFileLogResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(importFileLog.getId().intValue())))
-            .andExpect(jsonPath("$.[*].lineIndex").value(hasItem(DEFAULT_LINE_INDEX)))
-            .andExpect(jsonPath("$.[*].field").value(hasItem(DEFAULT_FIELD)))
-            .andExpect(jsonPath("$.[*].errorCode").value(hasItem(DEFAULT_ERROR_CODE)))
+            .andExpect(jsonPath("$.[*].eventCode").value(hasItem(DEFAULT_EVENT_CODE)))
+            .andExpect(jsonPath("$.[*].level").value(hasItem(DEFAULT_LEVEL)))
             .andExpect(jsonPath("$.[*].message").value(hasItem(DEFAULT_MESSAGE)))
-            .andExpect(jsonPath("$.[*].rawLine").value(hasItem(DEFAULT_RAW_LINE)))
-            .andExpect(jsonPath("$.[*].sourceFamily").value(hasItem(DEFAULT_SOURCE_FAMILY)))
-            .andExpect(jsonPath("$.[*].normalizedFamily").value(hasItem(DEFAULT_NORMALIZED_FAMILY)));
+            .andExpect(jsonPath("$.[*].detail").value(hasItem(DEFAULT_DETAIL)))
+            .andExpect(jsonPath("$.[*].occurredAt").value(hasItem(DEFAULT_OCCURRED_AT.toString())));
 
         // Check, that the count call also returns 1
         restImportFileLogMockMvc
@@ -754,13 +578,11 @@ class ImportFileLogResourceIT {
         // Disconnect from session so that the updates on updatedImportFileLog are not directly saved in db
         em.detach(updatedImportFileLog);
         updatedImportFileLog
-            .lineIndex(UPDATED_LINE_INDEX)
-            .field(UPDATED_FIELD)
-            .errorCode(UPDATED_ERROR_CODE)
+            .eventCode(UPDATED_EVENT_CODE)
+            .level(UPDATED_LEVEL)
             .message(UPDATED_MESSAGE)
-            .rawLine(UPDATED_RAW_LINE)
-            .sourceFamily(UPDATED_SOURCE_FAMILY)
-            .normalizedFamily(UPDATED_NORMALIZED_FAMILY);
+            .detail(UPDATED_DETAIL)
+            .occurredAt(UPDATED_OCCURRED_AT);
         ImportFileLogDTO importFileLogDTO = importFileLogMapper.toDto(updatedImportFileLog);
 
         restImportFileLogMockMvc
@@ -850,7 +672,7 @@ class ImportFileLogResourceIT {
         ImportFileLog partialUpdatedImportFileLog = new ImportFileLog();
         partialUpdatedImportFileLog.setId(importFileLog.getId());
 
-        partialUpdatedImportFileLog.field(UPDATED_FIELD).errorCode(UPDATED_ERROR_CODE).normalizedFamily(UPDATED_NORMALIZED_FAMILY);
+        partialUpdatedImportFileLog.level(UPDATED_LEVEL).message(UPDATED_MESSAGE).occurredAt(UPDATED_OCCURRED_AT);
 
         restImportFileLogMockMvc
             .perform(
@@ -882,13 +704,11 @@ class ImportFileLogResourceIT {
         partialUpdatedImportFileLog.setId(importFileLog.getId());
 
         partialUpdatedImportFileLog
-            .lineIndex(UPDATED_LINE_INDEX)
-            .field(UPDATED_FIELD)
-            .errorCode(UPDATED_ERROR_CODE)
+            .eventCode(UPDATED_EVENT_CODE)
+            .level(UPDATED_LEVEL)
             .message(UPDATED_MESSAGE)
-            .rawLine(UPDATED_RAW_LINE)
-            .sourceFamily(UPDATED_SOURCE_FAMILY)
-            .normalizedFamily(UPDATED_NORMALIZED_FAMILY);
+            .detail(UPDATED_DETAIL)
+            .occurredAt(UPDATED_OCCURRED_AT);
 
         restImportFileLogMockMvc
             .perform(

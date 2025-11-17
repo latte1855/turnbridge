@@ -33,6 +33,16 @@ enum ImportStatus {
   FAILED("失敗")
 }
 
+/** 匯入明細狀態（ImportFileItem.status） */
+enum ImportItemStatus {
+  /** 待處理 */
+  PENDING("待處理"),
+  /** 已正規化 */
+  NORMALIZED("已正規化"),
+  /** 檢核失敗 */
+  FAILED("檢核失敗")
+}
+
 enum InvoiceStatus {
   /** 草稿 */ 
   DRAFT("草稿"),
@@ -131,22 +141,56 @@ entity ImportFile { // extends AbstractAuditingEntity
   legacyType String maxlength(16)
 }
 
-/** 匯入錯誤/訊息紀錄 */
+/** 匯入批次事件紀錄（非逐行） */
 entity ImportFileLog { // extends AbstractAuditingEntity
-  /** 行號 */
+  /** 事件代碼（如 PARSE_ERROR/NORMALIZE_SUMMARY） */
+  eventCode String required maxlength(64)
+  /** 層級（INFO/WARN/ERROR） */
+  level String required maxlength(16)
+  /** 訊息摘要 */
+  message String maxlength(1024)
+  /** 詳細內容（JSON 或堆疊） */
+  detail TextBlob
+  /** 發生時間 */
+  occurredAt Instant
+}
+
+/** 匯入檔明細（逐行資料，儲存原始欄位與檢核結果） */
+entity ImportFileItem { // extends AbstractAuditingEntity
+  /** 行號（1-based） */
   lineIndex Integer required min(1)
-  /** 欄位名稱 */
-  field String maxlength(64)
-  /** 錯誤碼 */
-  errorCode String required maxlength(32)
+  /** 原始資料（JSON 或原始 CSV 行） */
+  rawData TextBlob required
+  /** 原始資料 SHA-256（利於去重、結果 append） */
+  rawHash String minlength(64) maxlength(64)
+  /** 來源訊息別（A0401/B0401…） */
+  sourceFamily String maxlength(16)
+  /** 目標訊息別（F/G 系） */
+  normalizedFamily String maxlength(16)
+  /** 正規化 JSON（成功時保留） */
+  normalizedJson TextBlob
+  /** 處理狀態 */
+  status ImportItemStatus required
+  /** 錯誤碼（失敗時） */
+  errorCode String maxlength(32)
+  /** 錯誤訊息（失敗時） */
+  errorMessage String maxlength(1024)
+}
+
+/** 匯入檔明細欄位錯誤（供 UI 詳細檢視） */
+entity ImportFileItemError { // extends AbstractAuditingEntity
+  /** 欄位號（1-based） */
+  columnIndex Integer required min(1)
+  /** 欄位名稱（如 BuyerId/Amount） */
+  fieldName String required maxlength(128)
+  /** 錯誤碼（LENGTH_INVALID、NUMBER_FORMAT 等） */
+  errorCode String required maxlength(64)
   /** 錯誤訊息 */
   message String maxlength(1024)
-  /** 原始行 */
-  rawLine TextBlob
-  /** 原訊息別 */
-  sourceFamily String maxlength(16)
-  /** 正規化訊息別 */
-  normalizedFamily String maxlength(16)
+  /** 嚴重度（INFO/WARN/ERROR） */
+  severity String maxlength(16)
+  /** 發生時間（可選） */
+  occurredAt Instant
 }
 
 /** 發票/折讓資料主檔（Normalized） */
@@ -173,8 +217,6 @@ entity Invoice { // extends AbstractAuditingEntity
   taxType String maxlength(16)
   /** 正規化 JSON */
   normalizedJson TextBlob
-  /** 原始 payload */
-  originalPayload TextBlob
   /** 發票狀態 */
   invoiceStatus InvoiceStatus required
   /** 開立時間 */
@@ -313,10 +355,16 @@ relationship ManyToOne {
   ImportFileLog{importFile(originalFilename) required} to ImportFile,
 
   /** 匯入檔主檔 */
+  ImportFileItem{importFile(originalFilename) required} to ImportFile,
+
+  /** 匯入檔主檔 */
   Invoice{importFile(originalFilename) required } to ImportFile,
 
   /** 發票主檔 */
   InvoiceItem{invoice(invoiceNo)  required} to Invoice,
+
+  /** 發票主檔 */
+  ImportFileItem{invoice(invoiceNo)} to Invoice,
 
   /** 發票主檔 */
   TurnkeyMessage{invoice(invoiceNo) } to Invoice,
@@ -335,6 +383,9 @@ relationship ManyToOne {
 
   /** 匯入檔主檔 */
   ManualAction{importFile(originalFilename)} to ImportFile
+
+  /** 匯入檔明細 */
+  ImportFileItemError{importFileItem(lineIndex) required} to ImportFileItem
 }
 
 //////////////////////////////////////////////////////
@@ -343,5 +394,5 @@ relationship ManyToOne {
 
 dto * with mapstruct
 service * with serviceClass
-paginate ImportFile, ImportFileLog, Invoice, InvoiceItem, TurnkeyMessage, WebhookEndpoint, WebhookDeliveryLog with pagination
+paginate ImportFile, ImportFileItem, ImportFileItemError, ImportFileLog, Invoice, InvoiceItem, TurnkeyMessage, WebhookEndpoint, WebhookDeliveryLog with pagination
 filter *

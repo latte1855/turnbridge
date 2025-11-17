@@ -1,0 +1,38 @@
+{
+  "turnbridgeBackendApp": {
+    "importFileItemError": {
+      "home": {
+        "title": "Import File Item Errors",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Import File Item Error",
+        "createOrEditLabel": "Create or edit a Import File Item Error",
+        "notFound": "No Import File Item Errors found"
+      },
+      "created": "A new Import File Item Error is created with identifier {{ param }}",
+      "updated": "A Import File Item Error is updated with identifier {{ param }}",
+      "deleted": "A Import File Item Error is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Import File Item Error {{ id }}?"
+      },
+      "detail": {
+        "title": "Import File Item Error"
+      },
+      "id": "ID",
+      "columnIndex": "Column Index",
+      "fieldName": "Field Name",
+      "errorCode": "Error Code",
+      "message": "Message",
+      "severity": "Severity",
+      "occurredAt": "Occurred At",
+      "importFileItem": "Import File Item",
+      "help": {
+        "columnIndex": "欄位號（1-based）",
+        "fieldName": "欄位名稱（如 BuyerId/Amount）",
+        "errorCode": "錯誤碼（LENGTH_INVALID、NUMBER_FORMAT 等）",
+        "message": "錯誤訊息",
+        "severity": "嚴重度（INFO/WARN/ERROR）",
+        "occurredAt": "發生時間（可選）"
+      }
+    }
+  }
+}
