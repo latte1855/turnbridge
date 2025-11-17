@@ -44,4 +44,6 @@ public interface ImportFileItemErrorRepository
         "select importFileItemError from ImportFileItemError importFileItemError left join fetch importFileItemError.importFileItem where importFileItemError.id =:id"
     )
     Optional<ImportFileItemError> findOneWithToOneRelationships(@Param("id") Long id);
+
+    List<ImportFileItemError> findByImportFileItemIdIn(List<Long> importFileItemIds);
 }

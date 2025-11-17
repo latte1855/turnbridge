@@ -40,7 +40,8 @@
 
 > **交易規範：** Normalize 進行時不得因單筆失敗回滾整批 ImportFile。ImportFileItem 必須先寫入後再進一步產生 Invoice/InvoiceItem；就算全部失敗，也能透過 ImportFile + ImportFileItem 查詢與下載錯誤結果。
 
-> **ImportFileLog 角色：** 自本版起作為「批次事件/稽核紀錄」，僅記錄 `UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等事件（含層級、訊息、細節 JSON）；逐行錯誤改由 ImportFileItem + ImportFileItemError 儲存。
+> **ImportFileLog 角色：** 自本版起作為「批次事件/稽核紀錄」，僅記錄 `UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等事件（含層級、訊息、細節 JSON）；逐行錯誤改由 ImportFileItem + ImportFileItemError 儲存。  
+> **結果下載 API：** `GET /api/import-files/{id}/result` 產生單檔 CSV；`POST /api/import-files/results/download` 接受 `importFileIds` 陣列並回傳 ZIP。
 
 ---
 

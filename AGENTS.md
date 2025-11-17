@@ -59,6 +59,8 @@
 | 上傳 E0501   | `POST`     | `/api/v1/upload/e0501`           | 回 `importId`                     |
 | 上傳 Invoice | `POST`     | `/api/v1/upload/invoice`         | 支援 ZIP；999 切檔；回 `importId`       |
 | 查匯入        | `GET`      | `/api/v1/imports/{importId}`     | `status/successCount/errorCount` |
+| 匯入結果下載（單檔） | `GET`      | `/api/import-files/{id}/result` | 回傳單一 CSV（原欄位 + `status/error/fieldErrors`） |
+| 匯入結果下載（多檔） | `POST`     | `/api/import-files/results/download` | body 傳入 `importFileIds`，系統打包 ZIP 回傳 |
 | 查回饋        | `GET`      | `/api/v1/turnkey/messages`       | 期間/代碼/狀態過濾                       |
 | 重送         | `POST`     | `/api/v1/invoices/{id}/resend`   | 人工重送需審核（雙人）                      |
 | Webhook    | `POST/GET` | `/api/v1/webhooks` / `{id}/logs` | 註冊/查投遞紀錄                         |
