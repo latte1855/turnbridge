@@ -3,6 +3,7 @@ package com.asynctide.turnbridge.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.asynctide.turnbridge.security.*;
+import com.asynctide.turnbridge.tenant.TenantRequestFilter;
 import com.asynctide.turnbridge.web.filter.SpaWebFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +39,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc, TenantRequestFilter tenantRequestFilter)
+        throws Exception {
         http
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
@@ -86,6 +88,7 @@ public class SecurityConfiguration {
                     .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
+        http.addFilterAfter(tenantRequestFilter, BasicAuthenticationFilter.class);
         return http.build();
     }
 

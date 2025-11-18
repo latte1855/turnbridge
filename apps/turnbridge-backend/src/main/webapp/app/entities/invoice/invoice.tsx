@@ -158,10 +158,6 @@ export const Invoice = () => {
                   <Translate contentKey="turnbridgeBackendApp.invoice.normalizedJson">Normalized Json</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('normalizedJson')} />
                 </th>
-                <th className="hand" onClick={sort('originalPayload')}>
-                  <Translate contentKey="turnbridgeBackendApp.invoice.originalPayload">Original Payload</Translate>{' '}
-                  <FontAwesomeIcon icon={getSortIconByFieldName('originalPayload')} />
-                </th>
                 <th className="hand" onClick={sort('invoiceStatus')}>
                   <Translate contentKey="turnbridgeBackendApp.invoice.invoiceStatus">Invoice Status</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('invoiceStatus')} />
@@ -204,7 +200,6 @@ export const Invoice = () => {
                   <td>{invoice.totalAmount}</td>
                   <td>{invoice.taxType}</td>
                   <td>{invoice.normalizedJson}</td>
-                  <td>{invoice.originalPayload}</td>
                   <td>
                     <Translate contentKey={`turnbridgeBackendApp.InvoiceStatus.${invoice.invoiceStatus}`} />
                   </td>

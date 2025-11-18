@@ -526,7 +526,7 @@ class TenantResourceIT {
         Tenant partialUpdatedTenant = new Tenant();
         partialUpdatedTenant.setId(tenant.getId());
 
-        partialUpdatedTenant.name(UPDATED_NAME).code(UPDATED_CODE).status(UPDATED_STATUS);
+        partialUpdatedTenant.name(UPDATED_NAME).code(UPDATED_CODE);
 
         restTenantMockMvc
             .perform(

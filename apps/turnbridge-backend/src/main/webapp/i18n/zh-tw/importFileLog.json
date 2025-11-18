@@ -18,22 +18,18 @@
         "title": "Import File Log"
       },
       "id": "ID",
-      "lineIndex": "Line Index",
-      "field": "Field",
-      "errorCode": "Error Code",
+      "eventCode": "Event Code",
+      "level": "Level",
       "message": "Message",
-      "rawLine": "Raw Line",
-      "sourceFamily": "Source Family",
-      "normalizedFamily": "Normalized Family",
+      "detail": "Detail",
+      "occurredAt": "Occurred At",
       "importFile": "Import File",
       "help": {
-        "lineIndex": "行號",
-        "field": "欄位名稱",
-        "errorCode": "錯誤碼",
-        "message": "錯誤訊息",
-        "rawLine": "原始行",
-        "sourceFamily": "原訊息別",
-        "normalizedFamily": "正規化訊息別"
+        "eventCode": "事件代碼（如 PARSE_ERROR/NORMALIZE_SUMMARY）",
+        "level": "層級（INFO/WARN/ERROR）",
+        "message": "訊息摘要",
+        "detail": "詳細內容（JSON 或堆疊）",
+        "occurredAt": "發生時間"
       }
     }
   }

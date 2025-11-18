@@ -47,13 +47,11 @@ public class ImportFileLogAsserts {
     public static void assertImportFileLogUpdatableFieldsEquals(ImportFileLog expected, ImportFileLog actual) {
         assertThat(actual)
             .as("Verify ImportFileLog relevant properties")
-            .satisfies(a -> assertThat(a.getLineIndex()).as("check lineIndex").isEqualTo(expected.getLineIndex()))
-            .satisfies(a -> assertThat(a.getField()).as("check field").isEqualTo(expected.getField()))
-            .satisfies(a -> assertThat(a.getErrorCode()).as("check errorCode").isEqualTo(expected.getErrorCode()))
+            .satisfies(a -> assertThat(a.getEventCode()).as("check eventCode").isEqualTo(expected.getEventCode()))
+            .satisfies(a -> assertThat(a.getLevel()).as("check level").isEqualTo(expected.getLevel()))
             .satisfies(a -> assertThat(a.getMessage()).as("check message").isEqualTo(expected.getMessage()))
-            .satisfies(a -> assertThat(a.getRawLine()).as("check rawLine").isEqualTo(expected.getRawLine()))
-            .satisfies(a -> assertThat(a.getSourceFamily()).as("check sourceFamily").isEqualTo(expected.getSourceFamily()))
-            .satisfies(a -> assertThat(a.getNormalizedFamily()).as("check normalizedFamily").isEqualTo(expected.getNormalizedFamily()));
+            .satisfies(a -> assertThat(a.getDetail()).as("check detail").isEqualTo(expected.getDetail()))
+            .satisfies(a -> assertThat(a.getOccurredAt()).as("check occurredAt").isEqualTo(expected.getOccurredAt()));
     }
 
     /**

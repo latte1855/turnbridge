@@ -47,8 +47,8 @@ class InvoiceAssignNoResourceIT {
     private static final String DEFAULT_TRACK = "AA";
     private static final String UPDATED_TRACK = "BB";
 
-    private static final String DEFAULT_PERIOD = "772383";
-    private static final String UPDATED_PERIOD = "742832";
+    private static final String DEFAULT_PERIOD = "438569";
+    private static final String UPDATED_PERIOD = "687863";
 
     private static final String DEFAULT_FROM_NO = "AAAAAAAAAA";
     private static final String UPDATED_FROM_NO = "BBBBBBBBBB";
@@ -940,7 +940,7 @@ class InvoiceAssignNoResourceIT {
         InvoiceAssignNo partialUpdatedInvoiceAssignNo = new InvoiceAssignNo();
         partialUpdatedInvoiceAssignNo.setId(invoiceAssignNo.getId());
 
-        partialUpdatedInvoiceAssignNo.track(UPDATED_TRACK).period(UPDATED_PERIOD).rollSize(UPDATED_ROLL_SIZE).status(UPDATED_STATUS);
+        partialUpdatedInvoiceAssignNo.track(UPDATED_TRACK).fromNo(UPDATED_FROM_NO).toNo(UPDATED_TO_NO);
 
         restInvoiceAssignNoMockMvc
             .perform(

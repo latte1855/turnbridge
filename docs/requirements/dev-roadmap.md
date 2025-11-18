@@ -18,15 +18,34 @@
 
 ---
 
+## **最新進度（Phase 1 / 目前 Sprint）**
+
+- ✅ `POST /api/upload/invoice|e0501` 已可驗證 SHA-256 並建立 `ImportFile`（僅受理單一 CSV），同時把 `legacyType`/`rawLine` 保存（對應 DEV-001、DEV-002）。
+- ✅ `NormalizationService` 已正式啟用：逐張聚合、寫入 `ImportFileItem`、`ImportFileItemError`、`ImportFileLog`，通過者轉成 `Invoice/InvoiceItem`，ProblemDetail 回傳 `errorCode/field/normalizedFamily`（DEV-003、DEV-004）。
+- ✅ Portal 新增「Import Monitor」模組：列表查詢/分頁/勾選下載、多檔 ZIP 打包、明細呈現 `ImportFileItem`＋欄位錯誤、同頁上傳表單自動計算 SHA-256（DEV-005）。
+- ✅ 伺服器側新增 999 明細驗證：CSV 超過 999 行會回傳 ProblemDetail `ITEM_LIMIT_EXCEEDED` 並保留 ImportFile（DEV-002）。
+- ✅ 多租戶/RLS Skeleton：`X-Tenant-Code` Header 解析 + ThreadLocal Context + Postgres Session 變數注入；Upload Flow 會自動帶入租戶（DEV-000）。
+- ✅ Phase1 測試證據：`./mvnw verify`、`npm run lint && npm run webapp:build:dev` 已於 2025-11-18 跑通並保留輸出，作為交付審查依據。
+- ⚠️ 待辦：整理 Phase 1 文件（SRS/AGENTS/dev-roadmap）與上傳/Normalize 測試證據，為 Phase 2（Turnkey + Webhook）準備變更點。
+
+---
+
 # **1. 模組拆解（Modules Overview）**
 
 ## **1.1. 匯入 / Normalize**
 
 | 模組                    | 子項                                                          | 依賴     | 輸入/產出                       |
 | --------------------- | ----------------------------------------------------------- | ------ | --------------------------- |
-| **上傳/驗證**             | `POST /upload/{type}`、SHA-256、ImportFile、999 不拆單、agent metadata | 無      | API Spec、Agent 測試集          |
-| **Normalize 引擎**      | ABCD → FG、欄位映射、錯誤碼、rawLine/legacyType 保存                    | 上傳/驗證  | AGENTS_MAPPING_v1.md、MIG4.1 |
+| **上傳/驗證**             | `POST /upload/{type}`、**僅允許單一 CSV**、SHA-256、ImportFile、999 不拆單、agent metadata | 無      | API Spec、Agent 測試集          |
+| **ImportFileItem**    | *每一行* 上傳資料都落地，含 `rawData/hash/result` 與錯誤摘要，後續下載結果檔直接引用；使用者可選擇多筆批次下載，系統再自動壓縮為 ZIP | 上傳/驗證  | 原始 CSV、結果 CSV/ZIP         |
+| **ImportFileItemError** | 一行資料可對應多個欄位錯誤（欄位名、錯誤碼、訊息、嚴重度），供 UI 詳細檢視／下載結果時附上 | ImportFileItem | 多欄位錯誤報表、結果檔附註            |
+| **Normalize 引擎**      | ABCD → FG、欄位映射、錯誤碼、rawLine/legacyType 保存；<br/>逐行處理，成功才寫 Invoice，失敗僅更新 ImportFileItem + ImportFileItemError | 上傳/驗證  | AGENTS_MAPPING_v1.md、MIG4.1 |
 | **RLS / 多租戶（Tenant）** | tenant_id、角色（加值中心/總公司/分公司）、RLS Policy                       | Domain | RLS Policy、Migration        |
+
+> **交易規範：** Normalize 進行時不得因單筆失敗回滾整批 ImportFile。ImportFileItem 必須先寫入後再進一步產生 Invoice/InvoiceItem；就算全部失敗，也能透過 ImportFile + ImportFileItem 查詢與下載錯誤結果。
+
+> **ImportFileLog 角色：** 自本版起作為「批次事件/稽核紀錄」，僅記錄 `UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等事件（含層級、訊息、細節 JSON）；逐行錯誤改由 ImportFileItem + ImportFileItemError 儲存。  
+> **結果下載 API：** `GET /api/import-files/{id}/result` 產生單檔 CSV；`POST /api/import-files/results/download` 接受 `importFileIds` 陣列並回傳 ZIP。
 
 ---
 
@@ -123,6 +142,7 @@
 | **DEV-008** | **Turnkey Feedback Parser**（重要新增）     | 5d | 解析 ACK/ERROR → InvoiceStatus 更新 |
 | **DEV-009** | Webhook Deliver：HMAC + Retry + DLQ    | 4d | newman-smoke/timeout case pass  |
 | **DEV-010** | Webhook Registration + Secret Rotate  | 3d | UI 可設定 URL/secret/events        |
+| **DEV-020** | （Enhance）Admin Impersonation        | 3d | 管理者可切換成租戶帳號上傳/查詢（供營運排障） |
 
 ---
 

@@ -1,0 +1,101 @@
+{
+  "annotations": {
+    "changelogDate": "20251117000502"
+  },
+  "applications": "*",
+  "documentation": "匯入檔明細（逐行資料，儲存原始欄位與檢核結果）",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "行號（1-based）",
+      "fieldName": "lineIndex",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "documentation": "原始資料（JSON 或原始 CSV 行）",
+      "fieldName": "rawData",
+      "fieldType": "TextBlob",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "documentation": "原始資料 SHA-256（利於去重、結果 append）",
+      "fieldName": "rawHash",
+      "fieldType": "String",
+      "fieldValidateRules": ["minlength", "maxlength"],
+      "fieldValidateRulesMaxlength": "64",
+      "fieldValidateRulesMinlength": "64"
+    },
+    {
+      "documentation": "來源訊息別（A0401/B0401…）",
+      "fieldName": "sourceFamily",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "目標訊息別（F/G 系）",
+      "fieldName": "normalizedFamily",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "正規化 JSON（成功時保留）",
+      "fieldName": "normalizedJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "documentation": "處理狀態",
+      "fieldName": "status",
+      "fieldType": "ImportItemStatus",
+      "fieldTypeDocumentation": "匯入明細狀態（ImportFileItem.status）",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "PENDING (待處理),NORMALIZED (已正規化),FAILED (檢核失敗)",
+      "fieldValuesJavadocs": {
+        "FAILED": "檢核失敗",
+        "NORMALIZED": "已正規化",
+        "PENDING": "待處理"
+      }
+    },
+    {
+      "documentation": "錯誤碼（失敗時）",
+      "fieldName": "errorCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "錯誤訊息（失敗時）",
+      "fieldName": "errorMessage",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "ImportFileItem",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "匯入檔主檔",
+      "otherEntityField": "originalFilename",
+      "otherEntityName": "importFile",
+      "relationshipName": "importFile",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "documentation": "發票主檔",
+      "otherEntityField": "invoiceNo",
+      "otherEntityName": "invoice",
+      "relationshipName": "invoice",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

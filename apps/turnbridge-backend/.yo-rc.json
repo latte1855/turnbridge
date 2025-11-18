@@ -25,13 +25,15 @@
       "TurnkeyMessage",
       "WebhookEndpoint",
       "WebhookDeliveryLog",
-      "ManualAction"
+      "ManualAction",
+      "ImportFileItem",
+      "ImportFileItemError"
     ],
     "feignClient": null,
     "jhipsterVersion": "8.11.0",
     "jwtSecretKey": "YTA1MTA0MDQzZTA5MzRmYzE2MDYzZWIzNDJjYzVkNGQ1MDVhYTk0YTYwZjg0N2QyNmQ3NTQwODc4ZWMwZWM2YTc4ZTUzMzU4NDdiYzhkMzdjMDRlYjE3MjY5ODM3YWMxN2VkYzBhMGE2ZmJjYmM5ZDllZDQ3NGI1Nzc5YWJiNzk=",
     "languages": ["zh-tw", "en"],
-    "lastLiquibaseTimestamp": 1763263919000,
+    "lastLiquibaseTimestamp": 1763353816000,
     "microfrontend": null,
     "microfrontends": [],
     "monorepository": true,

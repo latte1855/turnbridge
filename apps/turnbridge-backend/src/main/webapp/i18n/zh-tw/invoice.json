@@ -29,7 +29,6 @@
       "totalAmount": "Total Amount",
       "taxType": "Tax Type",
       "normalizedJson": "Normalized Json",
-      "originalPayload": "Original Payload",
       "invoiceStatus": "Invoice Status",
       "issuedAt": "Issued At",
       "legacyType": "Legacy Type",
@@ -47,7 +46,6 @@
         "totalAmount": "含稅金額",
         "taxType": "稅別",
         "normalizedJson": "正規化 JSON",
-        "originalPayload": "原始 payload",
         "invoiceStatus": "發票狀態",
         "issuedAt": "開立時間",
         "legacyType": "原訊息別"

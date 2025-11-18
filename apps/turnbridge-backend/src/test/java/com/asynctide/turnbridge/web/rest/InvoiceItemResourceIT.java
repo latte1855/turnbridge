@@ -815,6 +815,7 @@ class InvoiceItemResourceIT {
         partialUpdatedInvoiceItem
             .description(UPDATED_DESCRIPTION)
             .quantity(UPDATED_QUANTITY)
+            .unitPrice(UPDATED_UNIT_PRICE)
             .amount(UPDATED_AMOUNT)
             .sequence(UPDATED_SEQUENCE);
 

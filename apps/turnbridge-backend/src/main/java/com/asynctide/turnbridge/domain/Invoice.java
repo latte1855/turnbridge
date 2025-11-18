@@ -104,12 +104,6 @@ public class Invoice implements Serializable {
     private String normalizedJson;
 
     /**
-     * 原始 payload
-     */
-    @Column(name = "original_payload")
-    private String originalPayload;
-
-    /**
      * 發票狀態
      */
     @NotNull
@@ -303,19 +297,6 @@ public class Invoice implements Serializable {
         this.normalizedJson = normalizedJson;
     }
 
-    public String getOriginalPayload() {
-        return this.originalPayload;
-    }
-
-    public Invoice originalPayload(String originalPayload) {
-        this.setOriginalPayload(originalPayload);
-        return this;
-    }
-
-    public void setOriginalPayload(String originalPayload) {
-        this.originalPayload = originalPayload;
-    }
-
     public InvoiceStatus getInvoiceStatus() {
         return this.invoiceStatus;
     }
@@ -416,7 +397,6 @@ public class Invoice implements Serializable {
             ", totalAmount=" + getTotalAmount() +
             ", taxType='" + getTaxType() + "'" +
             ", normalizedJson='" + getNormalizedJson() + "'" +
-            ", originalPayload='" + getOriginalPayload() + "'" +
             ", invoiceStatus='" + getInvoiceStatus() + "'" +
             ", issuedAt='" + getIssuedAt() + "'" +
             ", legacyType='" + getLegacyType() + "'" +

@@ -71,7 +71,6 @@ public class InvoiceAsserts {
             )
             .satisfies(a -> assertThat(a.getTaxType()).as("check taxType").isEqualTo(expected.getTaxType()))
             .satisfies(a -> assertThat(a.getNormalizedJson()).as("check normalizedJson").isEqualTo(expected.getNormalizedJson()))
-            .satisfies(a -> assertThat(a.getOriginalPayload()).as("check originalPayload").isEqualTo(expected.getOriginalPayload()))
             .satisfies(a -> assertThat(a.getInvoiceStatus()).as("check invoiceStatus").isEqualTo(expected.getInvoiceStatus()))
             .satisfies(a -> assertThat(a.getIssuedAt()).as("check issuedAt").isEqualTo(expected.getIssuedAt()))
             .satisfies(a -> assertThat(a.getLegacyType()).as("check legacyType").isEqualTo(expected.getLegacyType()));

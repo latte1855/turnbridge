@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 /**
  * Spring Data JPA repository for the Tenant entity.
  */
-@SuppressWarnings("unused")
 @Repository
 public interface TenantRepository
-    extends JpaRepository<Tenant, Long>, JpaSpecificationExecutor<Tenant>, QuerydslPredicateExecutor<Tenant> {}
+    extends JpaRepository<Tenant, Long>, JpaSpecificationExecutor<Tenant>, QuerydslPredicateExecutor<Tenant> {
+    java.util.Optional<Tenant> findOneByCode(String code);
+}

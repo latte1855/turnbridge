@@ -47,9 +47,6 @@
             <column name="normalized_json" type="${clobType}" remarks="正規化 JSON">
                 <constraints nullable="true" />
             </column>
-            <column name="original_payload" type="${clobType}" remarks="原始 payload">
-                <constraints nullable="true" />
-            </column>
             <column name="invoice_status" type="varchar(255)" remarks="發票狀態">
                 <constraints nullable="false" />
             </column>
@@ -98,7 +95,6 @@
             <column name="total_amount" type="numeric"/>
             <column name="tax_type" type="string"/>
             <column name="normalized_json" type="string"/>
-            <column name="original_payload" type="string"/>
             <column name="invoice_status" type="string"/>
             <column name="issued_at" type="date"/>
             <column name="legacy_type" type="string"/>

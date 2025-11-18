@@ -79,7 +79,6 @@ public class InvoiceGatlingTest extends Simulation {
                                 ", \"totalAmount\": 0" +
                                 ", \"taxType\": \"SAMPLE_TEXT\"" +
                                 ", \"normalizedJson\": null" +
-                                ", \"originalPayload\": null" +
                                 ", \"invoiceStatus\": \"DRAFT\"" +
                                 ", \"issuedAt\": \"2020-01-01T00:00:00.000Z\"" +
                                 ", \"legacyType\": \"SAMPLE_TEXT\"" +

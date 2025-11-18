@@ -1,0 +1,66 @@
+{
+  "annotations": {
+    "changelogDate": "20251117043016"
+  },
+  "applications": "*",
+  "documentation": "匯入檔明細欄位錯誤（供 UI 詳細檢視）",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "documentation": "欄位號（1-based）",
+      "fieldName": "columnIndex",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "documentation": "欄位名稱（如 BuyerId/Amount）",
+      "fieldName": "fieldName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "錯誤碼（LENGTH_INVALID、NUMBER_FORMAT 等）",
+      "fieldName": "errorCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "錯誤訊息",
+      "fieldName": "message",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "documentation": "嚴重度（INFO/WARN/ERROR）",
+      "fieldName": "severity",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "發生時間（可選）",
+      "fieldName": "occurredAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "ImportFileItemError",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "documentation": "匯入檔明細",
+      "otherEntityField": "lineIndex",
+      "otherEntityName": "importFileItem",
+      "relationshipName": "importFileItem",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

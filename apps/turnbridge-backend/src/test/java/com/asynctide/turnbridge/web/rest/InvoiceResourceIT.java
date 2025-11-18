@@ -87,9 +87,6 @@ class InvoiceResourceIT {
     private static final String DEFAULT_NORMALIZED_JSON = "AAAAAAAAAA";
     private static final String UPDATED_NORMALIZED_JSON = "BBBBBBBBBB";
 
-    private static final String DEFAULT_ORIGINAL_PAYLOAD = "AAAAAAAAAA";
-    private static final String UPDATED_ORIGINAL_PAYLOAD = "BBBBBBBBBB";
-
     private static final InvoiceStatus DEFAULT_INVOICE_STATUS = InvoiceStatus.DRAFT;
     private static final InvoiceStatus UPDATED_INVOICE_STATUS = InvoiceStatus.NORMALIZED;
 
@@ -149,7 +146,6 @@ class InvoiceResourceIT {
             .totalAmount(DEFAULT_TOTAL_AMOUNT)
             .taxType(DEFAULT_TAX_TYPE)
             .normalizedJson(DEFAULT_NORMALIZED_JSON)
-            .originalPayload(DEFAULT_ORIGINAL_PAYLOAD)
             .invoiceStatus(DEFAULT_INVOICE_STATUS)
             .issuedAt(DEFAULT_ISSUED_AT)
             .legacyType(DEFAULT_LEGACY_TYPE);
@@ -185,7 +181,6 @@ class InvoiceResourceIT {
             .totalAmount(UPDATED_TOTAL_AMOUNT)
             .taxType(UPDATED_TAX_TYPE)
             .normalizedJson(UPDATED_NORMALIZED_JSON)
-            .originalPayload(UPDATED_ORIGINAL_PAYLOAD)
             .invoiceStatus(UPDATED_INVOICE_STATUS)
             .issuedAt(UPDATED_ISSUED_AT)
             .legacyType(UPDATED_LEGACY_TYPE);
@@ -331,7 +326,6 @@ class InvoiceResourceIT {
             .andExpect(jsonPath("$.[*].totalAmount").value(hasItem(sameNumber(DEFAULT_TOTAL_AMOUNT))))
             .andExpect(jsonPath("$.[*].taxType").value(hasItem(DEFAULT_TAX_TYPE)))
             .andExpect(jsonPath("$.[*].normalizedJson").value(hasItem(DEFAULT_NORMALIZED_JSON)))
-            .andExpect(jsonPath("$.[*].originalPayload").value(hasItem(DEFAULT_ORIGINAL_PAYLOAD)))
             .andExpect(jsonPath("$.[*].invoiceStatus").value(hasItem(DEFAULT_INVOICE_STATUS.toString())))
             .andExpect(jsonPath("$.[*].issuedAt").value(hasItem(DEFAULT_ISSUED_AT.toString())))
             .andExpect(jsonPath("$.[*].legacyType").value(hasItem(DEFAULT_LEGACY_TYPE)));
@@ -377,7 +371,6 @@ class InvoiceResourceIT {
             .andExpect(jsonPath("$.totalAmount").value(sameNumber(DEFAULT_TOTAL_AMOUNT)))
             .andExpect(jsonPath("$.taxType").value(DEFAULT_TAX_TYPE))
             .andExpect(jsonPath("$.normalizedJson").value(DEFAULT_NORMALIZED_JSON))
-            .andExpect(jsonPath("$.originalPayload").value(DEFAULT_ORIGINAL_PAYLOAD))
             .andExpect(jsonPath("$.invoiceStatus").value(DEFAULT_INVOICE_STATUS.toString()))
             .andExpect(jsonPath("$.issuedAt").value(DEFAULT_ISSUED_AT.toString()))
             .andExpect(jsonPath("$.legacyType").value(DEFAULT_LEGACY_TYPE));
@@ -1141,7 +1134,6 @@ class InvoiceResourceIT {
             .andExpect(jsonPath("$.[*].totalAmount").value(hasItem(sameNumber(DEFAULT_TOTAL_AMOUNT))))
             .andExpect(jsonPath("$.[*].taxType").value(hasItem(DEFAULT_TAX_TYPE)))
             .andExpect(jsonPath("$.[*].normalizedJson").value(hasItem(DEFAULT_NORMALIZED_JSON)))
-            .andExpect(jsonPath("$.[*].originalPayload").value(hasItem(DEFAULT_ORIGINAL_PAYLOAD)))
             .andExpect(jsonPath("$.[*].invoiceStatus").value(hasItem(DEFAULT_INVOICE_STATUS.toString())))
             .andExpect(jsonPath("$.[*].issuedAt").value(hasItem(DEFAULT_ISSUED_AT.toString())))
             .andExpect(jsonPath("$.[*].legacyType").value(hasItem(DEFAULT_LEGACY_TYPE)));
@@ -1204,7 +1196,6 @@ class InvoiceResourceIT {
             .totalAmount(UPDATED_TOTAL_AMOUNT)
             .taxType(UPDATED_TAX_TYPE)
             .normalizedJson(UPDATED_NORMALIZED_JSON)
-            .originalPayload(UPDATED_ORIGINAL_PAYLOAD)
             .invoiceStatus(UPDATED_INVOICE_STATUS)
             .issuedAt(UPDATED_ISSUED_AT)
             .legacyType(UPDATED_LEGACY_TYPE);
@@ -1294,15 +1285,13 @@ class InvoiceResourceIT {
         partialUpdatedInvoice.setId(invoice.getId());
 
         partialUpdatedInvoice
-            .invoiceNo(UPDATED_INVOICE_NO)
-            .messageFamily(UPDATED_MESSAGE_FAMILY)
+            .buyerId(UPDATED_BUYER_ID)
             .sellerId(UPDATED_SELLER_ID)
             .sellerName(UPDATED_SELLER_NAME)
+            .taxAmount(UPDATED_TAX_AMOUNT)
             .totalAmount(UPDATED_TOTAL_AMOUNT)
-            .taxType(UPDATED_TAX_TYPE)
             .normalizedJson(UPDATED_NORMALIZED_JSON)
-            .invoiceStatus(UPDATED_INVOICE_STATUS)
-            .issuedAt(UPDATED_ISSUED_AT);
+            .legacyType(UPDATED_LEGACY_TYPE);
 
         restInvoiceMockMvc
             .perform(
@@ -1342,7 +1331,6 @@ class InvoiceResourceIT {
             .totalAmount(UPDATED_TOTAL_AMOUNT)
             .taxType(UPDATED_TAX_TYPE)
             .normalizedJson(UPDATED_NORMALIZED_JSON)
-            .originalPayload(UPDATED_ORIGINAL_PAYLOAD)
             .invoiceStatus(UPDATED_INVOICE_STATUS)
             .issuedAt(UPDATED_ISSUED_AT)
             .legacyType(UPDATED_LEGACY_TYPE);

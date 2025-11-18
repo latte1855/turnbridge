@@ -8,6 +8,8 @@ import turnkeyMessage from 'app/entities/turnkey-message/turnkey-message.reducer
 import webhookEndpoint from 'app/entities/webhook-endpoint/webhook-endpoint.reducer';
 import webhookDeliveryLog from 'app/entities/webhook-delivery-log/webhook-delivery-log.reducer';
 import manualAction from 'app/entities/manual-action/manual-action.reducer';
+import importFileItem from 'app/entities/import-file-item/import-file-item.reducer';
+import importFileItemError from 'app/entities/import-file-item-error/import-file-item-error.reducer';
 /* jhipster-needle-add-reducer-import - JHipster will add reducer here */
 
 const entitiesReducers = {
@@ -21,6 +23,8 @@ const entitiesReducers = {
   webhookEndpoint,
   webhookDeliveryLog,
   manualAction,
+  importFileItem,
+  importFileItemError,
   /* jhipster-needle-add-reducer-combine - JHipster will add reducer here */
 };
 

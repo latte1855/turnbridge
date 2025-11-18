@@ -43,7 +43,7 @@
 ```mermaid
 flowchart LR
   subgraph ClientEdge[Client / Agent]
-    A["Client/Agent<br/>CSV/ZIP + SHA-256"]
+    A["Client/Agent<br/>CSV + SHA-256"]
   end
   subgraph APILayer[API & Gateway]
     B["REST API / Upload Gateway"]
@@ -177,8 +177,9 @@ flowchart LR
 
 ### 5.1 上傳與驗證（E0501 / Invoice）
 
-* **檔案**：CSV（建議 UTF-8；E0501 允許 BIG5），可 ZIP；需附 **SHA-256**。
-* **999 筆上限**：以「**明細行數**」計算；若最後一張發票跨越 999，**整張移至下一檔**（不得拆單）。
+* **檔案**：僅接受單一 CSV（建議 UTF-8；E0501 允許 BIG5）；需附 **SHA-256**。若需一次下載多批結果，由後端在下載 API 自動壓 ZIP 回傳。
+* **租戶識別**：所有 `/api/**` 呼叫需帶 `X-Tenant-Code`（例如 `TEN-001`），後端據此設定 Postgres RLS；管理端 Portal 也提供「租戶切換」元件，管理者可選擇單一租戶或 `ALL`，All 代表不帶 Header 並讓 Postgres 依 `app.is_admin=true` 查詢所有資料；DEV/Test 可設定 `turnbridge.tenant.default-code` 以提供預設值。
+* **999 筆上限**：以「**明細行數**」計算；若最後一張發票跨越 999，**整張移至下一檔**（不得拆單）。後端於 Normalize 前會重新掃描 CSV；若超過 999 筆即以 ProblemDetail（`ITEM_LIMIT_EXCEEDED`、field=`lineIndex`）拒收，ImportFile 仍保留以供查詢。
 * **格式偵測**：逐筆依 `MessageType` 或欄位特徵判定 A/B/C/D/F/G。
 * **原文保存**：每一筆（行）保存 `source_family (A/B/C/D/F/G)`、`source_message_type`、`raw_line` 或原始 JSON。
 * **Normalize**：將 A/B/C/D 轉為 **F/G** 結構（含欄位對應、值域/型別轉換、節點合併/拆分、常數補值）。
@@ -188,7 +189,7 @@ flowchart LR
   * 統編：8 碼；期別：雙月期（01-02、03-04…）。
   * 字軌：2 碼；起訖號連號且卷規則（**00/50 起始、49/99 結尾**）。
   * **加油站例外卷**：250 張/卷；仍須卷內連號（可 per-tenant 設定）。
-* **錯誤處理**：逐筆寫入 `ImportFileLog`（行號、欄位、錯誤碼、訊息、`source_family`、`normalized_family`）。
+* **錯誤處理**：每一行先寫入 `ImportFileItem`，欄位錯誤拆為 `ImportFileItemError`（欄位名、欄位序、錯誤碼、訊息）；批次層級事件（上傳/匯總/致命錯）則寫入 `ImportFileLog`。
 
 **Normalize 階段主要錯誤碼**
 
@@ -260,6 +261,15 @@ flowchart LR
 - Traceability：伺服器應提供原始檔案與分割後每個 `importId` 的 mapping（原始行號 → importId + targetLine）以利稽核與回溯。
 
 
+#### 5.1.2 ImportFile / ImportFileItem / ImportFileLog 交易準則
+
+1. **ImportFile 永不回滾**：完成 SHA-256 驗證後即寫入 ImportFile，Normalize 只會更新其 `status/successCount/errorCount` 與 ImportFileLog，決不刪除/回滾。
+2. **逐行保存原始資料**：CSV 每一行都建立 `ImportFileItem`，保存 `rawData/rawHash/lineIndex/sourceFamily/status`，方便 Portal 與結果檔直接引用原稿。
+3. **欄位錯誤拆解**：同一行可寫入多筆 `ImportFileItemError`（欄位名、欄位序、錯誤碼、訊息、嚴重度），Portal 會依此呈現欄位錯誤並附在結果檔末尾。
+4. **Invoice/InvoiceItem 寫入條件**：以「同一 InvoiceNo」為交易邊界。通過檢核才寫入 `Invoice/InvoiceItem`；若該發票失敗則 rollback 該群組，但不影響其他發票與 ImportFileItem。
+5. **ImportFileLog 角色**：記錄批次事件（`UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等）與逐筆錯誤事件 `NORMALIZE_ROW_ERROR`；detail 會保存 `lineIndex/invoiceNo/field/errorCode/rawData`，Portal 可查閱欄位級錯誤。逐行欄位錯誤仍由 `ImportFileItem(Error)` 保留以供下載結果附註。
+6. **結果回饋 API**：`GET /api/import-files/{id}/result` 會輸出原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`；`POST /api/import-files/results/download` 接受多個 importFileIds 並回傳 ZIP（系統自動壓縮）。
+
 ### 5.2 轉檔與上拋（F/G 唯一輸出）
 
 * **排程**：預設 **每 5 分鐘**掃描待轉檔佇列。
@@ -315,9 +325,11 @@ flowchart LR
 
 | 方法   | 路徑                             | 目的         | 說明                                                                      |
 | ---- | ------------------------------ | ---------- | ----------------------------------------------------------------------- |
-| POST | `/api/v1/upload/e0501`         | 上傳配號       | form-data 或 JSON；支援 ZIP；回傳 `importId`                                   |
-| POST | `/api/v1/upload/invoice`       | 上傳發票檔      | 可混合 A/B/C/D/F/G；999 切檔；回傳 `importId`                                    |
+| POST | `/api/v1/upload/e0501`         | 上傳配號       | form-data；僅接受單一 CSV；驗證 SHA-256 後回傳 `importId`                                 |
+| POST | `/api/v1/upload/invoice`       | 上傳發票檔      | 僅接受 CSV；可混合 A/B/C/D/F/G；999 切檔；成功即觸發 Normalize；回傳 `importId`                                   |
 | GET  | `/api/v1/imports/{importId}`   | 匯入結果       | 回傳 `status/successCount/errorCount`、分頁錯誤清單、**source/normalized family** |
+| GET  | `/api/import-files/{id}/result` | 匯入結果下載（單檔） | 回傳原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`                        |
+| POST | `/api/import-files/results/download` | 匯入結果下載（多檔 ZIP） | body: `importFileIds[]`；後端自動打包 ZIP 回傳多個結果檔                            |
 | GET  | `/api/v1/invoices`             | 查詢發票       | 依狀態/日期/號碼/客戶查詢（RLS 限制），支援 `normalizedMessageType=F0401/G0401...`        |
 | POST | `/api/v1/invoices/{id}/resend` | 重送         | 人工重送入佇列（需審核）                                                            |
 | GET  | `/api/v1/turnkey/messages`     | 回饋查詢       | 依時間/狀態/代碼過濾                                                             |
@@ -431,6 +443,17 @@ if (abs(now - parse(timestamp)) > Duration.ofMinutes(5)) {
 ##### DLQ / 重試合約
 - 投遞失敗重試次數：3（1m、5m、15m）；若仍失敗，寫入 `WebhookDLQ`，由 Ops/Portal 提供人工重送與追蹤功能。
 - DLQ 需保存原始 payload、headers、最後錯誤訊息、重試次數、firstFailureAt、lastFailureAt。
+
+### 7.x 匯入作業 Portal UI
+
+| 頁面/功能            | 說明                                                                                         |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| 匯入批次列表（/import-monitor） | 顯示 `importId / 檔名 / Status / successCount / errorCount / 上傳時間`；支援勾選多筆批次後下載 ZIP（呼叫 `POST /api/import-files/results/download`）。 |
+| 匯入上傳表單 | 與列表同頁，提供 `type/sellerId/profile/legacyType/encoding` 等欄位與檔案選擇；瀏覽器自動計算 SHA-256（Web Crypto），同時保留手動輸入備援；完成後重整列表。 |
+| 單批下載             | 每筆列有「下載結果」按鈕，呼叫 `GET /api/import-files/{id}/result` 取得 CSV；欄位包含原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`。 |
+| 匯入明細檢視（/import-monitor/:id） | 展開 `ImportFileItem`，顯示 `lineIndex / InvoiceNo / status / errorCode / errorMessage`，並列出多個 `ImportFileItemError`（欄位名、欄位序、錯誤碼、訊息）。 |
+| 批次事件             | 在明細頁顯示 `ImportFileLog`（UPLOAD_RECEIVED / NORMALIZE_SUMMARY / NORMALIZE_FAILURE），提供營運追蹤匯入流程。 |
+| 權限與 UX           | 僅需 USER 權限即可瀏覽；此功能以 React 新模組實作，不修改 JHipster 既有 CRUD。                         |
 
 ---
 

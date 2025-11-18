@@ -1,14 +1,13 @@
+import dayjs from 'dayjs';
 import { IImportFile } from 'app/shared/model/import-file.model';
 
 export interface IImportFileLog {
   id?: number;
-  lineIndex?: number;
-  field?: string | null;
-  errorCode?: string;
+  eventCode?: string;
+  level?: string;
   message?: string | null;
-  rawLine?: string | null;
-  sourceFamily?: string | null;
-  normalizedFamily?: string | null;
+  detail?: string | null;
+  occurredAt?: dayjs.Dayjs | null;
   importFile?: IImportFile;
 }
 

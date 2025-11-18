@@ -132,15 +132,6 @@ export const InvoiceDetail = () => {
           </dt>
           <dd>{invoiceEntity.normalizedJson}</dd>
           <dt>
-            <span id="originalPayload">
-              <Translate contentKey="turnbridgeBackendApp.invoice.originalPayload">Original Payload</Translate>
-            </span>
-            <UncontrolledTooltip target="originalPayload">
-              <Translate contentKey="turnbridgeBackendApp.invoice.help.originalPayload" />
-            </UncontrolledTooltip>
-          </dt>
-          <dd>{invoiceEntity.originalPayload}</dd>
-          <dt>
             <span id="invoiceStatus">
               <Translate contentKey="turnbridgeBackendApp.invoice.invoiceStatus">Invoice Status</Translate>
             </span>

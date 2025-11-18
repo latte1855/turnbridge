@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Col, FormText, Row, UncontrolledTooltip } from 'reactstrap';
-import { Translate, ValidatedField, ValidatedForm, isNumber, translate } from 'react-jhipster';
+import { Translate, ValidatedField, ValidatedForm, translate } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { convertDateTimeFromServer, convertDateTimeToServer, displayDefaultDateTime } from 'app/shared/util/date-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import { getEntities as getImportFiles } from 'app/entities/import-file/import-file.reducer';
@@ -47,9 +48,7 @@ export const ImportFileLogUpdate = () => {
     if (values.id !== undefined && typeof values.id !== 'number') {
       values.id = Number(values.id);
     }
-    if (values.lineIndex !== undefined && typeof values.lineIndex !== 'number') {
-      values.lineIndex = Number(values.lineIndex);
-    }
+    values.occurredAt = convertDateTimeToServer(values.occurredAt);
 
     const entity = {
       ...importFileLogEntity,
@@ -66,9 +65,12 @@ export const ImportFileLogUpdate = () => {
 
   const defaultValues = () =>
     isNew
-      ? {}
+      ? {
+          occurredAt: displayDefaultDateTime(),
+        }
       : {
           ...importFileLogEntity,
+          occurredAt: convertDateTimeFromServer(importFileLogEntity.occurredAt),
           importFile: importFileLogEntity?.importFile?.id,
         };
 
@@ -98,46 +100,32 @@ export const ImportFileLogUpdate = () => {
                 />
               ) : null}
               <ValidatedField
-                label={translate('turnbridgeBackendApp.importFileLog.lineIndex')}
-                id="import-file-log-lineIndex"
-                name="lineIndex"
-                data-cy="lineIndex"
+                label={translate('turnbridgeBackendApp.importFileLog.eventCode')}
+                id="import-file-log-eventCode"
+                name="eventCode"
+                data-cy="eventCode"
                 type="text"
                 validate={{
                   required: { value: true, message: translate('entity.validation.required') },
-                  min: { value: 1, message: translate('entity.validation.min', { min: 1 }) },
-                  validate: v => isNumber(v) || translate('entity.validation.number'),
-                }}
-              />
-              <UncontrolledTooltip target="lineIndexLabel">
-                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.lineIndex" />
-              </UncontrolledTooltip>
-              <ValidatedField
-                label={translate('turnbridgeBackendApp.importFileLog.field')}
-                id="import-file-log-field"
-                name="field"
-                data-cy="field"
-                type="text"
-                validate={{
                   maxLength: { value: 64, message: translate('entity.validation.maxlength', { max: 64 }) },
                 }}
               />
-              <UncontrolledTooltip target="fieldLabel">
-                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.field" />
+              <UncontrolledTooltip target="eventCodeLabel">
+                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.eventCode" />
               </UncontrolledTooltip>
               <ValidatedField
-                label={translate('turnbridgeBackendApp.importFileLog.errorCode')}
-                id="import-file-log-errorCode"
-                name="errorCode"
-                data-cy="errorCode"
+                label={translate('turnbridgeBackendApp.importFileLog.level')}
+                id="import-file-log-level"
+                name="level"
+                data-cy="level"
                 type="text"
                 validate={{
                   required: { value: true, message: translate('entity.validation.required') },
-                  maxLength: { value: 32, message: translate('entity.validation.maxlength', { max: 32 }) },
+                  maxLength: { value: 16, message: translate('entity.validation.maxlength', { max: 16 }) },
                 }}
               />
-              <UncontrolledTooltip target="errorCodeLabel">
-                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.errorCode" />
+              <UncontrolledTooltip target="levelLabel">
+                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.level" />
               </UncontrolledTooltip>
               <ValidatedField
                 label={translate('turnbridgeBackendApp.importFileLog.message')}
@@ -153,40 +141,25 @@ export const ImportFileLogUpdate = () => {
                 <Translate contentKey="turnbridgeBackendApp.importFileLog.help.message" />
               </UncontrolledTooltip>
               <ValidatedField
-                label={translate('turnbridgeBackendApp.importFileLog.rawLine')}
-                id="import-file-log-rawLine"
-                name="rawLine"
-                data-cy="rawLine"
+                label={translate('turnbridgeBackendApp.importFileLog.detail')}
+                id="import-file-log-detail"
+                name="detail"
+                data-cy="detail"
                 type="textarea"
               />
-              <UncontrolledTooltip target="rawLineLabel">
-                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.rawLine" />
+              <UncontrolledTooltip target="detailLabel">
+                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.detail" />
               </UncontrolledTooltip>
               <ValidatedField
-                label={translate('turnbridgeBackendApp.importFileLog.sourceFamily')}
-                id="import-file-log-sourceFamily"
-                name="sourceFamily"
-                data-cy="sourceFamily"
-                type="text"
-                validate={{
-                  maxLength: { value: 16, message: translate('entity.validation.maxlength', { max: 16 }) },
-                }}
+                label={translate('turnbridgeBackendApp.importFileLog.occurredAt')}
+                id="import-file-log-occurredAt"
+                name="occurredAt"
+                data-cy="occurredAt"
+                type="datetime-local"
+                placeholder="YYYY-MM-DD HH:mm"
               />
-              <UncontrolledTooltip target="sourceFamilyLabel">
-                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.sourceFamily" />
-              </UncontrolledTooltip>
-              <ValidatedField
-                label={translate('turnbridgeBackendApp.importFileLog.normalizedFamily')}
-                id="import-file-log-normalizedFamily"
-                name="normalizedFamily"
-                data-cy="normalizedFamily"
-                type="text"
-                validate={{
-                  maxLength: { value: 16, message: translate('entity.validation.maxlength', { max: 16 }) },
-                }}
-              />
-              <UncontrolledTooltip target="normalizedFamilyLabel">
-                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.normalizedFamily" />
+              <UncontrolledTooltip target="occurredAtLabel">
+                <Translate contentKey="turnbridgeBackendApp.importFileLog.help.occurredAt" />
               </UncontrolledTooltip>
               <ValidatedField
                 id="import-file-log-importFile"

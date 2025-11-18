@@ -255,16 +255,6 @@ export const InvoiceUpdate = () => {
                 <Translate contentKey="turnbridgeBackendApp.invoice.help.normalizedJson" />
               </UncontrolledTooltip>
               <ValidatedField
-                label={translate('turnbridgeBackendApp.invoice.originalPayload')}
-                id="invoice-originalPayload"
-                name="originalPayload"
-                data-cy="originalPayload"
-                type="textarea"
-              />
-              <UncontrolledTooltip target="originalPayloadLabel">
-                <Translate contentKey="turnbridgeBackendApp.invoice.help.originalPayload" />
-              </UncontrolledTooltip>
-              <ValidatedField
                 label={translate('turnbridgeBackendApp.invoice.invoiceStatus')}
                 id="invoice-invoiceStatus"
                 name="invoiceStatus"

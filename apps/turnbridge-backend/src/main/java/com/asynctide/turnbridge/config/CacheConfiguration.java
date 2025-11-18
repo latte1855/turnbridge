@@ -96,6 +96,8 @@ public class CacheConfiguration {
             createCache(cm, com.asynctide.turnbridge.domain.WebhookEndpoint.class.getName(), jcacheConfiguration);
             createCache(cm, com.asynctide.turnbridge.domain.WebhookDeliveryLog.class.getName(), jcacheConfiguration);
             createCache(cm, com.asynctide.turnbridge.domain.ManualAction.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.ImportFileItem.class.getName(), jcacheConfiguration);
+            createCache(cm, com.asynctide.turnbridge.domain.ImportFileItemError.class.getName(), jcacheConfiguration);
             // jhipster-needle-redis-add-entry
         };
     }

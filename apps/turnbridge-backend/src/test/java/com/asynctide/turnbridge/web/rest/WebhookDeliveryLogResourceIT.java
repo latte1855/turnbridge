@@ -916,12 +916,7 @@ class WebhookDeliveryLogResourceIT {
         WebhookDeliveryLog partialUpdatedWebhookDeliveryLog = new WebhookDeliveryLog();
         partialUpdatedWebhookDeliveryLog.setId(webhookDeliveryLog.getId());
 
-        partialUpdatedWebhookDeliveryLog
-            .deliveryId(UPDATED_DELIVERY_ID)
-            .status(UPDATED_STATUS)
-            .httpStatus(UPDATED_HTTP_STATUS)
-            .lastError(UPDATED_LAST_ERROR)
-            .deliveredAt(UPDATED_DELIVERED_AT);
+        partialUpdatedWebhookDeliveryLog.event(UPDATED_EVENT).attempts(UPDATED_ATTEMPTS).lastError(UPDATED_LAST_ERROR);
 
         restWebhookDeliveryLogMockMvc
             .perform(

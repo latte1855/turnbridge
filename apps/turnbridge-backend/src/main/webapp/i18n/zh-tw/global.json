@@ -17,7 +17,9 @@
         "turnkeyMessage": "Turnkey Message",
         "webhookEndpoint": "Webhook Endpoint",
         "webhookDeliveryLog": "Webhook Delivery Log",
-        "manualAction": "Manual Action"
+        "manualAction": "Manual Action",
+        "importFileItem": "Import File Item",
+        "importFileItemError": "Import File Item Error"
       },
       "account": {
         "main": "帳號",
@@ -39,6 +41,15 @@
         "apidocs": "API",
         "database": "資料庫",
         "jhipster-needle-menu-add-admin-element": "JHipster will add additional menu entries here (do not translate!)"
+      },
+      "import": {
+        "monitor": "匯入作業"
+      },
+      "tenantSelector": {
+        "label": "操作租戶",
+        "loadError": "無法取得租戶清單",
+        "all": "全部租戶",
+        "placeholder": "選擇或輸入租戶代碼..."
       },
       "language": "語言"
     },

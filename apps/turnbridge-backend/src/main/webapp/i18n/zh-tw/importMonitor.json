@@ -1,0 +1,59 @@
+{
+  "importMonitor": {
+    "title": "匯入作業",
+    "refresh": "重新整理",
+    "downloadSelected": "下載勾選批次 (ZIP)",
+    "downloadSingle": "下載結果",
+    "noData": "目前沒有匯入批次。",
+    "messages": {
+      "loadError": "無法載入匯入資料。",
+      "downloadError": "下載失敗，請稍後再試。"
+    },
+    "upload": {
+      "title": "新增匯入檔案",
+      "type": "類型 / Profile",
+      "file": "CSV 檔案",
+      "seller": "賣方統編",
+      "sha": "SHA-256",
+      "legacyType": "原訊息別",
+      "profile": "Profile",
+      "submit": "送出上傳",
+      "noFile": "請選擇 CSV 檔案。",
+      "noSeller": "請填寫賣方統編。",
+      "noSha": "請提供 SHA-256。",
+      "failed": "上傳失敗，請稍後再試。",
+      "successMessage": "上傳成功，批次編號 = {{importId}}"
+    },
+    "filter": {
+      "filename": "檔名包含",
+      "type": "類型",
+      "status": "狀態",
+      "search": "查詢",
+      "reset": "清除",
+      "all": "全部"
+    },
+    "table": {
+      "id": "批次 ID",
+      "filename": "檔名",
+      "type": "類型",
+      "status": "狀態",
+      "success": "成功筆數",
+      "error": "失敗筆數",
+      "actions": "操作"
+    },
+    "detail": {
+      "title": "匯入批次 #{{id}}",
+      "summary": "批次摘要",
+      "items": "匯入明細",
+      "logs": "批次事件",
+      "noItems": "沒有匯入明細。",
+      "noLogs": "尚無事件紀錄。",
+      "fieldErrors": "欄位錯誤",
+      "invoiceNo": "發票/折讓號碼",
+      "logTime": "時間",
+      "logEvent": "事件",
+      "logLevel": "層級",
+      "logMessage": "訊息"
+    }
+  }
+}

@@ -61,10 +61,6 @@ public class InvoiceDTO implements Serializable {
     @Lob
     private String normalizedJson;
 
-    @Schema(description = "原始 payload")
-    @Lob
-    private String originalPayload;
-
     @NotNull
     @Schema(description = "發票狀態", requiredMode = Schema.RequiredMode.REQUIRED)
     private InvoiceStatus invoiceStatus;
@@ -179,14 +175,6 @@ public class InvoiceDTO implements Serializable {
         this.normalizedJson = normalizedJson;
     }
 
-    public String getOriginalPayload() {
-        return originalPayload;
-    }
-
-    public void setOriginalPayload(String originalPayload) {
-        this.originalPayload = originalPayload;
-    }
-
     public InvoiceStatus getInvoiceStatus() {
         return invoiceStatus;
     }
@@ -264,7 +252,6 @@ public class InvoiceDTO implements Serializable {
             ", totalAmount=" + getTotalAmount() +
             ", taxType='" + getTaxType() + "'" +
             ", normalizedJson='" + getNormalizedJson() + "'" +
-            ", originalPayload='" + getOriginalPayload() + "'" +
             ", invoiceStatus='" + getInvoiceStatus() + "'" +
             ", issuedAt='" + getIssuedAt() + "'" +
             ", legacyType='" + getLegacyType() + "'" +

@@ -76,12 +76,10 @@ class ImportFileLogCriteriaTest {
 
     private static void setAllFilters(ImportFileLogCriteria importFileLogCriteria) {
         importFileLogCriteria.id();
-        importFileLogCriteria.lineIndex();
-        importFileLogCriteria.field();
-        importFileLogCriteria.errorCode();
+        importFileLogCriteria.eventCode();
+        importFileLogCriteria.level();
         importFileLogCriteria.message();
-        importFileLogCriteria.sourceFamily();
-        importFileLogCriteria.normalizedFamily();
+        importFileLogCriteria.occurredAt();
         importFileLogCriteria.importFileId();
         importFileLogCriteria.distinct();
     }
@@ -90,12 +88,10 @@ class ImportFileLogCriteriaTest {
         return new Condition<>(
             criteria ->
                 condition.apply(criteria.getId()) &&
-                condition.apply(criteria.getLineIndex()) &&
-                condition.apply(criteria.getField()) &&
-                condition.apply(criteria.getErrorCode()) &&
+                condition.apply(criteria.getEventCode()) &&
+                condition.apply(criteria.getLevel()) &&
                 condition.apply(criteria.getMessage()) &&
-                condition.apply(criteria.getSourceFamily()) &&
-                condition.apply(criteria.getNormalizedFamily()) &&
+                condition.apply(criteria.getOccurredAt()) &&
                 condition.apply(criteria.getImportFileId()) &&
                 condition.apply(criteria.getDistinct()),
             "every filter matches"
@@ -109,12 +105,10 @@ class ImportFileLogCriteriaTest {
         return new Condition<>(
             criteria ->
                 condition.apply(criteria.getId(), copy.getId()) &&
-                condition.apply(criteria.getLineIndex(), copy.getLineIndex()) &&
-                condition.apply(criteria.getField(), copy.getField()) &&
-                condition.apply(criteria.getErrorCode(), copy.getErrorCode()) &&
+                condition.apply(criteria.getEventCode(), copy.getEventCode()) &&
+                condition.apply(criteria.getLevel(), copy.getLevel()) &&
                 condition.apply(criteria.getMessage(), copy.getMessage()) &&
-                condition.apply(criteria.getSourceFamily(), copy.getSourceFamily()) &&
-                condition.apply(criteria.getNormalizedFamily(), copy.getNormalizedFamily()) &&
+                condition.apply(criteria.getOccurredAt(), copy.getOccurredAt()) &&
                 condition.apply(criteria.getImportFileId(), copy.getImportFileId()) &&
                 condition.apply(criteria.getDistinct(), copy.getDistinct()),
             "every filter matches"

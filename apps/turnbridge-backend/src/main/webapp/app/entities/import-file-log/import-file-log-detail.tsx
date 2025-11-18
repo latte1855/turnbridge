@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Col, Row, UncontrolledTooltip } from 'reactstrap';
-import { Translate } from 'react-jhipster';
+import { TextFormat, Translate } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { APP_DATE_FORMAT } from 'app/config/constants';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import { getEntity } from './import-file-log.reducer';
@@ -32,32 +33,23 @@ export const ImportFileLogDetail = () => {
           </dt>
           <dd>{importFileLogEntity.id}</dd>
           <dt>
-            <span id="lineIndex">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.lineIndex">Line Index</Translate>
+            <span id="eventCode">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.eventCode">Event Code</Translate>
             </span>
-            <UncontrolledTooltip target="lineIndex">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.lineIndex" />
+            <UncontrolledTooltip target="eventCode">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.eventCode" />
             </UncontrolledTooltip>
           </dt>
-          <dd>{importFileLogEntity.lineIndex}</dd>
+          <dd>{importFileLogEntity.eventCode}</dd>
           <dt>
-            <span id="field">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.field">Field</Translate>
+            <span id="level">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.level">Level</Translate>
             </span>
-            <UncontrolledTooltip target="field">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.field" />
+            <UncontrolledTooltip target="level">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.level" />
             </UncontrolledTooltip>
           </dt>
-          <dd>{importFileLogEntity.field}</dd>
-          <dt>
-            <span id="errorCode">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.errorCode">Error Code</Translate>
-            </span>
-            <UncontrolledTooltip target="errorCode">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.errorCode" />
-            </UncontrolledTooltip>
-          </dt>
-          <dd>{importFileLogEntity.errorCode}</dd>
+          <dd>{importFileLogEntity.level}</dd>
           <dt>
             <span id="message">
               <Translate contentKey="turnbridgeBackendApp.importFileLog.message">Message</Translate>
@@ -68,32 +60,27 @@ export const ImportFileLogDetail = () => {
           </dt>
           <dd>{importFileLogEntity.message}</dd>
           <dt>
-            <span id="rawLine">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.rawLine">Raw Line</Translate>
+            <span id="detail">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.detail">Detail</Translate>
             </span>
-            <UncontrolledTooltip target="rawLine">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.rawLine" />
+            <UncontrolledTooltip target="detail">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.detail" />
             </UncontrolledTooltip>
           </dt>
-          <dd>{importFileLogEntity.rawLine}</dd>
+          <dd>{importFileLogEntity.detail}</dd>
           <dt>
-            <span id="sourceFamily">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.sourceFamily">Source Family</Translate>
+            <span id="occurredAt">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.occurredAt">Occurred At</Translate>
             </span>
-            <UncontrolledTooltip target="sourceFamily">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.sourceFamily" />
+            <UncontrolledTooltip target="occurredAt">
+              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.occurredAt" />
             </UncontrolledTooltip>
           </dt>
-          <dd>{importFileLogEntity.sourceFamily}</dd>
-          <dt>
-            <span id="normalizedFamily">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.normalizedFamily">Normalized Family</Translate>
-            </span>
-            <UncontrolledTooltip target="normalizedFamily">
-              <Translate contentKey="turnbridgeBackendApp.importFileLog.help.normalizedFamily" />
-            </UncontrolledTooltip>
-          </dt>
-          <dd>{importFileLogEntity.normalizedFamily}</dd>
+          <dd>
+            {importFileLogEntity.occurredAt ? (
+              <TextFormat value={importFileLogEntity.occurredAt} type="date" format={APP_DATE_FORMAT} />
+            ) : null}
+          </dd>
           <dt>
             <Translate contentKey="turnbridgeBackendApp.importFileLog.importFile">Import File</Translate>
           </dt>

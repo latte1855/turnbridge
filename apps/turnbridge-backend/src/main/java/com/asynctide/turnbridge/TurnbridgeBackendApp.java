@@ -20,7 +20,7 @@ import tech.jhipster.config.DefaultProfileUtil;
 import tech.jhipster.config.JHipsterConstants;
 
 @SpringBootApplication
-@EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class })
+@EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class, com.asynctide.turnbridge.tenant.TenantProperties.class })
 public class TurnbridgeBackendApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(TurnbridgeBackendApp.class);

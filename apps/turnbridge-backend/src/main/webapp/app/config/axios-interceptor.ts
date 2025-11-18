@@ -11,6 +11,10 @@ const setupAxiosInterceptors = onUnauthenticated => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    const tenantCode = localStorage.getItem('turnbridge-tenant-code');
+    if (tenantCode) {
+      config.headers['X-Tenant-Code'] = tenantCode;
+    }
     return config;
   };
   const onResponseSuccess = response => response;

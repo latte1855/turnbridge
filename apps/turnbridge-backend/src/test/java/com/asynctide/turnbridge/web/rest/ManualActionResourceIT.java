@@ -869,7 +869,7 @@ class ManualActionResourceIT {
         ManualAction partialUpdatedManualAction = new ManualAction();
         partialUpdatedManualAction.setId(manualAction.getId());
 
-        partialUpdatedManualAction.requestedBy(UPDATED_REQUESTED_BY).resultMessage(UPDATED_RESULT_MESSAGE);
+        partialUpdatedManualAction.reason(UPDATED_REASON).requestedAt(UPDATED_REQUESTED_AT).approvedBy(UPDATED_APPROVED_BY);
 
         restManualActionMockMvc
             .perform(
