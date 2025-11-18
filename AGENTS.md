@@ -11,7 +11,7 @@
 ## 0. 快速結論（三件事）
 
 1. **MIG 新制為主**：輸出 XML 一律用 `F0401/F0501/F0701`、`G0401/G0501`；若上游仍送 A/B/C/D 舊制，**CSV 需保留原始行與 legacyType**，並映射為新制欄位再上傳。
-2. **單檔 999 明細，不可拆單**：若第 999 筆落在某張發票中間，**整張移到下一檔**。
+2. **單檔 999 明細，不可拆單**：若第 999 筆落在某張發票中間，**整張移到下一檔**；後端若偵測超過 999 筆會回傳 ProblemDetail（`ITEM_LIMIT_EXCEEDED`）。
 3. **Webhook-first**：必備 HMAC 驗簽 Webhook 端點；WebSocket/Email 僅備援。
 
 ---
@@ -20,7 +20,7 @@
 
 * **Agent（客戶端）**
 
-  * 蒐集 POS/ERP/3S 資料 → **本地前置檢核** → 輸出 **CSV/ZIP + SHA-256**。
+  * 蒐集 POS/ERP/3S 資料 → **本地前置檢核** → 輸出 **單一 CSV + SHA-256**（若需彙整多檔結果，由下載 API 自動壓 ZIP 回傳）。
   * 舊制 → 新制欄位映射（見 §6）。
   * 呼叫後端 API 上傳、記錄 `importId`、處理重試與離線補送。
 
@@ -28,6 +28,7 @@
 
   * 驗證/入庫 → 轉檔（XML 以 F/G 新制）→ 投遞 Turnkey → 解析回饋 → 狀態更新 + Webhook。
   * Phase 1 起，上傳 API 會立即啟動 `NormalizationService`：解析單一 CSV、逐行寫入 `ImportFileItem`（保留原始欄位與狀態），每個欄位的錯誤再拆為 `ImportFileItemError` 供 UI 檢視；通過者才生成 `Invoice/InvoiceItem`。每筆失敗僅更新該行，不得回滾整批 ImportFile；回應會透過 ProblemDetail（`errorCode/field/normalizedFamily`）與結果檔告知。
+  * Portal「Import Monitor」模組已上線：列表可查詢/篩選/分頁並勾選多筆下載 ZIP，明細可檢視 `ImportFileItem` 與 `ImportFileItemError`，同頁提供上傳表單與 SHA-256 顯示，方便 Agent 對帳。
 
 ---
 
@@ -35,8 +36,10 @@
 
 **共同：** `multipart/form-data`，欄位：`file` (`*.csv` 單一檔案)、`sha256`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。  
 > 不再接受 ZIP 上傳；若需一次下載多個結果檔，後端會在下載階段自動將多個 CSV 壓成 ZIP 回傳。
-**分檔：** 以**明細行數**計 `<= 999`；**不得拆單**；需附分割序號（splitSeq）。
-**多租戶：** 由 OAuth2 Client/Scope 與 Header 指示租戶；RLS 於 DB 端強制隔離。
+
+**分檔：** 以**明細行數**計 `<= 999`；**不得拆單**；需附分割序號（splitSeq）。伺服器若偵測超過 999 筆，將以 `ITEM_LIMIT_EXCEEDED` ProblemDetail 拒收（欄位 `lineIndex`），請 Agent 依提示拆檔後再上傳。
+
+**多租戶：** 由 OAuth2 Client/Scope 搭配 Header `X-Tenant-Code` 指示租戶；RLS 於 DB 端強制隔離（管理者可在 Portal 透過「租戶切換」選單選取單一租戶或 All Tenants，All 代表不帶 Header 使用管理者視角）。
 
 ### 2.1 E0501（配號）重點
 
@@ -56,8 +59,8 @@
 
 | 用途         | Method     | Path                             | 重點                               |
 | ---------- | ---------- | -------------------------------- | -------------------------------- |
-| 上傳 E0501   | `POST`     | `/api/v1/upload/e0501`           | 回 `importId`                     |
-| 上傳 Invoice | `POST`     | `/api/v1/upload/invoice`         | 支援 ZIP；999 切檔；回 `importId`       |
+| 上傳 E0501   | `POST`     | `/api/v1/upload/e0501`           | 單一 CSV；驗證 SHA-256；回 `importId`                     |
+| 上傳 Invoice | `POST`     | `/api/v1/upload/invoice`         | **僅接受 CSV**；999 切檔；成功即觸發 Normalize 與 ImportFileItem/Log |
 | 查匯入        | `GET`      | `/api/v1/imports/{importId}`     | `status/successCount/errorCount` |
 | 匯入結果下載（單檔） | `GET`      | `/api/import-files/{id}/result` | 回傳單一 CSV（原欄位 + `status/error/fieldErrors`） |
 | 匯入結果下載（多檔） | `POST`     | `/api/import-files/results/download` | body 傳入 `importFileIds`，系統打包 ZIP 回傳 |
@@ -87,6 +90,16 @@
 ---
 
 ## 5. 轉檔與 Turnkey（系統內部，Agent 僅需理解）
+
+> **ImportFile / Item / Log 流程摘要**
+>
+> * `ImportFile`：每次上傳建立一筆記錄，包含原檔名、SHA-256、租戶、legacyType。除非寫入 ImportFile 即失敗，否則不會因單筆檢核失敗被回滾；Normalize 僅更新其 `status/successCount/errorCount` 與 ImportFileLog。
+> * `ImportFileItem`：CSV **每一行**都落地，帶有 `rawData/rawHash/lineIndex/sourceFamily/status`，即可供 Portal/下載結果查看原始行，即便該行檢核失敗也不會丟失。
+> * `ImportFileItemError`：同一行可記錄多個欄位錯誤（欄位名、欄位序、錯誤碼、訊息、嚴重度）。Portal 會在明細與結果檔呈現這些錯誤，以告知使用者原因。
+> * `Invoice/InvoiceItem`：僅當同一發票號碼的所有檢核通過才寫入 DB；若任一欄位錯誤會 rollback 該張發票（及其明細），但其他發票不受影響。
+> * `ImportFileLog`：記錄批次事件（`UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等）以及「逐筆錯誤事件」`NORMALIZE_ROW_ERROR`（detail 內含 lineIndex/invoiceNo/欄位/錯誤碼/rawData JSON），方便營運在 Portal 查詢。
+> * **交易注意**：Normalize 以「同一發票」為交易邊界；整批 ImportFile 永遠可查詢，上傳 API 標註 `@Transactional(noRollbackFor = NormalizationException.class)` 以確保 ImportFile/ImportFileItem 已寫入時不會在後續檢核失敗時被回滾。
+> * **結果回饋**：`GET /api/import-files/{id}/result` 會輸出原 CSV 欄位 + `status/error/fieldErrors`；選擇多筆則由 `POST /api/import-files/results/download` 自動打包 ZIP，無須 Agent 自行壓縮。
 
 * 排程：每 **5 分鐘**掃描待轉檔。
 * 輸出 XML：**僅** `F0401/F0501/F0701/G0401/G0501`；XSD 驗證、壓縮、簽章。

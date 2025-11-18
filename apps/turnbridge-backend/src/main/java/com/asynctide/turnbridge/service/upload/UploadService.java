@@ -5,8 +5,10 @@ import com.asynctide.turnbridge.domain.ImportFileLog;
 import com.asynctide.turnbridge.domain.enumeration.ImportStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportType;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
+import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.repository.ImportFileLogRepository;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
+import com.asynctide.turnbridge.tenant.TenantContextHolder;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,15 +31,18 @@ public class UploadService {
     private final ImportFileRepository importFileRepository;
     private final ImportFileLogRepository importFileLogRepository;
     private final NormalizationService normalizationService;
+    private final TenantRepository tenantRepository;
 
     public UploadService(
         ImportFileRepository importFileRepository,
         ImportFileLogRepository importFileLogRepository,
-        NormalizationService normalizationService
+        NormalizationService normalizationService,
+        TenantRepository tenantRepository
     ) {
         this.importFileRepository = importFileRepository;
         this.importFileLogRepository = importFileLogRepository;
         this.normalizationService = normalizationService;
+        this.tenantRepository = tenantRepository;
     }
 
     @Transactional(noRollbackFor = NormalizationException.class)
@@ -65,6 +70,7 @@ public class UploadService {
         if (metadata.hasLegacyType()) {
             importFile.setLegacyType(metadata.legacyType());
         }
+        importFile.setTenant(resolveTenant());
         importFile = importFileRepository.save(importFile);
         saveUploadLog(importFile, metadata);
         log.info("Accepted upload [{}] size={} bytes", importFile.getId(), file.getSize());
@@ -91,5 +97,13 @@ public class UploadService {
         logEntity.setMessage("批次檔案 " + importFile.getOriginalFilename() + " 已驗證 SHA-256");
         logEntity.setOccurredAt(java.time.Instant.now());
         importFileLogRepository.save(logEntity);
+    }
+
+    private com.asynctide.turnbridge.domain.Tenant resolveTenant() {
+        return TenantContextHolder
+            .get()
+            .filter(TenantContext -> TenantContext.tenantId() != null)
+            .map(ctx -> tenantRepository.getReferenceById(ctx.tenantId()))
+            .orElseThrow(() -> new BadRequestAlertException("缺少租戶資訊", "importFile", "tenantmissing"));
     }
 }

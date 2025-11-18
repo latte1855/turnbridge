@@ -59,6 +59,7 @@ public class NormalizationService {
 
     private static final Logger log = LoggerFactory.getLogger(NormalizationService.class);
     private static final TypeReference<List<Map<String, Object>>> ITEM_LIST_TYPE = new TypeReference<>() {};
+    private static final int MAX_DETAIL_LINES = 999;
 
     private final ImportFileRepository importFileRepository;
     private final ImportFileItemRepository importFileItemRepository;
@@ -93,6 +94,58 @@ public class NormalizationService {
     public void normalize(ImportFile importFile, MultipartFile file, UploadMetadata metadata) {
         NormalizationStats stats = new NormalizationStats();
         Charset charset = resolveCharset(metadata.encoding());
+        try {
+            ensureLineLimit(file, charset);
+            try (
+                BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), charset));
+                CSVParser parser = CSVFormat.DEFAULT
+                    .builder()
+                    .setTrim(true)
+                    .setIgnoreEmptyLines(true)
+                    .setHeader()
+                    .setSkipHeaderRecord(true)
+                    .build()
+                    .parse(reader)
+            ) {
+                List<RowBundle> currentGroup = new ArrayList<>();
+                String currentKey = null;
+                for (CSVRecord record : parser) {
+                    RowContext rowContext = RowContext.from(record);
+                    ImportFileItem item = createItem(importFile, rowContext);
+                    stats.total++;
+                    RowBundle bundle = new RowBundle(rowContext, item);
+                    String key = groupKey(rowContext);
+                    if (currentKey == null) {
+                        currentKey = key;
+                    }
+                    if (!currentKey.equals(key)) {
+                        processGroup(currentGroup, importFile, metadata, stats);
+                        currentGroup = new ArrayList<>();
+                        currentKey = key;
+                    }
+                    currentGroup.add(bundle);
+                }
+
+                if (!currentGroup.isEmpty()) {
+                    processGroup(currentGroup, importFile, metadata, stats);
+                }
+
+                if (stats.total == 0) {
+                    throw new NormalizationException("CSV 無資料", "EMPTY_FILE", "file", "UNKNOWN");
+                }
+
+                finalizeImport(importFile, stats);
+            }
+        } catch (NormalizationException e) {
+            markFailed(importFile, stats, e.getMessage());
+            throw e;
+        } catch (IOException e) {
+            markFailed(importFile, stats, "CSV 讀取失敗");
+            throw new NormalizationException("CSV 讀取失敗", "IO_ERROR", "file", "UNKNOWN");
+        }
+    }
+
+    private void ensureLineLimit(MultipartFile file, Charset charset) {
         try (
             BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), charset));
             CSVParser parser = CSVFormat.DEFAULT
@@ -104,39 +157,21 @@ public class NormalizationService {
                 .build()
                 .parse(reader)
         ) {
-            List<RowBundle> currentGroup = new ArrayList<>();
-            String currentKey = null;
+            int count = 0;
             for (CSVRecord record : parser) {
-                RowContext rowContext = RowContext.from(record);
-                ImportFileItem item = createItem(importFile, rowContext);
-                stats.total++;
-                RowBundle bundle = new RowBundle(rowContext, item);
-                String key = groupKey(rowContext);
-                if (currentKey == null) {
-                    currentKey = key;
+                count++;
+                if (count > MAX_DETAIL_LINES) {
+                    throw new NormalizationException(
+                        "單檔最多 999 筆明細，第 " + record.getRecordNumber() + " 行起請拆成下一檔",
+                        "ITEM_LIMIT_EXCEEDED",
+                        "lineIndex",
+                        "UNKNOWN"
+                    );
                 }
-                if (!currentKey.equals(key)) {
-                    processGroup(currentGroup, importFile, metadata, stats);
-                    currentGroup = new ArrayList<>();
-                    currentKey = key;
-                }
-                currentGroup.add(bundle);
             }
-
-            if (!currentGroup.isEmpty()) {
-                processGroup(currentGroup, importFile, metadata, stats);
-            }
-
-            if (stats.total == 0) {
-                throw new NormalizationException("CSV 無資料", "EMPTY_FILE", "file", "UNKNOWN");
-            }
-
-            finalizeImport(importFile, stats);
         } catch (NormalizationException e) {
-            markFailed(importFile, stats, e.getMessage());
             throw e;
         } catch (IOException e) {
-            markFailed(importFile, stats, "CSV 讀取失敗");
             throw new NormalizationException("CSV 讀取失敗", "IO_ERROR", "file", "UNKNOWN");
         }
     }
@@ -167,6 +202,7 @@ public class NormalizationService {
                 item.setNormalizedFamily(ex.getNormalizedFamily());
                 importFileItemRepository.save(item);
                 recordItemError(bundle, ex);
+                logRowError(importFile, bundle.row(), ex);
             }
             stats.error += bundles.size();
         }
@@ -194,6 +230,16 @@ public class NormalizationService {
         error.setSeverity("ERROR");
         error.setOccurredAt(Instant.now());
         importFileItemErrorRepository.save(error);
+    }
+
+    private void logRowError(ImportFile importFile, RowContext row, NormalizationException ex) {
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("lineIndex", row.lineNumber());
+        detail.put("invoiceNo", firstNonBlank(row, "InvoiceNo", "AllowanceNo"));
+        detail.put("field", ex.getField());
+        detail.put("errorCode", ex.getErrorCode());
+        detail.put("rawData", row.original());
+        saveLog(importFile, "NORMALIZE_ROW_ERROR", "ERROR", ex.getMessage(), detail);
     }
 
     private void finalizeImport(ImportFile importFile, NormalizationStats stats) {

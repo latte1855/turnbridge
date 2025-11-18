@@ -10,6 +10,7 @@ import com.asynctide.turnbridge.domain.ImportFileItemError;
 import com.asynctide.turnbridge.domain.ImportFileLog;
 import com.asynctide.turnbridge.domain.Invoice;
 import com.asynctide.turnbridge.domain.InvoiceItem;
+import com.asynctide.turnbridge.domain.Tenant;
 import com.asynctide.turnbridge.domain.enumeration.ImportItemStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportType;
@@ -20,6 +21,7 @@ import com.asynctide.turnbridge.repository.ImportFileLogRepository;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
 import com.asynctide.turnbridge.repository.InvoiceItemRepository;
 import com.asynctide.turnbridge.repository.InvoiceRepository;
+import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.service.upload.NormalizationException;
 import com.asynctide.turnbridge.service.upload.NormalizationService;
 import com.asynctide.turnbridge.service.upload.UploadMetadata;
@@ -64,6 +66,11 @@ class NormalizationServiceIT {
     @Autowired
     private ImportFileItemErrorRepository importFileItemErrorRepository;
 
+    @Autowired
+    private TenantRepository tenantRepository;
+
+    private Tenant tenant;
+
     @BeforeEach
     void cleanRepositories() {
         importFileItemErrorRepository.deleteAll();
@@ -72,6 +79,8 @@ class NormalizationServiceIT {
         invoiceRepository.deleteAll();
         importFileLogRepository.deleteAll();
         importFileRepository.deleteAll();
+        tenantRepository.deleteAll();
+        tenant = tenantRepository.save(new Tenant().name("測試租戶").code("TEN-NORM").status("ACTIVE"));
     }
 
     @Test
@@ -214,6 +223,7 @@ class NormalizationServiceIT {
         importFile.setErrorCount(0);
         importFile.setStatus(ImportStatus.RECEIVED);
         importFile.setLegacyType("C0401");
+        importFile.setTenant(tenant);
         return importFileRepository.saveAndFlush(importFile);
     }
 

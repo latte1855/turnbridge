@@ -6,12 +6,14 @@ import com.asynctide.turnbridge.IntegrationTest;
 import com.asynctide.turnbridge.domain.ImportFile;
 import com.asynctide.turnbridge.domain.ImportFileItem;
 import com.asynctide.turnbridge.domain.ImportFileItemError;
+import com.asynctide.turnbridge.domain.Tenant;
 import com.asynctide.turnbridge.domain.enumeration.ImportItemStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportType;
 import com.asynctide.turnbridge.repository.ImportFileItemErrorRepository;
 import com.asynctide.turnbridge.repository.ImportFileItemRepository;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
+import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.service.upload.ImportResultService;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,13 +44,20 @@ class ImportResultServiceIT {
     @Autowired
     private ImportFileItemErrorRepository importFileItemErrorRepository;
 
+    @Autowired
+    private TenantRepository tenantRepository;
+
     private ImportFile importFile;
+    private Tenant tenant;
 
     @BeforeEach
     void setupData() {
         importFileItemErrorRepository.deleteAll();
         importFileItemRepository.deleteAll();
         importFileRepository.deleteAll();
+        tenantRepository.deleteAll();
+
+        tenant = tenantRepository.save(new Tenant().name("匯出租戶").code("TEN-RESULT").status("ACTIVE"));
 
         importFile = new ImportFile();
         importFile.setImportType(ImportType.INVOICE);
@@ -58,6 +67,7 @@ class ImportResultServiceIT {
         importFile.setSuccessCount(1);
         importFile.setErrorCount(1);
         importFile.setStatus(ImportStatus.FAILED);
+        importFile.setTenant(tenant);
         importFileRepository.save(importFile);
 
         ImportFileItem success = new ImportFileItem();
@@ -114,6 +124,7 @@ class ImportResultServiceIT {
         another.setSuccessCount(0);
         another.setErrorCount(0);
         another.setStatus(ImportStatus.NORMALIZED);
+        another.setTenant(tenant);
         another = importFileRepository.save(another);
 
         ImportResultService.ResultFile zip = importResultService.generateZip(List.of(importFile.getId(), another.getId()));

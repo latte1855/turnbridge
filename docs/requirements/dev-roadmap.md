@@ -20,9 +20,13 @@
 
 ## **最新進度（Phase 1 / 目前 Sprint）**
 
-- ✅ `POST /api/upload/invoice|e0501` 已可驗證 SHA-256 並建立 `ImportFile`，同時把 `legacyType`/`rawLine` 保存（對應 DEV-001、DEV-002）。
-- ✅ `NormalizationService` 已上線：上傳後立即解析 CSV/ZIP → 寫入 `Invoice/InvoiceItem`、錯誤寫入 `ImportFileLog`，金額/訊息別驗證依 `docs/AGENTS_MAPPING_v1.md`、`docs/turnkey/mig41/CSV_FG_MAPPING.md`（DEV-003、DEV-004）。
-- ⚠️ 待辦：補齊 `com.asynctide.turnbridge.my.upload` 底下的 Normalize 成功/失敗測試案例，驗證 ProblemDetail、ImportFileLog（本回合完成後更新 DEV-003 驗收）。
+- ✅ `POST /api/upload/invoice|e0501` 已可驗證 SHA-256 並建立 `ImportFile`（僅受理單一 CSV），同時把 `legacyType`/`rawLine` 保存（對應 DEV-001、DEV-002）。
+- ✅ `NormalizationService` 已正式啟用：逐張聚合、寫入 `ImportFileItem`、`ImportFileItemError`、`ImportFileLog`，通過者轉成 `Invoice/InvoiceItem`，ProblemDetail 回傳 `errorCode/field/normalizedFamily`（DEV-003、DEV-004）。
+- ✅ Portal 新增「Import Monitor」模組：列表查詢/分頁/勾選下載、多檔 ZIP 打包、明細呈現 `ImportFileItem`＋欄位錯誤、同頁上傳表單自動計算 SHA-256（DEV-005）。
+- ✅ 伺服器側新增 999 明細驗證：CSV 超過 999 行會回傳 ProblemDetail `ITEM_LIMIT_EXCEEDED` 並保留 ImportFile（DEV-002）。
+- ✅ 多租戶/RLS Skeleton：`X-Tenant-Code` Header 解析 + ThreadLocal Context + Postgres Session 變數注入；Upload Flow 會自動帶入租戶（DEV-000）。
+- ✅ Phase1 測試證據：`./mvnw verify`、`npm run lint && npm run webapp:build:dev` 已於 2025-11-18 跑通並保留輸出，作為交付審查依據。
+- ⚠️ 待辦：整理 Phase 1 文件（SRS/AGENTS/dev-roadmap）與上傳/Normalize 測試證據，為 Phase 2（Turnkey + Webhook）準備變更點。
 
 ---
 
@@ -138,6 +142,7 @@
 | **DEV-008** | **Turnkey Feedback Parser**（重要新增）     | 5d | 解析 ACK/ERROR → InvoiceStatus 更新 |
 | **DEV-009** | Webhook Deliver：HMAC + Retry + DLQ    | 4d | newman-smoke/timeout case pass  |
 | **DEV-010** | Webhook Registration + Secret Rotate  | 3d | UI 可設定 URL/secret/events        |
+| **DEV-020** | （Enhance）Admin Impersonation        | 3d | 管理者可切換成租戶帳號上傳/查詢（供營運排障） |
 
 ---
 

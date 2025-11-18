@@ -42,6 +42,15 @@
         "database": "Database",
         "jhipster-needle-menu-add-admin-element": "JHipster will add additional menu entries here (do not translate!)"
       },
+      "import": {
+        "monitor": "Import Monitor"
+      },
+      "tenantSelector": {
+        "label": "Tenant scope",
+        "loadError": "Unable to load tenants",
+        "all": "All tenants",
+        "placeholder": "Select tenant..."
+      },
       "language": "Language"
     },
     "form": {

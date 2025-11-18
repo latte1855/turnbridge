@@ -176,6 +176,11 @@ server:
 springdoc:
   show-actuator: true
 
+turnbridge:
+  tenant:
+    header-name: X-Tenant-Code
+    default-code: ""
+
 # Properties to be exposed on the /info management endpoint
 info:
   # Comma separated list of profiles that will trigger the ribbon to show

@@ -1,6 +1,7 @@
 package com.asynctide.turnbridge.my.upload;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import com.asynctide.turnbridge.IntegrationTest;
 import com.asynctide.turnbridge.domain.ImportFile;
@@ -9,22 +10,29 @@ import com.asynctide.turnbridge.domain.ImportFileItemError;
 import com.asynctide.turnbridge.domain.ImportFileLog;
 import com.asynctide.turnbridge.domain.Invoice;
 import com.asynctide.turnbridge.domain.InvoiceItem;
+import com.asynctide.turnbridge.domain.Tenant;
 import com.asynctide.turnbridge.domain.enumeration.ImportStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportType;
+import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.repository.ImportFileItemErrorRepository;
 import com.asynctide.turnbridge.repository.ImportFileItemRepository;
 import com.asynctide.turnbridge.repository.ImportFileLogRepository;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
 import com.asynctide.turnbridge.repository.InvoiceItemRepository;
 import com.asynctide.turnbridge.repository.InvoiceRepository;
+import com.asynctide.turnbridge.service.upload.ImportResultService;
+import com.asynctide.turnbridge.service.upload.NormalizationException;
 import com.asynctide.turnbridge.service.upload.UploadMetadata;
 import com.asynctide.turnbridge.service.upload.UploadResponse;
 import com.asynctide.turnbridge.service.upload.UploadService;
+import com.asynctide.turnbridge.tenant.TenantContext;
+import com.asynctide.turnbridge.tenant.TenantContextHolder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +70,14 @@ class UploadServiceIT {
     @Autowired
     private ImportFileItemErrorRepository importFileItemErrorRepository;
 
+    @Autowired
+    private ImportResultService importResultService;
+
+    @Autowired
+    private TenantRepository tenantRepository;
+
+    private Tenant tenant;
+
     @BeforeEach
     void cleanUp() {
         importFileItemErrorRepository.deleteAll();
@@ -70,6 +86,14 @@ class UploadServiceIT {
         invoiceRepository.deleteAll();
         importFileLogRepository.deleteAll();
         importFileRepository.deleteAll();
+        tenantRepository.deleteAll();
+        tenant = tenantRepository.save(new Tenant().name("整合租戶").code("TEN-IT").status("ACTIVE"));
+        TenantContextHolder.set(new TenantContext(tenant.getId(), tenant.getCode(), false, List.of()));
+    }
+
+    @AfterEach
+    void clearTenant() {
+        TenantContextHolder.clear();
     }
 
     @Test
@@ -115,7 +139,7 @@ class UploadServiceIT {
             """
                 Type,InvoiceNo,SellerId,BuyerId,SalesAmount,Tax,Total,TaxType,DateTime,rawLine,legacyType
                 F0401,AB99990001,24556677,15888888,100,5,130,TX,2025-11-04T10:00:00+08:00,RAW-ERR,C0401
-                """
+            """
         );
         UploadMetadata metadata = new UploadMetadata(
             SELLER_ID,
@@ -141,10 +165,52 @@ class UploadServiceIT {
         assertThat(errors).hasSize(1);
         assertThat(errors.get(0).getImportFileItem().getId()).isEqualTo(importItems.get(0).getId());
         List<ImportFileLog> logs = importFileLogRepository.findAll();
-        assertThat(logs).hasSize(2);
+        assertThat(logs).hasSize(3);
         assertThat(logs).extracting(ImportFileLog::getImportFile).extracting(ImportFile::getId).containsOnly(saved.getId());
-        assertThat(logs).extracting(ImportFileLog::getEventCode).containsExactlyInAnyOrder("UPLOAD_RECEIVED", "NORMALIZE_SUMMARY");
+        assertThat(logs)
+            .extracting(ImportFileLog::getEventCode)
+            .containsExactlyInAnyOrder("UPLOAD_RECEIVED", "NORMALIZE_SUMMARY", "NORMALIZE_ROW_ERROR");
+        ImportFileLog rowError = logs
+            .stream()
+            .filter(log -> "NORMALIZE_ROW_ERROR".equals(log.getEventCode()))
+            .findFirst()
+            .orElseThrow();
+        assertThat(rowError.getDetail()).contains("AMOUNT_MISMATCH").contains("\"lineIndex\":1");
+        ImportFileLog summary = logs.stream().filter(log -> "NORMALIZE_SUMMARY".equals(log.getEventCode())).findFirst().orElseThrow();
+        assertThat(summary.getLevel()).isEqualTo("WARN");
         assertThat(invoiceRepository.findAll()).isEmpty();
+
+        ImportResultService.ResultFile csvFile = importResultService.generateCsv(saved.getId());
+        String csv = new String(csvFile.content(), StandardCharsets.UTF_8);
+        assertThat(csv).contains("AB99990001");
+        assertThat(csv).contains("FAILED");
+        assertThat(csv).contains("AMOUNT_MISMATCH");
+    }
+
+    @Test
+    void handleUpload_whenExceedLineLimit_shouldThrowItemLimitException() {
+        MultipartFile file = csv(buildLargeCsv(1000));
+        UploadMetadata metadata = new UploadMetadata(
+            SELLER_ID,
+            "UTF-8",
+            "default",
+            sha256(file),
+            "C0401",
+            "upload-it-limit"
+        );
+
+        NormalizationException ex = catchThrowableOfType(
+            NormalizationException.class,
+            () -> uploadService.handleUpload(ImportType.INVOICE, file, metadata)
+        );
+        assertThat(ex).isNotNull();
+        assertThat(ex.getProblemDetailWithCause().getProperties().get("errorCode")).isEqualTo("ITEM_LIMIT_EXCEEDED");
+
+        List<ImportFile> imports = importFileRepository.findAll();
+        assertThat(imports).hasSize(1);
+        ImportFile saved = imports.get(0);
+        assertThat(saved.getStatus()).isEqualTo(ImportStatus.FAILED);
+        assertThat(importFileLogRepository.findAll()).extracting(ImportFileLog::getEventCode).contains("UPLOAD_RECEIVED", "NORMALIZE_FAILURE");
     }
 
     private MultipartFile csv(String content) {
@@ -159,5 +225,19 @@ class UploadServiceIT {
         } catch (NoSuchAlgorithmException | java.io.IOException e) {
             throw new IllegalStateException("Unable to hash test csv", e);
         }
+    }
+
+    private String buildLargeCsv(int rowCount) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Type,InvoiceNo,SellerId,BuyerId,SalesAmount,Tax,Total,TaxType,DateTime,rawLine,legacyType\n");
+        for (int i = 0; i < rowCount; i++) {
+            builder
+                .append("F0401,LINE")
+                .append(String.format("%05d", i))
+                .append(",24556677,15888888,100,5,105,TX,2025-11-05T10:00:00+08:00,RAW-")
+                .append(i)
+                .append(",C0401\n");
+        }
+        return builder.toString();
     }
 }

@@ -30,6 +30,10 @@ const Admin = Loadable({
   loader: () => import(/* webpackChunkName: "administration" */ 'app/modules/administration'),
   loading: () => loading,
 });
+const ImportMonitor = Loadable({
+  loader: () => import('app/modules/import-monitor'),
+  loading: () => loading,
+});
 const AppRoutes = () => {
   const pageLocation = useLocation();
   React.useEffect(() => {
@@ -62,6 +66,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute hasAnyAuthorities={[AUTHORITIES.ADMIN]}>
               <Admin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="import-monitor/*"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.USER]}>
+              <ImportMonitor />
             </PrivateRoute>
           }
         />

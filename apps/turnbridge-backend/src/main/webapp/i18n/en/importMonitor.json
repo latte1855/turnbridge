@@ -1,0 +1,59 @@
+{
+  "importMonitor": {
+    "title": "Import Monitor",
+    "refresh": "Refresh",
+    "downloadSelected": "Download Selected (ZIP)",
+    "downloadSingle": "Download",
+    "noData": "No import batches found.",
+    "messages": {
+      "loadError": "Unable to load import data.",
+      "downloadError": "Download failed. Please try again."
+    },
+    "upload": {
+      "title": "Upload File",
+      "type": "Profile / Type",
+      "file": "CSV File",
+      "seller": "Seller ID",
+      "sha": "SHA-256",
+      "legacyType": "Legacy Type",
+      "profile": "Profile",
+      "submit": "Upload",
+      "noFile": "Please select a CSV file.",
+      "noSeller": "Seller ID is required.",
+      "noSha": "Please provide SHA-256.",
+      "failed": "Upload failed, please retry.",
+      "successMessage": "Upload accepted. Import ID = {{importId}}"
+    },
+    "filter": {
+      "filename": "Filename contains",
+      "type": "Type",
+      "status": "Status",
+      "search": "Search",
+      "reset": "Clear",
+      "all": "All"
+    },
+    "table": {
+      "id": "ID",
+      "filename": "Filename",
+      "type": "Type",
+      "status": "Status",
+      "success": "Success",
+      "error": "Error",
+      "actions": "Actions"
+    },
+    "detail": {
+      "title": "Import #{{id}}",
+      "summary": "Summary",
+      "items": "Items",
+      "logs": "Events",
+      "noItems": "No import items found.",
+      "noLogs": "No events recorded.",
+      "fieldErrors": "Field Errors",
+      "invoiceNo": "Invoice / Allowance",
+      "logTime": "Timestamp",
+      "logEvent": "Event",
+      "logLevel": "Level",
+      "logMessage": "Message"
+    }
+  }
+}
