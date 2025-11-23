@@ -45,6 +45,56 @@
       "import": {
         "monitor": "Import Monitor"
       },
+      "webhook": {
+        "dashboard": "Webhook Dashboard",
+        "registration": "Webhook Registration"
+      },
+      "operations": {
+        "main": "Operations",
+        "importMonitor": "Import Monitor",
+        "webhookDashboard": "Webhook Dashboard",
+        "webhookRegistration": "Webhook Registration",
+        "turnkeyExport": "Turnkey Export"
+      },
+      "webhookRegistration": {
+        "title": "Webhook Registration",
+        "description": "Manage webhook endpoints per tenant, rotate secrets, and choose subscribed events.",
+        "filters": {
+          "name": "Name",
+          "event": "Event contains",
+          "status": "Status",
+          "all": "All statuses"
+        },
+        "table": {
+          "title": "Registered endpoints",
+          "name": "Name",
+          "url": "Target URL",
+          "events": "Subscribed events",
+          "status": "Status",
+          "tenant": "Tenant",
+          "actions": "Actions",
+          "empty": "No webhook endpoints yet."
+        },
+        "actions": {
+          "refresh": "Refresh",
+          "create": "New Endpoint",
+          "rotate": "Rotate secret"
+        }
+      },
+      "webhookDashboard": {
+        "title": "Webhook Dashboard",
+        "refresh": "Refresh",
+        "deliveryId": "Delivery",
+        "event": "Event",
+        "tbCode": "TB Code",
+        "status": "Status",
+        "attempts": "Attempts",
+        "import": "Import",
+        "action": "Action",
+        "dlqTitle": "Webhook DLQ",
+        "resend": "Resend",
+        "sampleInvoice": "Sample"
+      },
       "tenantSelector": {
         "label": "Tenant scope",
         "loadError": "Unable to load tenants",
@@ -117,6 +167,8 @@
       "delete": "Delete",
       "edit": "Edit",
       "open": "Open",
+      "reset": "Reset",
+      "search": "Search",
       "save": "Save",
       "view": "View",
       "show": "Show {{otherEntity}}"

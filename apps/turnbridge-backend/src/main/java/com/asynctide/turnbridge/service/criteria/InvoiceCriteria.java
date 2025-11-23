@@ -86,6 +86,20 @@ public class InvoiceCriteria implements Serializable, Criteria {
 
     private StringFilter legacyType;
 
+    private StringFilter tbCode;
+
+    private StringFilter tbCategory;
+
+    private BooleanFilter tbCanAutoRetry;
+
+    private StringFilter tbRecommendedAction;
+
+    private StringFilter tbSourceCode;
+
+    private StringFilter tbSourceMessage;
+
+    private StringFilter tbResultCode;
+
     private LongFilter importFileId;
 
     private LongFilter tenantId;
@@ -109,6 +123,13 @@ public class InvoiceCriteria implements Serializable, Criteria {
         this.invoiceStatus = other.optionalInvoiceStatus().map(InvoiceStatusFilter::copy).orElse(null);
         this.issuedAt = other.optionalIssuedAt().map(InstantFilter::copy).orElse(null);
         this.legacyType = other.optionalLegacyType().map(StringFilter::copy).orElse(null);
+        this.tbCode = other.optionalTbCode().map(StringFilter::copy).orElse(null);
+        this.tbCategory = other.optionalTbCategory().map(StringFilter::copy).orElse(null);
+        this.tbCanAutoRetry = other.optionalTbCanAutoRetry().map(BooleanFilter::copy).orElse(null);
+        this.tbRecommendedAction = other.optionalTbRecommendedAction().map(StringFilter::copy).orElse(null);
+        this.tbSourceCode = other.optionalTbSourceCode().map(StringFilter::copy).orElse(null);
+        this.tbSourceMessage = other.optionalTbSourceMessage().map(StringFilter::copy).orElse(null);
+        this.tbResultCode = other.optionalTbResultCode().map(StringFilter::copy).orElse(null);
         this.importFileId = other.optionalImportFileId().map(LongFilter::copy).orElse(null);
         this.tenantId = other.optionalTenantId().map(LongFilter::copy).orElse(null);
         this.distinct = other.distinct;
@@ -385,6 +406,139 @@ public class InvoiceCriteria implements Serializable, Criteria {
         this.legacyType = legacyType;
     }
 
+    public StringFilter getTbCode() {
+        return tbCode;
+    }
+
+    public Optional<StringFilter> optionalTbCode() {
+        return Optional.ofNullable(tbCode);
+    }
+
+    public StringFilter tbCode() {
+        if (tbCode == null) {
+            setTbCode(new StringFilter());
+        }
+        return tbCode;
+    }
+
+    public void setTbCode(StringFilter tbCode) {
+        this.tbCode = tbCode;
+    }
+
+    public StringFilter getTbCategory() {
+        return tbCategory;
+    }
+
+    public Optional<StringFilter> optionalTbCategory() {
+        return Optional.ofNullable(tbCategory);
+    }
+
+    public StringFilter tbCategory() {
+        if (tbCategory == null) {
+            setTbCategory(new StringFilter());
+        }
+        return tbCategory;
+    }
+
+    public void setTbCategory(StringFilter tbCategory) {
+        this.tbCategory = tbCategory;
+    }
+
+    public BooleanFilter getTbCanAutoRetry() {
+        return tbCanAutoRetry;
+    }
+
+    public Optional<BooleanFilter> optionalTbCanAutoRetry() {
+        return Optional.ofNullable(tbCanAutoRetry);
+    }
+
+    public BooleanFilter tbCanAutoRetry() {
+        if (tbCanAutoRetry == null) {
+            setTbCanAutoRetry(new BooleanFilter());
+        }
+        return tbCanAutoRetry;
+    }
+
+    public void setTbCanAutoRetry(BooleanFilter tbCanAutoRetry) {
+        this.tbCanAutoRetry = tbCanAutoRetry;
+    }
+
+    public StringFilter getTbRecommendedAction() {
+        return tbRecommendedAction;
+    }
+
+    public Optional<StringFilter> optionalTbRecommendedAction() {
+        return Optional.ofNullable(tbRecommendedAction);
+    }
+
+    public StringFilter tbRecommendedAction() {
+        if (tbRecommendedAction == null) {
+            setTbRecommendedAction(new StringFilter());
+        }
+        return tbRecommendedAction;
+    }
+
+    public void setTbRecommendedAction(StringFilter tbRecommendedAction) {
+        this.tbRecommendedAction = tbRecommendedAction;
+    }
+
+    public StringFilter getTbSourceCode() {
+        return tbSourceCode;
+    }
+
+    public Optional<StringFilter> optionalTbSourceCode() {
+        return Optional.ofNullable(tbSourceCode);
+    }
+
+    public StringFilter tbSourceCode() {
+        if (tbSourceCode == null) {
+            setTbSourceCode(new StringFilter());
+        }
+        return tbSourceCode;
+    }
+
+    public void setTbSourceCode(StringFilter tbSourceCode) {
+        this.tbSourceCode = tbSourceCode;
+    }
+
+    public StringFilter getTbSourceMessage() {
+        return tbSourceMessage;
+    }
+
+    public Optional<StringFilter> optionalTbSourceMessage() {
+        return Optional.ofNullable(tbSourceMessage);
+    }
+
+    public StringFilter tbSourceMessage() {
+        if (tbSourceMessage == null) {
+            setTbSourceMessage(new StringFilter());
+        }
+        return tbSourceMessage;
+    }
+
+    public void setTbSourceMessage(StringFilter tbSourceMessage) {
+        this.tbSourceMessage = tbSourceMessage;
+    }
+
+    public StringFilter getTbResultCode() {
+        return tbResultCode;
+    }
+
+    public Optional<StringFilter> optionalTbResultCode() {
+        return Optional.ofNullable(tbResultCode);
+    }
+
+    public StringFilter tbResultCode() {
+        if (tbResultCode == null) {
+            setTbResultCode(new StringFilter());
+        }
+        return tbResultCode;
+    }
+
+    public void setTbResultCode(StringFilter tbResultCode) {
+        this.tbResultCode = tbResultCode;
+    }
+
     public LongFilter getImportFileId() {
         return importFileId;
     }
@@ -466,6 +620,13 @@ public class InvoiceCriteria implements Serializable, Criteria {
             Objects.equals(invoiceStatus, that.invoiceStatus) &&
             Objects.equals(issuedAt, that.issuedAt) &&
             Objects.equals(legacyType, that.legacyType) &&
+            Objects.equals(tbCode, that.tbCode) &&
+            Objects.equals(tbCategory, that.tbCategory) &&
+            Objects.equals(tbCanAutoRetry, that.tbCanAutoRetry) &&
+            Objects.equals(tbRecommendedAction, that.tbRecommendedAction) &&
+            Objects.equals(tbSourceCode, that.tbSourceCode) &&
+            Objects.equals(tbSourceMessage, that.tbSourceMessage) &&
+            Objects.equals(tbResultCode, that.tbResultCode) &&
             Objects.equals(importFileId, that.importFileId) &&
             Objects.equals(tenantId, that.tenantId) &&
             Objects.equals(distinct, that.distinct)
@@ -489,6 +650,13 @@ public class InvoiceCriteria implements Serializable, Criteria {
             invoiceStatus,
             issuedAt,
             legacyType,
+            tbCode,
+            tbCategory,
+            tbCanAutoRetry,
+            tbRecommendedAction,
+            tbSourceCode,
+            tbSourceMessage,
+            tbResultCode,
             importFileId,
             tenantId,
             distinct
@@ -513,6 +681,13 @@ public class InvoiceCriteria implements Serializable, Criteria {
             optionalInvoiceStatus().map(f -> "invoiceStatus=" + f + ", ").orElse("") +
             optionalIssuedAt().map(f -> "issuedAt=" + f + ", ").orElse("") +
             optionalLegacyType().map(f -> "legacyType=" + f + ", ").orElse("") +
+            optionalTbCode().map(f -> "tbCode=" + f + ", ").orElse("") +
+            optionalTbCategory().map(f -> "tbCategory=" + f + ", ").orElse("") +
+            optionalTbCanAutoRetry().map(f -> "tbCanAutoRetry=" + f + ", ").orElse("") +
+            optionalTbRecommendedAction().map(f -> "tbRecommendedAction=" + f + ", ").orElse("") +
+            optionalTbSourceCode().map(f -> "tbSourceCode=" + f + ", ").orElse("") +
+            optionalTbSourceMessage().map(f -> "tbSourceMessage=" + f + ", ").orElse("") +
+            optionalTbResultCode().map(f -> "tbResultCode=" + f + ", ").orElse("") +
             optionalImportFileId().map(f -> "importFileId=" + f + ", ").orElse("") +
             optionalTenantId().map(f -> "tenantId=" + f + ", ").orElse("") +
             optionalDistinct().map(f -> "distinct=" + f + ", ").orElse("") +

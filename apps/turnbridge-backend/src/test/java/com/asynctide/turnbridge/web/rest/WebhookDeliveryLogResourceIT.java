@@ -73,6 +73,15 @@ class WebhookDeliveryLogResourceIT {
     private static final Instant DEFAULT_DELIVERED_AT = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_DELIVERED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
+    private static final Instant DEFAULT_NEXT_ATTEMPT_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_NEXT_ATTEMPT_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+    private static final Instant DEFAULT_LOCKED_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_LOCKED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+    private static final String DEFAULT_DLQ_REASON = "AAAAAAAAAA";
+    private static final String UPDATED_DLQ_REASON = "BBBBBBBBBB";
+
     private static final String ENTITY_API_URL = "/api/webhook-delivery-logs";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -119,7 +128,10 @@ class WebhookDeliveryLogResourceIT {
             .httpStatus(DEFAULT_HTTP_STATUS)
             .attempts(DEFAULT_ATTEMPTS)
             .lastError(DEFAULT_LAST_ERROR)
-            .deliveredAt(DEFAULT_DELIVERED_AT);
+            .deliveredAt(DEFAULT_DELIVERED_AT)
+            .nextAttemptAt(DEFAULT_NEXT_ATTEMPT_AT)
+            .lockedAt(DEFAULT_LOCKED_AT)
+            .dlqReason(DEFAULT_DLQ_REASON);
         // Add required entity
         WebhookEndpoint webhookEndpoint;
         if (TestUtil.findAll(em, WebhookEndpoint.class).isEmpty()) {
@@ -148,7 +160,10 @@ class WebhookDeliveryLogResourceIT {
             .httpStatus(UPDATED_HTTP_STATUS)
             .attempts(UPDATED_ATTEMPTS)
             .lastError(UPDATED_LAST_ERROR)
-            .deliveredAt(UPDATED_DELIVERED_AT);
+            .deliveredAt(UPDATED_DELIVERED_AT)
+            .nextAttemptAt(UPDATED_NEXT_ATTEMPT_AT)
+            .lockedAt(UPDATED_LOCKED_AT)
+            .dlqReason(UPDATED_DLQ_REASON);
         // Add required entity
         WebhookEndpoint webhookEndpoint;
         if (TestUtil.findAll(em, WebhookEndpoint.class).isEmpty()) {
@@ -290,7 +305,10 @@ class WebhookDeliveryLogResourceIT {
             .andExpect(jsonPath("$.[*].httpStatus").value(hasItem(DEFAULT_HTTP_STATUS)))
             .andExpect(jsonPath("$.[*].attempts").value(hasItem(DEFAULT_ATTEMPTS)))
             .andExpect(jsonPath("$.[*].lastError").value(hasItem(DEFAULT_LAST_ERROR)))
-            .andExpect(jsonPath("$.[*].deliveredAt").value(hasItem(DEFAULT_DELIVERED_AT.toString())));
+            .andExpect(jsonPath("$.[*].deliveredAt").value(hasItem(DEFAULT_DELIVERED_AT.toString())))
+            .andExpect(jsonPath("$.[*].nextAttemptAt").value(hasItem(DEFAULT_NEXT_ATTEMPT_AT.toString())))
+            .andExpect(jsonPath("$.[*].lockedAt").value(hasItem(DEFAULT_LOCKED_AT.toString())))
+            .andExpect(jsonPath("$.[*].dlqReason").value(hasItem(DEFAULT_DLQ_REASON)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -329,7 +347,10 @@ class WebhookDeliveryLogResourceIT {
             .andExpect(jsonPath("$.httpStatus").value(DEFAULT_HTTP_STATUS))
             .andExpect(jsonPath("$.attempts").value(DEFAULT_ATTEMPTS))
             .andExpect(jsonPath("$.lastError").value(DEFAULT_LAST_ERROR))
-            .andExpect(jsonPath("$.deliveredAt").value(DEFAULT_DELIVERED_AT.toString()));
+            .andExpect(jsonPath("$.deliveredAt").value(DEFAULT_DELIVERED_AT.toString()))
+            .andExpect(jsonPath("$.nextAttemptAt").value(DEFAULT_NEXT_ATTEMPT_AT.toString()))
+            .andExpect(jsonPath("$.lockedAt").value(DEFAULT_LOCKED_AT.toString()))
+            .andExpect(jsonPath("$.dlqReason").value(DEFAULT_DLQ_REASON));
     }
 
     @Test
@@ -729,6 +750,131 @@ class WebhookDeliveryLogResourceIT {
 
     @Test
     @Transactional
+    void getAllWebhookDeliveryLogsByNextAttemptAtIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where nextAttemptAt equals to
+        defaultWebhookDeliveryLogFiltering(
+            "nextAttemptAt.equals=" + DEFAULT_NEXT_ATTEMPT_AT,
+            "nextAttemptAt.equals=" + UPDATED_NEXT_ATTEMPT_AT
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByNextAttemptAtIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where nextAttemptAt in
+        defaultWebhookDeliveryLogFiltering(
+            "nextAttemptAt.in=" + DEFAULT_NEXT_ATTEMPT_AT + "," + UPDATED_NEXT_ATTEMPT_AT,
+            "nextAttemptAt.in=" + UPDATED_NEXT_ATTEMPT_AT
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByNextAttemptAtIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where nextAttemptAt is not null
+        defaultWebhookDeliveryLogFiltering("nextAttemptAt.specified=true", "nextAttemptAt.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByLockedAtIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where lockedAt equals to
+        defaultWebhookDeliveryLogFiltering("lockedAt.equals=" + DEFAULT_LOCKED_AT, "lockedAt.equals=" + UPDATED_LOCKED_AT);
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByLockedAtIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where lockedAt in
+        defaultWebhookDeliveryLogFiltering(
+            "lockedAt.in=" + DEFAULT_LOCKED_AT + "," + UPDATED_LOCKED_AT,
+            "lockedAt.in=" + UPDATED_LOCKED_AT
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByLockedAtIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where lockedAt is not null
+        defaultWebhookDeliveryLogFiltering("lockedAt.specified=true", "lockedAt.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByDlqReasonIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where dlqReason equals to
+        defaultWebhookDeliveryLogFiltering("dlqReason.equals=" + DEFAULT_DLQ_REASON, "dlqReason.equals=" + UPDATED_DLQ_REASON);
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByDlqReasonIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where dlqReason in
+        defaultWebhookDeliveryLogFiltering(
+            "dlqReason.in=" + DEFAULT_DLQ_REASON + "," + UPDATED_DLQ_REASON,
+            "dlqReason.in=" + UPDATED_DLQ_REASON
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByDlqReasonIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where dlqReason is not null
+        defaultWebhookDeliveryLogFiltering("dlqReason.specified=true", "dlqReason.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByDlqReasonContainsSomething() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where dlqReason contains
+        defaultWebhookDeliveryLogFiltering("dlqReason.contains=" + DEFAULT_DLQ_REASON, "dlqReason.contains=" + UPDATED_DLQ_REASON);
+    }
+
+    @Test
+    @Transactional
+    void getAllWebhookDeliveryLogsByDlqReasonNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedWebhookDeliveryLog = webhookDeliveryLogRepository.saveAndFlush(webhookDeliveryLog);
+
+        // Get all the webhookDeliveryLogList where dlqReason does not contain
+        defaultWebhookDeliveryLogFiltering(
+            "dlqReason.doesNotContain=" + UPDATED_DLQ_REASON,
+            "dlqReason.doesNotContain=" + DEFAULT_DLQ_REASON
+        );
+    }
+
+    @Test
+    @Transactional
     void getAllWebhookDeliveryLogsByWebhookEndpointIsEqualToSomething() throws Exception {
         WebhookEndpoint webhookEndpoint;
         if (TestUtil.findAll(em, WebhookEndpoint.class).isEmpty()) {
@@ -770,7 +916,10 @@ class WebhookDeliveryLogResourceIT {
             .andExpect(jsonPath("$.[*].httpStatus").value(hasItem(DEFAULT_HTTP_STATUS)))
             .andExpect(jsonPath("$.[*].attempts").value(hasItem(DEFAULT_ATTEMPTS)))
             .andExpect(jsonPath("$.[*].lastError").value(hasItem(DEFAULT_LAST_ERROR)))
-            .andExpect(jsonPath("$.[*].deliveredAt").value(hasItem(DEFAULT_DELIVERED_AT.toString())));
+            .andExpect(jsonPath("$.[*].deliveredAt").value(hasItem(DEFAULT_DELIVERED_AT.toString())))
+            .andExpect(jsonPath("$.[*].nextAttemptAt").value(hasItem(DEFAULT_NEXT_ATTEMPT_AT.toString())))
+            .andExpect(jsonPath("$.[*].lockedAt").value(hasItem(DEFAULT_LOCKED_AT.toString())))
+            .andExpect(jsonPath("$.[*].dlqReason").value(hasItem(DEFAULT_DLQ_REASON)));
 
         // Check, that the count call also returns 1
         restWebhookDeliveryLogMockMvc
@@ -826,7 +975,10 @@ class WebhookDeliveryLogResourceIT {
             .httpStatus(UPDATED_HTTP_STATUS)
             .attempts(UPDATED_ATTEMPTS)
             .lastError(UPDATED_LAST_ERROR)
-            .deliveredAt(UPDATED_DELIVERED_AT);
+            .deliveredAt(UPDATED_DELIVERED_AT)
+            .nextAttemptAt(UPDATED_NEXT_ATTEMPT_AT)
+            .lockedAt(UPDATED_LOCKED_AT)
+            .dlqReason(UPDATED_DLQ_REASON);
         WebhookDeliveryLogDTO webhookDeliveryLogDTO = webhookDeliveryLogMapper.toDto(updatedWebhookDeliveryLog);
 
         restWebhookDeliveryLogMockMvc
@@ -916,7 +1068,11 @@ class WebhookDeliveryLogResourceIT {
         WebhookDeliveryLog partialUpdatedWebhookDeliveryLog = new WebhookDeliveryLog();
         partialUpdatedWebhookDeliveryLog.setId(webhookDeliveryLog.getId());
 
-        partialUpdatedWebhookDeliveryLog.event(UPDATED_EVENT).attempts(UPDATED_ATTEMPTS).lastError(UPDATED_LAST_ERROR);
+        partialUpdatedWebhookDeliveryLog
+            .event(UPDATED_EVENT)
+            .attempts(UPDATED_ATTEMPTS)
+            .lastError(UPDATED_LAST_ERROR)
+            .dlqReason(UPDATED_DLQ_REASON);
 
         restWebhookDeliveryLogMockMvc
             .perform(
@@ -955,7 +1111,10 @@ class WebhookDeliveryLogResourceIT {
             .httpStatus(UPDATED_HTTP_STATUS)
             .attempts(UPDATED_ATTEMPTS)
             .lastError(UPDATED_LAST_ERROR)
-            .deliveredAt(UPDATED_DELIVERED_AT);
+            .deliveredAt(UPDATED_DELIVERED_AT)
+            .nextAttemptAt(UPDATED_NEXT_ATTEMPT_AT)
+            .lockedAt(UPDATED_LOCKED_AT)
+            .dlqReason(UPDATED_DLQ_REASON);
 
         restWebhookDeliveryLogMockMvc
             .perform(

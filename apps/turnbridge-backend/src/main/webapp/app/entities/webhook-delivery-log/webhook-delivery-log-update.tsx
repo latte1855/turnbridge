@@ -57,6 +57,8 @@ export const WebhookDeliveryLogUpdate = () => {
       values.attempts = Number(values.attempts);
     }
     values.deliveredAt = convertDateTimeToServer(values.deliveredAt);
+    values.nextAttemptAt = convertDateTimeToServer(values.nextAttemptAt);
+    values.lockedAt = convertDateTimeToServer(values.lockedAt);
 
     const entity = {
       ...webhookDeliveryLogEntity,
@@ -75,11 +77,15 @@ export const WebhookDeliveryLogUpdate = () => {
     isNew
       ? {
           deliveredAt: displayDefaultDateTime(),
+          nextAttemptAt: displayDefaultDateTime(),
+          lockedAt: displayDefaultDateTime(),
         }
       : {
           status: 'SUCCESS',
           ...webhookDeliveryLogEntity,
           deliveredAt: convertDateTimeFromServer(webhookDeliveryLogEntity.deliveredAt),
+          nextAttemptAt: convertDateTimeFromServer(webhookDeliveryLogEntity.nextAttemptAt),
+          lockedAt: convertDateTimeFromServer(webhookDeliveryLogEntity.lockedAt),
           webhookEndpoint: webhookDeliveryLogEntity?.webhookEndpoint?.id,
         };
 
@@ -211,6 +217,41 @@ export const WebhookDeliveryLogUpdate = () => {
               />
               <UncontrolledTooltip target="deliveredAtLabel">
                 <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.deliveredAt" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.webhookDeliveryLog.nextAttemptAt')}
+                id="webhook-delivery-log-nextAttemptAt"
+                name="nextAttemptAt"
+                data-cy="nextAttemptAt"
+                type="datetime-local"
+                placeholder="YYYY-MM-DD HH:mm"
+              />
+              <UncontrolledTooltip target="nextAttemptAtLabel">
+                <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.nextAttemptAt" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.webhookDeliveryLog.lockedAt')}
+                id="webhook-delivery-log-lockedAt"
+                name="lockedAt"
+                data-cy="lockedAt"
+                type="datetime-local"
+                placeholder="YYYY-MM-DD HH:mm"
+              />
+              <UncontrolledTooltip target="lockedAtLabel">
+                <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.lockedAt" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.webhookDeliveryLog.dlqReason')}
+                id="webhook-delivery-log-dlqReason"
+                name="dlqReason"
+                data-cy="dlqReason"
+                type="text"
+                validate={{
+                  maxLength: { value: 1024, message: translate('entity.validation.maxlength', { max: 1024 }) },
+                }}
+              />
+              <UncontrolledTooltip target="dlqReasonLabel">
+                <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.dlqReason" />
               </UncontrolledTooltip>
               <ValidatedField
                 id="webhook-delivery-log-webhookEndpoint"

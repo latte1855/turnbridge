@@ -5,3 +5,7 @@ id;event_code;level;message;detail;occurred_at;import_file_id
 4;"NORMALIZE_SUMMARY";"WARN";"正規化完成：success=2,error=1";"{""success"":2,""error"":1}";"2025-11-02 09:20:00";2
 5;"UPLOAD_RECEIVED";"INFO";"批次檔案 TEN002_20251102.csv 已驗證 SHA-256";"";"2025-11-02 11:45:00";5
 6;"NORMALIZE_SUMMARY";"ERROR";"正規化完成：success=1,error=2";"{""success"":1,""error"":2}";"2025-11-02 12:05:00";5
+7;"XML_GENERATED";"INFO";"F0401 XML 已產生";"{""file"": ""target/turnkey/INBOX/TEN-001/FGPAYLOAD_F0401_20251101_000001.xml""}";"2025-11-02 12:10:00";1
+8;"XML_DELIVERED_TO_TURNKEY";"INFO";"XML 已搬移至 B2SSTORAGE";"{""turnkeyFile"": ""/srv/turnkey/B2S/F0401/SRC/FGPAYLOAD_F0401_20251101_000001.xml""}";"2025-11-02 12:12:00";1
+9;"XML_GENERATE_FAILURE";"ERROR";"F0401 XML 產生失敗";"{""reason"": ""AmountMismatch""}";"2025-11-02 13:00:00";5
+10;"PROCESS_RESULT";"INFO";"ProcessResult: code=9,error=E200";"{""file"": ""/srv/turnkey/ProcessResult/F0401/err003.xml"", ""invoiceNo"": ""ZX99887766"", ""errorCode"": ""E200"", ""tbCode"": ""TB-5003""}";"2025-11-02 13:15:00";3

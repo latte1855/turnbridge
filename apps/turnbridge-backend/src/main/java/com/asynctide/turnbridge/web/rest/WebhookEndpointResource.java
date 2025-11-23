@@ -5,6 +5,7 @@ import com.asynctide.turnbridge.service.WebhookEndpointQueryService;
 import com.asynctide.turnbridge.service.WebhookEndpointService;
 import com.asynctide.turnbridge.service.criteria.WebhookEndpointCriteria;
 import com.asynctide.turnbridge.service.dto.WebhookEndpointDTO;
+import com.asynctide.turnbridge.service.dto.WebhookSecretRotateDTO;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -187,6 +188,19 @@ public class WebhookEndpointResource {
         LOG.debug("REST request to get WebhookEndpoint : {}", id);
         Optional<WebhookEndpointDTO> webhookEndpointDTO = webhookEndpointService.findOne(id);
         return ResponseUtil.wrapOrNotFound(webhookEndpointDTO);
+    }
+
+    /**
+     * {@code POST  /webhook-endpoints/:id/rotate-secret} : rotate secret for an endpoint.
+     *
+     * @param id the id of the webhook endpoint.
+     * @return the {@link ResponseEntity} containing new secret info.
+     */
+    @PostMapping("/{id}/rotate-secret")
+    public ResponseEntity<WebhookSecretRotateDTO> rotateSecret(@PathVariable("id") Long id) {
+        LOG.debug("REST request to rotate WebhookEndpoint secret : {}", id);
+        Optional<WebhookSecretRotateDTO> rotated = webhookEndpointService.rotateSecret(id);
+        return ResponseUtil.wrapOrNotFound(rotated);
     }
 
     /**

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Translate } from 'react-jhipster';
+import { Translate, translate } from 'react-jhipster';
 import { FormGroup, Input, Spinner } from 'reactstrap';
 
 interface TenantDTO {
@@ -59,9 +59,7 @@ const TenantSwitcher = ({ isAdmin }: TenantSwitcherProps) => {
         </span>
       ) : (
         <Input type="select" id="tenant-selector" className="tenant-selector" value={selected} onChange={onChange} bsSize="sm">
-          <option value={ALL_TENANTS}>
-            <Translate contentKey="global.menu.tenantSelector.all" />
-          </option>
+          <option value={ALL_TENANTS}>{translate('global.menu.tenantSelector.all')}</option>
           {tenants.map(tenant => (
             <option key={tenant.id ?? tenant.code} value={tenant.code}>
               {tenant.name} ({tenant.code})

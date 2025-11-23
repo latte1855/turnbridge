@@ -60,6 +60,23 @@
       "documentation": "投遞完成時間",
       "fieldName": "deliveredAt",
       "fieldType": "Instant"
+    },
+    {
+      "documentation": "下一次投遞時間（排程用）",
+      "fieldName": "nextAttemptAt",
+      "fieldType": "Instant"
+    },
+    {
+      "documentation": "最長鎖定時間，避免重複 worker 併發",
+      "fieldName": "lockedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "documentation": "DLQ 原因（超過上限後紀錄）",
+      "fieldName": "dlqReason",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
     }
   ],
   "jpaMetamodelFiltering": true,

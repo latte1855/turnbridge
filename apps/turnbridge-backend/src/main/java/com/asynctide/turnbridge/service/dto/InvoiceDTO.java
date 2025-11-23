@@ -72,6 +72,33 @@ public class InvoiceDTO implements Serializable {
     @Schema(description = "原訊息別")
     private String legacyType;
 
+    @Size(max = 32)
+    @Schema(description = "Turnkey TB-xxxx 錯誤碼")
+    private String tbCode;
+
+    @Size(max = 128)
+    @Schema(description = "TB 錯誤分類（例：PLATFORM.DATA_AMOUNT_MISMATCH）")
+    private String tbCategory;
+
+    @Schema(description = "是否允許系統自動重送")
+    private Boolean tbCanAutoRetry;
+
+    @Size(max = 64)
+    @Schema(description = "建議營運處置（FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM）")
+    private String tbRecommendedAction;
+
+    @Size(max = 64)
+    @Schema(description = "平台原始錯誤碼（ProcessResult ErrorCode）")
+    private String tbSourceCode;
+
+    @Size(max = 1024)
+    @Schema(description = "平台錯誤訊息")
+    private String tbSourceMessage;
+
+    @Size(max = 16)
+    @Schema(description = "ProcessResult ResultCode（0=成功）")
+    private String tbResultCode;
+
     @NotNull
     @Schema(description = "匯入檔主檔")
     private ImportFileDTO importFile;
@@ -199,6 +226,62 @@ public class InvoiceDTO implements Serializable {
         this.legacyType = legacyType;
     }
 
+    public String getTbCode() {
+        return tbCode;
+    }
+
+    public void setTbCode(String tbCode) {
+        this.tbCode = tbCode;
+    }
+
+    public String getTbCategory() {
+        return tbCategory;
+    }
+
+    public void setTbCategory(String tbCategory) {
+        this.tbCategory = tbCategory;
+    }
+
+    public Boolean getTbCanAutoRetry() {
+        return tbCanAutoRetry;
+    }
+
+    public void setTbCanAutoRetry(Boolean tbCanAutoRetry) {
+        this.tbCanAutoRetry = tbCanAutoRetry;
+    }
+
+    public String getTbRecommendedAction() {
+        return tbRecommendedAction;
+    }
+
+    public void setTbRecommendedAction(String tbRecommendedAction) {
+        this.tbRecommendedAction = tbRecommendedAction;
+    }
+
+    public String getTbSourceCode() {
+        return tbSourceCode;
+    }
+
+    public void setTbSourceCode(String tbSourceCode) {
+        this.tbSourceCode = tbSourceCode;
+    }
+
+    public String getTbSourceMessage() {
+        return tbSourceMessage;
+    }
+
+    public void setTbSourceMessage(String tbSourceMessage) {
+        this.tbSourceMessage = tbSourceMessage;
+    }
+
+    public String getTbResultCode() {
+        return tbResultCode;
+    }
+
+    public void setTbResultCode(String tbResultCode) {
+        this.tbResultCode = tbResultCode;
+    }
+
     public ImportFileDTO getImportFile() {
         return importFile;
     }
@@ -255,6 +338,13 @@ public class InvoiceDTO implements Serializable {
             ", invoiceStatus='" + getInvoiceStatus() + "'" +
             ", issuedAt='" + getIssuedAt() + "'" +
             ", legacyType='" + getLegacyType() + "'" +
+            ", tbCode='" + getTbCode() + "'" +
+            ", tbCategory='" + getTbCategory() + "'" +
+            ", tbCanAutoRetry='" + getTbCanAutoRetry() + "'" +
+            ", tbRecommendedAction='" + getTbRecommendedAction() + "'" +
+            ", tbSourceCode='" + getTbSourceCode() + "'" +
+            ", tbSourceMessage='" + getTbSourceMessage() + "'" +
+            ", tbResultCode='" + getTbResultCode() + "'" +
             ", importFile=" + getImportFile() +
             ", tenant=" + getTenant() +
             "}";

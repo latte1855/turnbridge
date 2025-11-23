@@ -84,6 +84,9 @@ public class WebhookDeliveryLogQueryService extends QueryService<WebhookDelivery
                 buildRangeSpecification(criteria.getAttempts(), WebhookDeliveryLog_.attempts),
                 buildStringSpecification(criteria.getLastError(), WebhookDeliveryLog_.lastError),
                 buildRangeSpecification(criteria.getDeliveredAt(), WebhookDeliveryLog_.deliveredAt),
+                buildRangeSpecification(criteria.getNextAttemptAt(), WebhookDeliveryLog_.nextAttemptAt),
+                buildRangeSpecification(criteria.getLockedAt(), WebhookDeliveryLog_.lockedAt),
+                buildStringSpecification(criteria.getDlqReason(), WebhookDeliveryLog_.dlqReason),
                 buildSpecification(criteria.getWebhookEndpointId(), root ->
                     root.join(WebhookDeliveryLog_.webhookEndpoint, JoinType.LEFT).get(WebhookEndpoint_.id)
                 )

@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Route } from 'react-router';
 
 import { useLocation } from 'react-router-dom';
-
-import Loadable from 'react-loadable';
 
 import Login from 'app/modules/login/login';
 import Register from 'app/modules/account/register/register';
@@ -21,19 +19,19 @@ import { sendActivity } from 'app/config/websocket-middleware';
 
 const loading = <div>loading ...</div>;
 
-const Account = Loadable({
-  loader: () => import(/* webpackChunkName: "account" */ 'app/modules/account'),
-  loading: () => loading,
-});
+/**
+ * 懶加載使用 React.lazy() 與 Suspense，以避免使用舊的 contextTypes API
+ */
+const Account = lazy(() => import(/* webpackChunkName: "account" */ 'app/modules/account'));
 
-const Admin = Loadable({
-  loader: () => import(/* webpackChunkName: "administration" */ 'app/modules/administration'),
-  loading: () => loading,
-});
-const ImportMonitor = Loadable({
-  loader: () => import('app/modules/import-monitor'),
-  loading: () => loading,
-});
+const Admin = lazy(() => import(/* webpackChunkName: "administration" */ 'app/modules/administration'));
+
+const ImportMonitor = lazy(() => import('app/modules/import-monitor'));
+
+const WebhookDashboard = lazy(() => import('app/modules/webhook/dashboard'));
+
+const WebhookRegistration = lazy(() => import('app/modules/webhook/registration'));
+const TurnkeyExportControl = lazy(() => import('app/modules/turnkey/export-control'));
 const AppRoutes = () => {
   const pageLocation = useLocation();
   React.useEffect(() => {
@@ -50,7 +48,9 @@ const AppRoutes = () => {
             path="*"
             element={
               <PrivateRoute hasAnyAuthorities={[AUTHORITIES.ADMIN, AUTHORITIES.USER]}>
-                <Account />
+                <Suspense fallback={loading}>
+                  <Account />
+                </Suspense>
               </PrivateRoute>
             }
           />
@@ -65,7 +65,9 @@ const AppRoutes = () => {
           path="admin/*"
           element={
             <PrivateRoute hasAnyAuthorities={[AUTHORITIES.ADMIN]}>
-              <Admin />
+              <Suspense fallback={loading}>
+                <Admin />
+              </Suspense>
             </PrivateRoute>
           }
         />
@@ -73,7 +75,39 @@ const AppRoutes = () => {
           path="import-monitor/*"
           element={
             <PrivateRoute hasAnyAuthorities={[AUTHORITIES.USER]}>
-              <ImportMonitor />
+              <Suspense fallback={loading}>
+                <ImportMonitor />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="dashboard/webhook"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.USER]}>
+              <Suspense fallback={loading}>
+                <WebhookDashboard />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="webhook/endpoints"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.USER]}>
+              <Suspense fallback={loading}>
+                <WebhookRegistration />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="turnkey/export"
+          element={
+            <PrivateRoute hasAnyAuthorities={[AUTHORITIES.ADMIN]}>
+              <Suspense fallback={loading}>
+                <TurnkeyExportControl />
+              </Suspense>
             </PrivateRoute>
           }
         />

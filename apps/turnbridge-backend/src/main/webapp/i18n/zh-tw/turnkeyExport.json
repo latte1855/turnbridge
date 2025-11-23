@@ -1,0 +1,73 @@
+{
+  "turnkeyExport": {
+    "title": "Turnkey XML 手動匯出",
+    "description": "當排程之外需要立即補送 XML 時，可在此輸入批次大小並觸發匯出。系統會依匯出結果更新 ImportFileLog 與 Invoice 狀態，營運可在 Turnkey 監控與 Portal 追蹤拾取情況。",
+    "adminNotice": {
+      "title": "僅管理者可進行手動匯出",
+      "body": "目前以 {tenant} 視角操作；手動匯出僅會處理對應租戶待轉檔的發票，請確認是否符合需求。",
+      "forbidden": "此帳號沒有 ADMIN 權限（視角：{tenant}），若需匯出請聯繫系統管理者。",
+      "tenantAll": "全部租戶（All）"
+    },
+    "form": {
+      "batchSize": "批次大小（選填）",
+      "help": "若留空則沿用後端預設值，建議視當下負載調整。",
+      "submit": "執行匯出"
+    },
+    "info": {
+      "scheduleTitle": "排程與權限",
+      "schedule": "自動匯出由 `turnbridge.turnkey.export-cron` 控制，約每 5 分鐘執行一次。",
+      "permission": "僅 ADMIN 可使用本頁手動觸發（同時會遵守租戶限制與 RLS）。",
+      "log": "匯出結果可在 ImportFileLog 檢視（XML_GENERATED / XML_DELIVERED_TO_TURNKEY / XML_DELIVERY_FAILURE）。",
+      "monitorTitle": "監控建議",
+      "monitorDescription": "Turnkey SRC/Pack/Upload/ERR 滯留情形可在 Monitoring Dashboard 觀察 `turnkey_pickup_*` 指標，必要時通知 Turnkey 小組。"
+    },
+    "messages": {
+      "success": "匯出已送出，請稍候查看 ImportFileLog 與 Turnkey 監控確認結果。",
+      "failure": "匯出呼叫失敗，請稍後再試或檢查伺服器紀錄。",
+      "forbidden": "此帳號沒有匯出權限。"
+    },
+    "history": {
+      "title": "本次登入的手動匯出紀錄",
+      "empty": "尚未執行手動匯出。",
+      "timestamp": "觸發時間",
+      "batchSize": "批次大小",
+      "processed": "處理筆數"
+    },
+    "helper": {
+      "title": "常用後續操作",
+      "importMonitor": "前往匯入作業",
+      "webhookDashboard": "檢視 Webhook 儀表板",
+      "grafana": "查看 Turnkey 監控（Grafana）"
+    },
+    "logs": {
+      "title": "匯出事件紀錄",
+      "refresh": "重新整理",
+      "empty": "近期無匯出事件。",
+      "occurredAt": "時間",
+      "eventCode": "事件",
+      "message": "訊息 / 詳細",
+      "importFile": "匯入批次",
+      "detail": "詳細",
+      "action": "操作",
+      "viewImport": "前往匯入作業",
+      "viewDetail": "查看內容",
+      "detailModalTitle": "匯出事件原始明細",
+      "detailDescription": "事件 {eventCode} 的 detail 內容如下",
+      "detailEmpty": "此事件沒有 detail 內容。"
+    },
+    "pickup": {
+      "title": "Turnkey 拾取巡檢",
+      "refresh": "重新取得",
+      "lastScan": "最近巡檢時間",
+      "src": "SRC 滯留",
+      "pack": "Pack 滯留",
+      "upload": "Upload 待上傳",
+      "err": "ERR 檔案",
+      "stage": "Stage",
+      "family": "訊息別",
+      "count": "數量",
+      "empty": "目前未偵測到滯留或錯誤檔案。",
+      "error": "無法取得巡檢資料，請稍後再試。"
+    }
+  }
+}

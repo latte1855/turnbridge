@@ -45,6 +45,56 @@
       "import": {
         "monitor": "匯入作業"
       },
+      "webhook": {
+        "dashboard": "Webhook 儀表板",
+        "registration": "Webhook 設定"
+      },
+      "operations": {
+        "main": "營運工具",
+        "importMonitor": "匯入作業",
+        "webhookDashboard": "Webhook 儀表板",
+        "webhookRegistration": "Webhook 設定",
+        "turnkeyExport": "Turnkey 匯出"
+      },
+      "webhookRegistration": {
+        "title": "Webhook 設定",
+        "description": "管理每個租戶的 Webhook 端點、旋轉 Secret 並決定訂閱事件。",
+        "filters": {
+          "name": "名稱",
+          "event": "事件包含",
+          "status": "狀態",
+          "all": "全部狀態"
+        },
+        "table": {
+          "title": "Webhook 端點列表",
+          "name": "名稱",
+          "url": "目標 URL",
+          "events": "訂閱事件",
+          "status": "狀態",
+          "tenant": "租戶",
+          "actions": "操作",
+          "empty": "目前尚未建立端點。"
+        },
+        "actions": {
+          "refresh": "重新整理",
+          "create": "新增端點",
+          "rotate": "旋轉 Secret"
+        }
+      },
+      "webhookDashboard": {
+        "title": "Webhook 儀表板",
+        "refresh": "重新整理",
+        "deliveryId": "投遞編號",
+        "event": "事件",
+        "tbCode": "TB 錯誤碼",
+        "status": "狀態",
+        "attempts": "嘗試",
+        "import": "匯入",
+        "action": "操作",
+        "dlqTitle": "Webhook DLQ",
+        "resend": "重送",
+        "sampleInvoice": "範例發票"
+      },
       "tenantSelector": {
         "label": "操作租戶",
         "loadError": "無法取得租戶清單",
@@ -117,6 +167,8 @@
       "delete": "刪除",
       "edit": "編輯",
       "open": "開啟",
+      "reset": "重設",
+      "search": "查詢",
       "save": "儲存",
       "view": "檢視",
       "show": "顯示 {{otherEntity}}"

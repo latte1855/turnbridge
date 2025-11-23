@@ -73,7 +73,16 @@ public class InvoiceAsserts {
             .satisfies(a -> assertThat(a.getNormalizedJson()).as("check normalizedJson").isEqualTo(expected.getNormalizedJson()))
             .satisfies(a -> assertThat(a.getInvoiceStatus()).as("check invoiceStatus").isEqualTo(expected.getInvoiceStatus()))
             .satisfies(a -> assertThat(a.getIssuedAt()).as("check issuedAt").isEqualTo(expected.getIssuedAt()))
-            .satisfies(a -> assertThat(a.getLegacyType()).as("check legacyType").isEqualTo(expected.getLegacyType()));
+            .satisfies(a -> assertThat(a.getLegacyType()).as("check legacyType").isEqualTo(expected.getLegacyType()))
+            .satisfies(a -> assertThat(a.getTbCode()).as("check tbCode").isEqualTo(expected.getTbCode()))
+            .satisfies(a -> assertThat(a.getTbCategory()).as("check tbCategory").isEqualTo(expected.getTbCategory()))
+            .satisfies(a -> assertThat(a.getTbCanAutoRetry()).as("check tbCanAutoRetry").isEqualTo(expected.getTbCanAutoRetry()))
+            .satisfies(a ->
+                assertThat(a.getTbRecommendedAction()).as("check tbRecommendedAction").isEqualTo(expected.getTbRecommendedAction())
+            )
+            .satisfies(a -> assertThat(a.getTbSourceCode()).as("check tbSourceCode").isEqualTo(expected.getTbSourceCode()))
+            .satisfies(a -> assertThat(a.getTbSourceMessage()).as("check tbSourceMessage").isEqualTo(expected.getTbSourceMessage()))
+            .satisfies(a -> assertThat(a.getTbResultCode()).as("check tbResultCode").isEqualTo(expected.getTbResultCode()));
     }
 
     /**

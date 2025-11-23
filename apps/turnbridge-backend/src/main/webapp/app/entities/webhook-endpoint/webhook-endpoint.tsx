@@ -7,6 +7,9 @@ import { faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons'
 import { ASC, DESC, ITEMS_PER_PAGE, SORT } from 'app/shared/util/pagination.constants';
 import { overridePaginationStateWithQueryParams } from 'app/shared/util/entity-utils';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { AUTHORITIES } from 'app/config/constants';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { getEntities as getTenants } from 'app/entities/tenant/tenant.reducer';
 
 import { getEntities } from './webhook-endpoint.reducer';
 
@@ -20,6 +23,10 @@ export const WebhookEndpoint = () => {
     overridePaginationStateWithQueryParams(getPaginationState(pageLocation, ITEMS_PER_PAGE, 'id'), pageLocation.search),
   );
 
+  const [tenantId, setTenantId] = useState(null);
+  const isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [AUTHORITIES.ADMIN]));
+  const tenants = useAppSelector(state => state.tenant.entities);
+
   const webhookEndpointList = useAppSelector(state => state.webhookEndpoint.entities);
   const loading = useAppSelector(state => state.webhookEndpoint.loading);
   const totalItems = useAppSelector(state => state.webhookEndpoint.totalItems);
@@ -30,6 +37,7 @@ export const WebhookEndpoint = () => {
         page: paginationState.activePage - 1,
         size: paginationState.itemsPerPage,
         sort: `${paginationState.sort},${paginationState.order}`,
+        tenantId,
       }),
     );
   };
@@ -44,7 +52,13 @@ export const WebhookEndpoint = () => {
 
   useEffect(() => {
     sortEntities();
-  }, [paginationState.activePage, paginationState.order, paginationState.sort]);
+  }, [paginationState.activePage, paginationState.order, paginationState.sort, tenantId]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      dispatch(getTenants({}));
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     const params = new URLSearchParams(pageLocation.search);
@@ -104,6 +118,22 @@ export const WebhookEndpoint = () => {
           </Link>
         </div>
       </h2>
+      {isAdmin && (
+        <div className="mb-3">
+          <select
+            className="form-control"
+            value={tenantId || ''}
+            onChange={e => setTenantId(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">All Tenants</option>
+            {tenants.map(tenant => (
+              <option key={tenant.id} value={tenant.id}>
+                {tenant.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="table-responsive">
         {webhookEndpointList && webhookEndpointList.length > 0 ? (
           <Table responsive>

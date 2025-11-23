@@ -15,6 +15,8 @@ interface ImportFileSummary {
   successCount?: number;
   errorCount?: number;
   legacyType?: string;
+  tbErrorSummary?: string;
+  hasTbError?: boolean;
 }
 
 interface UploadResponse {
@@ -383,6 +385,9 @@ const ImportMonitorList = () => {
                 <Translate contentKey="importMonitor.table.status" />
               </th>
               <th>
+                <Translate contentKey="importMonitor.table.tbSummary" />
+              </th>
+              <th>
                 <Translate contentKey="importMonitor.table.success" />
               </th>
               <th>
@@ -415,6 +420,15 @@ const ImportMonitorList = () => {
                   >
                     {file.status}
                   </span>
+                </td>
+                <td>
+                  {file.tbErrorSummary ? (
+                    <span className="text-truncate d-inline-block" style={{ maxWidth: '140px' }}>
+                      {file.tbErrorSummary}
+                    </span>
+                  ) : (
+                    '-'
+                  )}
                 </td>
                 <td>{file.successCount}</td>
                 <td>{file.errorCount}</td>

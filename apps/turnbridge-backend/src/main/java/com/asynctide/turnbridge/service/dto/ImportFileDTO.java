@@ -54,6 +54,12 @@ public class ImportFileDTO implements Serializable {
     @Schema(description = "租戶")
     private TenantDTO tenant;
 
+    @Schema(description = "Turnkey TB 錯誤摘要（例如 TB-5003(PLATFORM.DATA_AMOUNT_MISMATCH) ×3）")
+    private String tbErrorSummary;
+
+    @Schema(description = "是否含 Turnkey 錯誤")
+    private Boolean hasTbError;
+
     public Long getId() {
         return id;
     }
@@ -132,6 +138,22 @@ public class ImportFileDTO implements Serializable {
 
     public void setTenant(TenantDTO tenant) {
         this.tenant = tenant;
+    }
+
+    public String getTbErrorSummary() {
+        return tbErrorSummary;
+    }
+
+    public void setTbErrorSummary(String tbErrorSummary) {
+        this.tbErrorSummary = tbErrorSummary;
+    }
+
+    public Boolean getHasTbError() {
+        return hasTbError;
+    }
+
+    public void setHasTbError(Boolean hasTbError) {
+        this.hasTbError = hasTbError;
     }
 
     @Override

@@ -83,6 +83,9 @@ class WebhookDeliveryLogCriteriaTest {
         webhookDeliveryLogCriteria.attempts();
         webhookDeliveryLogCriteria.lastError();
         webhookDeliveryLogCriteria.deliveredAt();
+        webhookDeliveryLogCriteria.nextAttemptAt();
+        webhookDeliveryLogCriteria.lockedAt();
+        webhookDeliveryLogCriteria.dlqReason();
         webhookDeliveryLogCriteria.webhookEndpointId();
         webhookDeliveryLogCriteria.distinct();
     }
@@ -98,6 +101,9 @@ class WebhookDeliveryLogCriteriaTest {
                 condition.apply(criteria.getAttempts()) &&
                 condition.apply(criteria.getLastError()) &&
                 condition.apply(criteria.getDeliveredAt()) &&
+                condition.apply(criteria.getNextAttemptAt()) &&
+                condition.apply(criteria.getLockedAt()) &&
+                condition.apply(criteria.getDlqReason()) &&
                 condition.apply(criteria.getWebhookEndpointId()) &&
                 condition.apply(criteria.getDistinct()),
             "every filter matches"
@@ -118,6 +124,9 @@ class WebhookDeliveryLogCriteriaTest {
                 condition.apply(criteria.getAttempts(), copy.getAttempts()) &&
                 condition.apply(criteria.getLastError(), copy.getLastError()) &&
                 condition.apply(criteria.getDeliveredAt(), copy.getDeliveredAt()) &&
+                condition.apply(criteria.getNextAttemptAt(), copy.getNextAttemptAt()) &&
+                condition.apply(criteria.getLockedAt(), copy.getLockedAt()) &&
+                condition.apply(criteria.getDlqReason(), copy.getDlqReason()) &&
                 condition.apply(criteria.getWebhookEndpointId(), copy.getWebhookEndpointId()) &&
                 condition.apply(criteria.getDistinct(), copy.getDistinct()),
             "every filter matches"

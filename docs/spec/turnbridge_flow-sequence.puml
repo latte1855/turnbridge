@@ -1,0 +1,92 @@
+
+```puml
+@startuml
+title Turnbridge × Turnkey × MOF 發票流程（F/G 新制）Sequence
+
+actor Client as C
+participant "Turnbridge\n(API + Normalize + XML)" as TB
+participant "Turnkey\n(MIG 檢查 + 簽章 + 上傳)" as TK
+participant "MOF 平台\n(電子發票整合平台)" as MOF
+
+== 上游匯入階段 ==
+
+C -> TB : POST /upload/invoice\n(CSV / JSON, legacyType, rawLine)
+activate TB
+
+TB -> TB : 驗證基本欄位、防呆\n(必填、長度、數值、日期等)
+TB -> TB : Normalize 舊制欄位\n(A/B/C/D → Canonical Model)
+TB -> TB : FG Mapping\n(A0401/C0401 → F0401 等)
+TB -> TB : 儲存 ImportFile / ImportFileLog / NormalizedInvoice
+
+== 產生 XML 並寫入 Turnkey SRC ==
+
+TB -> TB : 依 MIG 4.1 產生 F/G XML
+TB -> TK : 寫入 XML 檔\nUpCast/B2SSTORAGE/<Type>/SRC/
+deactivate TB
+
+== Turnkey 端處理（排程/輪詢） ==
+
+activate TK
+TK -> TK : 監控 SRC 目錄\n讀取 XML 檔
+TK -> TK : MIG/XSD 格式檢查\n(欄位、長度、稅額、載具格式…)
+
+alt MIG 檢查失敗
+    TK -> TK : 將檔案移至 ERR 目錄\n並寫入 tk.log / error.log
+    TK -> TB : (間接) 錯誤狀態寫入 DB\n或供 Turnbridge 解析
+    deactivate TK
+
+    TB -> TB : 週期性掃描 ERR / DB 錯誤紀錄
+    TB -> C : Webhook / API 回報「格式錯誤」\n(不會進 MOF)
+else MIG 檢查成功
+    TK -> TK : XML 簽章（PFX）\n產生 zip 並寫入 Pack/、Upload/
+    TK -> MOF : HTTPS 上傳 zip 檔
+    deactivate TK
+
+    activate MOF
+    MOF -> MOF : 驗證 XSD / MIG 格式\n發票生命週期規則檢查
+    MOF -> MOF : 建立處理結果 ProcessResult
+    MOF --> TK : 提供 ProcessResult 下載
+    deactivate MOF
+
+    == Turnkey 下載 ProcessResult ==
+
+    activate TK
+    TK -> MOF : 下載 ProcessResult
+    MOF --> TK : 回傳 ProcessResult XML
+    TK -> TK : 解壓 / 驗簽 / 解析 ResultCode、ErrorCode
+    TK -> TK : 寫入內部 DB / Unpack/ProcessResult/
+    deactivate TK
+
+    == Turnbridge 解析結果並回報 ==
+
+    activate TB
+    TB -> TK : 讀取 Unpack/ProcessResult 或查 DB\n(排程/輪詢)
+    TK --> TB : 傳回 ProcessResult 資訊
+    TB -> TB : Result Parser\n(InvoiceNo, ResultCode, ErrorCode...)
+    TB -> TB : Error Mapper\n(平台錯誤碼 → Turnbridge 錯誤碼)
+
+    alt ResultCode == 0（成功）
+        TB -> C : Webhook / Callback\n/invoice/success\n包含 invoiceNo, type, timestamp...
+    else ResultCode != 0（失敗）
+        TB -> C : Webhook / Callback\n/invoice/error\n包含 errorCode, errorMessage, rawLine...
+        TB -> TB : 依錯誤類型決定是否可重送\n(格式錯誤/邏輯錯誤/平台異常)
+    end
+    deactivate TB
+end
+
+== 重送（可選流程） ==
+
+opt 允許重送（例如平台暫時性錯誤）
+    C -> TB : 要求重送 API\nPOST /reupload/{invoiceId}
+    activate TB
+    TB -> TB : 重新產生 XML（或重用舊 XML）
+    TB -> TK : 再次寫入 SRC 目錄\n(標記為 reupload 批次)
+    deactivate TB
+
+    activate TK
+    TK -> TK : 重複 MIG 檢查 → 打包 → 上傳 → 下載 ProcessResult
+    deactivate TK
+end
+
+@enduml
+```

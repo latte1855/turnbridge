@@ -8,9 +8,13 @@ import {
   faCogs,
   faDatabase,
   faDownload,
+  faClipboardList,
+  faChartLine,
+  faNetworkWired,
   faEye,
   faFileArchive,
   faFileImport,
+  faFileExport,
   faFlag,
   faHeart,
   faHome,
@@ -35,6 +39,7 @@ import {
   faUsers,
   faUsersCog,
   faWrench,
+  faScrewdriverWrench,
 } from '@fortawesome/free-solid-svg-icons';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -50,9 +55,13 @@ export const loadIcons = () => {
     faCogs,
     faDatabase,
     faDownload,
+    faClipboardList,
+    faChartLine,
+    faNetworkWired,
     faEye,
     faFileArchive,
     faFileImport,
+    faFileExport,
     faFlag,
     faHeart,
     faHome,
@@ -77,5 +86,6 @@ export const loadIcons = () => {
     faUsers,
     faUsersCog,
     faWrench,
+    faScrewdriverWrench,
   );
 };

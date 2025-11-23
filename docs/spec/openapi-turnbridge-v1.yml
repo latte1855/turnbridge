@@ -230,9 +230,73 @@ paths:
           required: true
           schema:
             type: string
+  responses:
+        '200':
+          description: OK
+  /dashboard/webhook-tb-summary:
+    get:
+      operationId: getWebhookTbSummary
+      tags: [Results]
+      summary: Turnkey TB 錯誤概覽
+      security:
+        - jwt: []
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TbSummary'
+  /dashboard/webhook-dlq:
+    get:
+      operationId: getWebhookDlq
+      tags: [Results]
+      summary: Webhook DLQ 清單
+      security:
+        - jwt: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: id,desc
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebhookDlq'
+  /dashboard/webhook-dlq/{id}/resend:
+    post:
+      operationId: resendWebhookDlq
+      tags: [Results]
+      summary: 重送 Webhook DLQ
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: No Content
 
 components:
   parameters:
@@ -345,6 +409,134 @@ components:
           type: integer
         totalPages:
           type: integer
+
+    InvoiceStatusWebhookPayload:
+      type: object
+      description: Webhook 封包（envelope），對應 `invoice.status.updated` 事件。
+      properties:
+        delivery_id:
+          type: string
+        event:
+          type: string
+          example: invoice.status.updated
+        timestamp:
+          type: string
+          format: date-time
+        tenant_id:
+          type: string
+        data:
+          $ref: '#/components/schemas/InvoiceStatusWebhookData'
+
+    InvoiceStatusWebhookData:
+      type: object
+      description: `invoice.status.updated` 事件 payload，參考 `docs/integration/webhook-contract.md`。
+      properties:
+        invoice_no:
+          type: string
+        status:
+          type: string
+          enum: [UPLOADED, ACKED, ERROR, VOIDED]
+        normalized_message_type:
+          type: string
+          description: MIG4.x 訊息別（F0401/F0501/F0701/G0401/G0501）
+        import_id:
+          type: integer
+          nullable: true
+        mof_code:
+          type: string
+          nullable: true
+          description: MOF ProcessResult ErrorCode
+        result_code:
+          type: string
+          nullable: true
+          description: ProcessResult ResultCode
+        tb_code:
+          type: string
+          nullable: true
+        tb_category:
+          type: string
+          nullable: true
+          description: 來源分類（例：`PLATFORM.DATA_AMOUNT_MISMATCH`）
+        can_auto_retry:
+          type: boolean
+          description: 是否允許系統自動重送（依 TB Code 決策）
+        recommended_action:
+          type: string
+          nullable: true
+          description: 建議處置（例：FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM）
+        source_layer:
+          type: string
+          nullable: true
+          description: 來源層級（PLATFORM / TURNKEY / IMPORT）
+        source_code:
+          type: string
+          nullable: true
+          description: 原始錯誤碼（ProcessResult ErrorCode）
+        source_message:
+          type: string
+          nullable: true
+          description: 平台錯誤訊息
+        message:
+          type: string
+          nullable: true
+          description: 同 source_message，保留相容性
+        legacy_type:
+          type: string
+          nullable: true
+          description: 上游 legacyType（A0401/B0401...）
+        turnkey_message_id:
+          type: integer
+          nullable: true
+          description: TurnkeyMessage 主鍵，供查詢原始 ProcessResult
+    TbSummary:
+      type: object
+      properties:
+        tbCode:
+          type: string
+        tbCategory:
+          type: string
+        count:
+          type: integer
+        sampleInvoice:
+          type: string
+        sampleImportId:
+          type: integer
+          nullable: true
+        lastUpdated:
+          type: string
+          format: date-time
+    WebhookDlq:
+      type: object
+      properties:
+        id:
+          type: integer
+        deliveryId:
+          type: string
+        event:
+          type: string
+        status:
+          type: string
+        attempts:
+          type: integer
+        lastError:
+          type: string
+        dlqReason:
+          type: string
+        nextAttemptAt:
+          type: string
+          format: date-time
+        webhookEndpointName:
+          type: string
+        tbCode:
+          type: string
+        tbCategory:
+          type: string
+        invoiceNo:
+          type: string
+        importId:
+          type: integer
+        platformMessage:
+          type: string
 
 security:
   - jwt: []

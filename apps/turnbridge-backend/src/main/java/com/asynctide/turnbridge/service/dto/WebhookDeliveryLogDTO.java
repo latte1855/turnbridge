@@ -49,6 +49,16 @@ public class WebhookDeliveryLogDTO implements Serializable {
     @Schema(description = "投遞完成時間")
     private Instant deliveredAt;
 
+    @Schema(description = "下一次投遞時間（排程用）")
+    private Instant nextAttemptAt;
+
+    @Schema(description = "最長鎖定時間，避免重複 worker 併發")
+    private Instant lockedAt;
+
+    @Size(max = 1024)
+    @Schema(description = "DLQ 原因（超過上限後紀錄）")
+    private String dlqReason;
+
     @NotNull
     @Schema(description = "Webhook 端點設定")
     private WebhookEndpointDTO webhookEndpoint;
@@ -125,6 +135,30 @@ public class WebhookDeliveryLogDTO implements Serializable {
         this.deliveredAt = deliveredAt;
     }
 
+    public Instant getNextAttemptAt() {
+        return nextAttemptAt;
+    }
+
+    public void setNextAttemptAt(Instant nextAttemptAt) {
+        this.nextAttemptAt = nextAttemptAt;
+    }
+
+    public Instant getLockedAt() {
+        return lockedAt;
+    }
+
+    public void setLockedAt(Instant lockedAt) {
+        this.lockedAt = lockedAt;
+    }
+
+    public String getDlqReason() {
+        return dlqReason;
+    }
+
+    public void setDlqReason(String dlqReason) {
+        this.dlqReason = dlqReason;
+    }
+
     public WebhookEndpointDTO getWebhookEndpoint() {
         return webhookEndpoint;
     }
@@ -167,6 +201,9 @@ public class WebhookDeliveryLogDTO implements Serializable {
             ", attempts=" + getAttempts() +
             ", lastError='" + getLastError() + "'" +
             ", deliveredAt='" + getDeliveredAt() + "'" +
+            ", nextAttemptAt='" + getNextAttemptAt() + "'" +
+            ", lockedAt='" + getLockedAt() + "'" +
+            ", dlqReason='" + getDlqReason() + "'" +
             ", webhookEndpoint=" + getWebhookEndpoint() +
             "}";
     }

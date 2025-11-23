@@ -4,3 +4,8 @@ id;message_id;message_family;type;code;message;payload_path;received_at;invoice_
 3;"MSG-ERR-003";F0401;"ERROR";E200;買受人缺漏;/turnkey/outbox/err003.xml;"2025-11-02 10:00:00";3
 4;"MSG-ACK-004";F0401;"ACK";000;MOF 已確認;/turnkey/outbox/ack004.xml;"2025-11-03 09:30:00";4
 5;"MSG-ERR-005";F0401;"ERROR";E410;金額不符;/turnkey/outbox/err005.xml;"2025-11-03 10:00:00";5
+6;"MSG-ACK-006";F0401;"ACK";000;MOF 已確認;/turnkey/outbox/ack006.xml;"2025-11-03 10:30:00";6
+7;"MSG-ERR-007";F0401;"ERROR";E300;載具錯誤;/turnkey/outbox/err007.xml;"2025-11-04 08:15:00";7
+8;"MSG-ERR-008";G0401;"ERROR";E500;折讓格式錯誤;/turnkey/outbox/err008.xml;"2025-11-04 09:00:00";8
+9;"MSG-ACK-009";F0501;"ACK";000;作廢確認;/turnkey/outbox/ack009.xml;"2025-11-05 08:20:00";9
+10;"MSG-ERR-010";F0401;"ERROR";E510;稅別不符;/turnkey/outbox/err010.xml;"2025-11-05 09:10:00";10

@@ -1,0 +1,61 @@
+{
+  "webhookRegistration": {
+    "title": "Webhook 設定",
+    "description": "於 Portal 建立/維護各租戶的 Webhook 端點、旋轉 HMAC Secret，並決定訂閱的事件列表。",
+    "actions": {
+      "refresh": "重新整理",
+      "create": "新增端點",
+      "rotate": "旋轉 Secret",
+      "rotateHint": "旋轉 HMAC Secret 代表重新產生新的簽章密鑰，等同重設 Token；當端點密鑰外洩或需要更換時請使用此功能。"
+    },
+    "filters": {
+      "name": "名稱",
+      "event": "事件包含",
+      "status": "狀態",
+      "all": "全部狀態"
+    },
+    "table": {
+      "title": "Webhook 端點列表",
+      "name": "名稱",
+      "url": "目標 URL",
+      "events": "訂閱事件",
+      "status": "狀態",
+      "tenant": "租戶",
+      "actions": "操作",
+      "empty": "目前尚未建立端點。"
+    },
+    "form": {
+      "createTitle": "建立 Webhook 端點",
+      "editTitle": "編輯 Webhook 端點",
+      "name": "顯示名稱",
+      "url": "目標 URL",
+      "status": "狀態",
+      "tenant": "租戶（僅管理者可選）",
+      "tenantPlaceholder": "請選擇租戶",
+      "events": "訂閱事件",
+      "secretHint": "系統只會在建立/旋轉後顯示一次 Secret，請立即複製並妥善保存。"
+    },
+    "events": {
+      "uploadCompleted": "upload.completed（匯入完成）",
+      "invoiceStatus": "invoice.status.updated（Turnkey 回饋）",
+      "turnkeySummary": "turnkey.feedback.daily-summary（每日摘要）"
+    },
+    "messages": {
+      "loadError": "載入 Webhook 端點失敗。",
+      "loadTenantError": "無法取得租戶清單。",
+      "loadDetailError": "載入端點資料失敗。",
+      "deleteConfirm": "確定刪除 {name} 嗎？",
+      "deleteError": "刪除端點失敗。",
+      "rotateError": "旋轉 Secret 失敗。",
+      "secretRotated": "Secret 已旋轉，請立即複製：",
+      "secretCreated": "端點建立完成，請立即複製建立的 Secret：",
+      "saveError": "儲存失敗，請檢查必填欄位。",
+      "noEventSelected": "請至少選取一個事件。",
+      "tenantRequired": "請指定租戶後再儲存。",
+      "restrictedTenant": "目前僅瀏覽租戶【{{tenant}}】，僅能查看與操作該租戶的端點。"
+    },
+    "validation": {
+      "url": "請輸入有效的 HTTP 或 HTTPS URL。"
+    }
+  }
+}

@@ -849,6 +849,29 @@ class WebhookEndpointResourceIT {
 
     @Test
     @Transactional
+    void rotateSecretShouldReturnNewSecret() throws Exception {
+        insertedWebhookEndpoint = webhookEndpointRepository.saveAndFlush(webhookEndpoint);
+        String originalSecret = insertedWebhookEndpoint.getSecret();
+
+        restWebhookEndpointMockMvc
+            .perform(post(ENTITY_API_URL_ID + "/rotate-secret", insertedWebhookEndpoint.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(insertedWebhookEndpoint.getId().intValue()))
+            .andExpect(jsonPath("$.secret").isNotEmpty())
+            .andExpect(jsonPath("$.rotatedAt").isNotEmpty());
+
+        WebhookEndpoint refreshed = webhookEndpointRepository.findById(insertedWebhookEndpoint.getId()).orElseThrow();
+        assertThat(refreshed.getSecret()).isNotBlank().isNotEqualTo(originalSecret);
+    }
+
+    @Test
+    @Transactional
+    void rotateSecretShouldReturnNotFoundWhenMissing() throws Exception {
+        restWebhookEndpointMockMvc.perform(post(ENTITY_API_URL_ID + "/rotate-secret", Long.MAX_VALUE)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
     void deleteWebhookEndpoint() throws Exception {
         // Initialize the database
         insertedWebhookEndpoint = webhookEndpointRepository.saveAndFlush(webhookEndpoint);

@@ -159,6 +159,69 @@ export const InvoiceDetail = () => {
           </dt>
           <dd>{invoiceEntity.legacyType}</dd>
           <dt>
+            <span id="tbCode">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbCode">Tb Code</Translate>
+            </span>
+            <UncontrolledTooltip target="tbCode">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbCode" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbCode}</dd>
+          <dt>
+            <span id="tbCategory">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbCategory">Tb Category</Translate>
+            </span>
+            <UncontrolledTooltip target="tbCategory">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbCategory" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbCategory}</dd>
+          <dt>
+            <span id="tbCanAutoRetry">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbCanAutoRetry">Tb Can Auto Retry</Translate>
+            </span>
+            <UncontrolledTooltip target="tbCanAutoRetry">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbCanAutoRetry" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbCanAutoRetry ? 'true' : 'false'}</dd>
+          <dt>
+            <span id="tbRecommendedAction">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbRecommendedAction">Tb Recommended Action</Translate>
+            </span>
+            <UncontrolledTooltip target="tbRecommendedAction">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbRecommendedAction" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbRecommendedAction}</dd>
+          <dt>
+            <span id="tbSourceCode">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbSourceCode">Tb Source Code</Translate>
+            </span>
+            <UncontrolledTooltip target="tbSourceCode">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbSourceCode" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbSourceCode}</dd>
+          <dt>
+            <span id="tbSourceMessage">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbSourceMessage">Tb Source Message</Translate>
+            </span>
+            <UncontrolledTooltip target="tbSourceMessage">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbSourceMessage" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbSourceMessage}</dd>
+          <dt>
+            <span id="tbResultCode">
+              <Translate contentKey="turnbridgeBackendApp.invoice.tbResultCode">Tb Result Code</Translate>
+            </span>
+            <UncontrolledTooltip target="tbResultCode">
+              <Translate contentKey="turnbridgeBackendApp.invoice.help.tbResultCode" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{invoiceEntity.tbResultCode}</dd>
+          <dt>
             <Translate contentKey="turnbridgeBackendApp.invoice.importFile">Import File</Translate>
           </dt>
           <dd>{invoiceEntity.importFile ? invoiceEntity.importFile.originalFilename : ''}</dd>

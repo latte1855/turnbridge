@@ -1,0 +1,20 @@
+{
+  "turnbridgeBackendApp": {
+    "webhookDashboard": {
+      "title": "Webhook Dashboard",
+      "refresh": "Refresh",
+      "count": "Count",
+      "sampleInvoice": "Sample Invoice",
+      "viewImport": "View Import",
+      "dlqTitle": "Webhook DLQ",
+      "deliveryId": "Delivery",
+      "event": "Event",
+      "tbCode": "TB Code",
+      "status": "Status",
+      "attempts": "Attempts",
+      "import": "Import",
+      "action": "Action",
+      "resend": "Resend"
+    }
+  }
+}

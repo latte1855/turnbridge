@@ -89,6 +89,13 @@ class InvoiceCriteriaTest {
         invoiceCriteria.invoiceStatus();
         invoiceCriteria.issuedAt();
         invoiceCriteria.legacyType();
+        invoiceCriteria.tbCode();
+        invoiceCriteria.tbCategory();
+        invoiceCriteria.tbCanAutoRetry();
+        invoiceCriteria.tbRecommendedAction();
+        invoiceCriteria.tbSourceCode();
+        invoiceCriteria.tbSourceMessage();
+        invoiceCriteria.tbResultCode();
         invoiceCriteria.importFileId();
         invoiceCriteria.tenantId();
         invoiceCriteria.distinct();
@@ -111,6 +118,13 @@ class InvoiceCriteriaTest {
                 condition.apply(criteria.getInvoiceStatus()) &&
                 condition.apply(criteria.getIssuedAt()) &&
                 condition.apply(criteria.getLegacyType()) &&
+                condition.apply(criteria.getTbCode()) &&
+                condition.apply(criteria.getTbCategory()) &&
+                condition.apply(criteria.getTbCanAutoRetry()) &&
+                condition.apply(criteria.getTbRecommendedAction()) &&
+                condition.apply(criteria.getTbSourceCode()) &&
+                condition.apply(criteria.getTbSourceMessage()) &&
+                condition.apply(criteria.getTbResultCode()) &&
                 condition.apply(criteria.getImportFileId()) &&
                 condition.apply(criteria.getTenantId()) &&
                 condition.apply(criteria.getDistinct()),
@@ -135,6 +149,13 @@ class InvoiceCriteriaTest {
                 condition.apply(criteria.getInvoiceStatus(), copy.getInvoiceStatus()) &&
                 condition.apply(criteria.getIssuedAt(), copy.getIssuedAt()) &&
                 condition.apply(criteria.getLegacyType(), copy.getLegacyType()) &&
+                condition.apply(criteria.getTbCode(), copy.getTbCode()) &&
+                condition.apply(criteria.getTbCategory(), copy.getTbCategory()) &&
+                condition.apply(criteria.getTbCanAutoRetry(), copy.getTbCanAutoRetry()) &&
+                condition.apply(criteria.getTbRecommendedAction(), copy.getTbRecommendedAction()) &&
+                condition.apply(criteria.getTbSourceCode(), copy.getTbSourceCode()) &&
+                condition.apply(criteria.getTbSourceMessage(), copy.getTbSourceMessage()) &&
+                condition.apply(criteria.getTbResultCode(), copy.getTbResultCode()) &&
                 condition.apply(criteria.getImportFileId(), copy.getImportFileId()) &&
                 condition.apply(criteria.getTenantId(), copy.getTenantId()) &&
                 condition.apply(criteria.getDistinct(), copy.getDistinct()),

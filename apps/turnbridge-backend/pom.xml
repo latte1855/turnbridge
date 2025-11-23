@@ -409,6 +409,20 @@
             <version>${querydsl.version}</version>
             <classifier>jakarta</classifier>
         </dependency>
+        
+        <!-- turnkey libs -->
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nat.einvoice.tky</groupId>
+            <artifactId>einvoice-tky-gateway-api</artifactId>
+            <version>3.1.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/einvoice-tky-gateway-api-3.1.2.jar</systemPath>
+        </dependency>
 
     </dependencies>
 

@@ -3,6 +3,7 @@ package com.asynctide.turnbridge.service.upload;
 import com.asynctide.turnbridge.domain.ImportFile;
 import com.asynctide.turnbridge.domain.ImportFileItem;
 import com.asynctide.turnbridge.domain.ImportFileItemError;
+import com.asynctide.turnbridge.domain.Invoice;
 import com.asynctide.turnbridge.repository.ImportFileItemErrorRepository;
 import com.asynctide.turnbridge.repository.ImportFileItemRepository;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -82,6 +84,13 @@ public class ImportResultService {
         headers.add("errorCode");
         headers.add("errorMessage");
         headers.add("fieldErrors");
+        headers.add("tbCode");
+        headers.add("tbCategory");
+        headers.add("tbCanAutoRetry");
+        headers.add("tbRecommendedAction");
+        headers.add("tbResultCode");
+        headers.add("tbSourceCode");
+        headers.add("tbSourceMessage");
 
         try {
             StringWriter writer = new StringWriter();
@@ -97,6 +106,14 @@ public class ImportResultService {
                     row.add(StringUtils.hasText(item.getErrorCode()) ? item.getErrorCode() : "");
                     row.add(StringUtils.hasText(item.getErrorMessage()) ? item.getErrorMessage() : "");
                     row.add(formatFieldErrors(errorMap.get(item.getId())));
+                    Invoice invoice = item.getInvoice();
+                    row.add(formatInvoiceValue(invoice, Invoice::getTbCode));
+                    row.add(formatInvoiceValue(invoice, Invoice::getTbCategory));
+                    row.add(formatBoolean(invoice != null ? invoice.getTbCanAutoRetry() : null));
+                    row.add(formatInvoiceValue(invoice, Invoice::getTbRecommendedAction));
+                    row.add(formatInvoiceValue(invoice, Invoice::getTbResultCode));
+                    row.add(formatInvoiceValue(invoice, Invoice::getTbSourceCode));
+                    row.add(formatInvoiceValue(invoice, Invoice::getTbSourceMessage));
                     printer.printRecord(row);
                 }
             }
@@ -200,6 +217,21 @@ public class ImportResultService {
                 return field + "(" + err.getColumnIndex() + "):" + code + (StringUtils.hasText(message) ? "-" + message : "");
             })
             .collect(Collectors.joining("; "));
+    }
+
+    private String formatInvoiceValue(Invoice invoice, Function<Invoice, String> extractor) {
+        if (invoice == null || extractor == null) {
+            return "";
+        }
+        String value = extractor.apply(invoice);
+        return value == null ? "" : value;
+    }
+
+    private String formatBoolean(Boolean value) {
+        if (value == null) {
+            return "";
+        }
+        return Boolean.TRUE.equals(value) ? "true" : "false";
     }
 
     private String buildResultFilename(ImportFile importFile) {

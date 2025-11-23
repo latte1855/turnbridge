@@ -131,6 +131,12 @@ Generic styles
   white-space: pre-wrap;
 }
 
+.required-label::after {
+  content: ' *';
+  color: #dc3545;
+  margin-left: 0.25rem;
+}
+
 /* padding helpers */
 
 @mixin pad($size, $side) {

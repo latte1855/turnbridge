@@ -109,6 +109,41 @@ export const WebhookDeliveryLogDetail = () => {
             ) : null}
           </dd>
           <dt>
+            <span id="nextAttemptAt">
+              <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.nextAttemptAt">Next Attempt At</Translate>
+            </span>
+            <UncontrolledTooltip target="nextAttemptAt">
+              <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.nextAttemptAt" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>
+            {webhookDeliveryLogEntity.nextAttemptAt ? (
+              <TextFormat value={webhookDeliveryLogEntity.nextAttemptAt} type="date" format={APP_DATE_FORMAT} />
+            ) : null}
+          </dd>
+          <dt>
+            <span id="lockedAt">
+              <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.lockedAt">Locked At</Translate>
+            </span>
+            <UncontrolledTooltip target="lockedAt">
+              <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.lockedAt" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>
+            {webhookDeliveryLogEntity.lockedAt ? (
+              <TextFormat value={webhookDeliveryLogEntity.lockedAt} type="date" format={APP_DATE_FORMAT} />
+            ) : null}
+          </dd>
+          <dt>
+            <span id="dlqReason">
+              <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.dlqReason">Dlq Reason</Translate>
+            </span>
+            <UncontrolledTooltip target="dlqReason">
+              <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.help.dlqReason" />
+            </UncontrolledTooltip>
+          </dt>
+          <dd>{webhookDeliveryLogEntity.dlqReason}</dd>
+          <dt>
             <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.webhookEndpoint">Webhook Endpoint</Translate>
           </dt>
           <dd>{webhookDeliveryLogEntity.webhookEndpoint ? webhookDeliveryLogEntity.webhookEndpoint.name : ''}</dd>

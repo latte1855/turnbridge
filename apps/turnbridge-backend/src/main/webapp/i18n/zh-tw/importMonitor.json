@@ -37,6 +37,7 @@
       "filename": "檔名",
       "type": "類型",
       "status": "狀態",
+      "tbSummary": "TB 總覽",
       "success": "成功筆數",
       "error": "失敗筆數",
       "actions": "操作"
@@ -53,7 +54,15 @@
       "logTime": "時間",
       "logEvent": "事件",
       "logLevel": "層級",
-      "logMessage": "訊息"
+      "logMessage": "訊息",
+      "tbSummary": "TB 總覽",
+      "tbCode": "TB 錯誤碼",
+      "tbCategory": "TB 錯誤分類",
+      "recommendedAction": "建議處置",
+      "autoRetry": "可自動重送",
+      "autoRetryYes": "可自動",
+      "autoRetryNo": "需人工",
+      "platformMessage": "平台錯誤訊息"
     }
   }
 }

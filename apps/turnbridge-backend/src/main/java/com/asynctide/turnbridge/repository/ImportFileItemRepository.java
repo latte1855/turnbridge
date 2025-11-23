@@ -17,7 +17,10 @@ import org.springframework.stereotype.Repository;
 public interface ImportFileItemRepository
     extends JpaRepository<ImportFileItem, Long>, JpaSpecificationExecutor<ImportFileItem>, QuerydslPredicateExecutor<ImportFileItem> {
 
+    @EntityGraph(attributePaths = { "invoice" })
     List<ImportFileItem> findByImportFileIdOrderByLineIndexAsc(Long importFileId);
+
+    List<ImportFileItem> findByInvoiceIdOrderByLineIndexAsc(Long invoiceId);
     default Optional<ImportFileItem> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

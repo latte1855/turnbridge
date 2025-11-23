@@ -141,7 +141,9 @@ Webhook 可透過 `PATCH /api/v1/webhooks/{id}` 更新事件或啟用/停用。
 | 第 1 次 | 即時 | 失敗則進入 retry queue |
 | 第 2 次 | +1 分鐘 | 仍失敗則紀錄 |
 | 第 3 次 | +5 分鐘 | 仍失敗則紀錄 |
-| 第 4 次 | +15 分鐘 | 再失敗 → DLQ，Halt 重試，通知 Ops |
+| 第 4 次 | +15 分鐘 | 再失敗 → DLQ，Halt 重試，通知 Ops (`webhook.delivery.failed`) |
+
+> 排程設定：`application.yml` 的 `webhook.retry-cron`（預設 `0 */1 * * * *`）負責掃描 `webhook_delivery_log.next_attempt_at`，若 `status=RETRY` 且到期即重送；超過四次則將 `status=FAILED`、填寫 `dlqReason` 並產生 DLQ 事件。
 
 DLQ 記錄：`delivery_id`、`payload`、`last_status`、`attempts`、`last_error`。  
 Ops 可於 `docs/operations/manual-resend.md` 依指引重送。

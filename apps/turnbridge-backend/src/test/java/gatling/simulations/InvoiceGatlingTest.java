@@ -82,6 +82,13 @@ public class InvoiceGatlingTest extends Simulation {
                                 ", \"invoiceStatus\": \"DRAFT\"" +
                                 ", \"issuedAt\": \"2020-01-01T00:00:00.000Z\"" +
                                 ", \"legacyType\": \"SAMPLE_TEXT\"" +
+                                ", \"tbCode\": \"SAMPLE_TEXT\"" +
+                                ", \"tbCategory\": \"SAMPLE_TEXT\"" +
+                                ", \"tbCanAutoRetry\": null" +
+                                ", \"tbRecommendedAction\": \"SAMPLE_TEXT\"" +
+                                ", \"tbSourceCode\": \"SAMPLE_TEXT\"" +
+                                ", \"tbSourceMessage\": \"SAMPLE_TEXT\"" +
+                                ", \"tbResultCode\": \"SAMPLE_TEXT\"" +
                                 "}"
                             )
                         )

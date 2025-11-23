@@ -1,0 +1,20 @@
+{
+  "turnbridgeBackendApp": {
+    "webhookDashboard": {
+      "title": "Webhook 儀表板",
+      "refresh": "重新整理",
+      "count": "筆數",
+      "sampleInvoice": "範例發票",
+      "viewImport": "檢視匯入",
+      "dlqTitle": "Webhook DLQ",
+      "deliveryId": "投遞編號",
+      "event": "事件",
+      "tbCode": "TB 錯誤碼",
+      "status": "狀態",
+      "attempts": "嘗試",
+      "import": "匯入",
+      "action": "操作",
+      "resend": "重送"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "webhookRegistration": {
+    "title": "Webhook Registration",
+    "description": "Manage webhook endpoints per tenant、rotate HMAC secrets, and decide which events each endpoint receives.",
+    "actions": {
+      "refresh": "Refresh",
+      "create": "New Endpoint",
+      "rotate": "Rotate secret",
+      "rotateHint": "Rotating the HMAC secret will regenerate a brand-new signing token. Use this when the endpoint credentials may be leaked."
+    },
+    "filters": {
+      "name": "Name",
+      "event": "Event contains",
+      "status": "Status",
+      "all": "All statuses"
+    },
+    "table": {
+      "title": "Registered endpoints",
+      "name": "Name",
+      "url": "Target URL",
+      "events": "Subscribed events",
+      "status": "Status",
+      "tenant": "Tenant",
+      "actions": "Actions",
+      "empty": "No webhook endpoints yet."
+    },
+    "form": {
+      "createTitle": "Create webhook endpoint",
+      "editTitle": "Edit webhook endpoint",
+      "name": "Display name",
+      "url": "Target URL",
+      "status": "Status",
+      "tenant": "Tenant (admin only)",
+      "tenantPlaceholder": "Select tenant",
+      "events": "Events",
+      "secretHint": "System will only show the secret once after create/rotate, please copy and store it securely."
+    },
+    "events": {
+      "uploadCompleted": "upload.completed",
+      "invoiceStatus": "invoice.status.updated",
+      "turnkeySummary": "turnkey.feedback.daily-summary"
+    },
+    "messages": {
+      "loadError": "Unable to load webhook endpoints.",
+      "loadTenantError": "Unable to load tenants.",
+      "loadDetailError": "Unable to load endpoint detail.",
+      "deleteConfirm": "Delete {name} ?",
+      "deleteError": "Failed to delete endpoint.",
+      "rotateError": "Failed to rotate secret.",
+      "secretRotated": "Secret rotated. Copy the new token:",
+      "secretCreated": "Endpoint created. Copy the generated secret:",
+      "saveError": "Save failed. Please check required fields.",
+      "noEventSelected": "Please select at least one event.",
+      "tenantRequired": "Please specify a tenant before saving.",
+      "restrictedTenant": "Currently viewing tenant scope: {{tenant}}. Only endpoints for this tenant can be listed or modified."
+    },
+    "validation": {
+      "url": "Please enter a valid HTTP or HTTPS URL."
+    }
+  }
+}

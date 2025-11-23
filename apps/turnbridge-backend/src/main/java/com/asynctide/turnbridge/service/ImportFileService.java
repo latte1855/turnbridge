@@ -2,10 +2,12 @@ package com.asynctide.turnbridge.service;
 
 import com.asynctide.turnbridge.domain.ImportFile;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
+import com.asynctide.turnbridge.repository.InvoiceRepository;
 import com.asynctide.turnbridge.service.dto.ImportFileDTO;
 import com.asynctide.turnbridge.service.mapper.ImportFileMapper;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,9 +35,16 @@ public class ImportFileService {
 
     private final ImportFileMapper importFileMapper;
 
-    public ImportFileService(ImportFileRepository importFileRepository, ImportFileMapper importFileMapper) {
+    private final InvoiceRepository invoiceRepository;
+
+    public ImportFileService(
+        ImportFileRepository importFileRepository,
+        ImportFileMapper importFileMapper,
+        InvoiceRepository invoiceRepository
+    ) {
         this.importFileRepository = importFileRepository;
         this.importFileMapper = importFileMapper;
+        this.invoiceRepository = invoiceRepository;
     }
 
     /**
@@ -174,7 +183,7 @@ public class ImportFileService {
         Page<ImportFile> page = Objects.isNull(predicate)
             ? importFileRepository.findAll(pageable)
             : importFileRepository.findAll(predicate, pageable);
-        return page.map(mapper);
+        return mapPageWithTbSummary(page, mapper);
     }
 
     /**
@@ -187,7 +196,11 @@ public class ImportFileService {
     @Transactional(readOnly = true)
     public List<ImportFileDTO> findAll(Predicate predicate, Sort sort) {
         LOG.debug("Request to get ImportFile with conditions: {}, sort: {}", predicate, sort);
-        return this.findAll(predicate, sort, importFileMapper::toDto);
+        Iterable<ImportFile> iterable = Objects.isNull(predicate)
+            ? importFileRepository.findAll(sort)
+            : importFileRepository.findAll(predicate, sort);
+        List<ImportFile> result = StreamSupport.stream(iterable.spliterator(), false).toList();
+        return mapListWithTbSummary(result, importFileMapper::toDto);
     }
 
     /**
@@ -201,9 +214,72 @@ public class ImportFileService {
     @Transactional(readOnly = true)
     public List<ImportFileDTO> findAll(Predicate predicate, Sort sort, Function<? super ImportFile, ? extends ImportFileDTO> mapper) {
         LOG.debug("Request to get ImportFile with conditions: {}, sort: {}", predicate, sort);
-        Stream<ImportFile> stream = Objects.isNull(predicate)
-            ? importFileRepository.findAll(sort).stream()
-            : StreamSupport.stream(importFileRepository.findAll(predicate, sort).spliterator(), false);
-        return stream.map(mapper).collect(Collectors.toList());
+        
+        Iterable<ImportFile> iterable = Objects.isNull(predicate)
+                ? importFileRepository.findAll(sort)
+                : importFileRepository.findAll(predicate, sort);
+        List<ImportFile> result = StreamSupport.stream(iterable.spliterator(), false).toList();
+            
+        return mapListWithTbSummary(result, mapper);
     }
+
+    private Page<ImportFileDTO> mapPageWithTbSummary(
+        Page<ImportFile> page,
+        Function<? super ImportFile, ? extends ImportFileDTO> mapper
+    ) {
+        List<Long> ids = page.stream().map(ImportFile::getId).filter(Objects::nonNull).toList();
+        Map<Long, String> summaries = buildTbSummaryMap(ids);
+        return page.map(importFile -> {
+            ImportFileDTO dto = mapper.apply(importFile);
+            if (dto != null) {
+                String summary = summaries.get(importFile.getId());
+                dto.setTbErrorSummary(summary);
+                dto.setHasTbError(summary != null);
+            }
+            return dto;
+        });
+    }
+
+    private List<ImportFileDTO> mapListWithTbSummary(
+        List<ImportFile> list,
+        Function<? super ImportFile, ? extends ImportFileDTO> mapper
+    ) {
+        List<Long> ids = list.stream().map(ImportFile::getId).filter(Objects::nonNull).toList();
+        Map<Long, String> summaries = buildTbSummaryMap(ids);
+        return list.stream()
+            .map(importFile -> {
+                ImportFileDTO dto = mapper.apply(importFile);
+                if (dto != null) {
+                    String summary = summaries.get(importFile.getId());
+                    dto.setTbErrorSummary(summary);
+                    dto.setHasTbError(summary != null);
+                }
+                return dto;
+            })
+            .collect(Collectors.toList());
+    }
+
+    private Map<Long, String> buildTbSummaryMap(List<Long> importFileIds) {
+        if (importFileIds == null || importFileIds.isEmpty()) {
+            return Map.of();
+        }
+        return invoiceRepository.findTbSummaryByImportFileIds(importFileIds).stream()
+            .map(row -> new TbSummaryRow(
+                ((Number) row[0]).longValue(),
+                (String) row[1],
+                (String) row[2],
+                ((Number) row[3]).longValue()
+            ))
+            .collect(
+                Collectors.groupingBy(
+                    TbSummaryRow::importFileId,
+                    Collectors.mapping(
+                        row -> String.format("%s (%s)×%d", row.tbCode(), row.tbCategory() == null ? "?" : row.tbCategory(), row.count()),
+                        Collectors.joining("; ")
+                    )
+                )
+            );
+    }
+
+    private record TbSummaryRow(Long importFileId, String tbCode, String tbCategory, Long count) {}
 }

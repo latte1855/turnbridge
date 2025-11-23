@@ -2,6 +2,7 @@ package com.asynctide.turnbridge;
 
 import com.asynctide.turnbridge.config.ApplicationProperties;
 import com.asynctide.turnbridge.config.CRLFLogConverter;
+import com.asynctide.turnbridge.turnkey.TurnkeyProperties;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -20,7 +21,12 @@ import tech.jhipster.config.DefaultProfileUtil;
 import tech.jhipster.config.JHipsterConstants;
 
 @SpringBootApplication
-@EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class, com.asynctide.turnbridge.tenant.TenantProperties.class })
+@EnableConfigurationProperties({
+    LiquibaseProperties.class,
+    ApplicationProperties.class,
+    com.asynctide.turnbridge.tenant.TenantProperties.class,
+    TurnkeyProperties.class,
+})
 public class TurnbridgeBackendApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(TurnbridgeBackendApp.class);
