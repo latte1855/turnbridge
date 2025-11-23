@@ -54,7 +54,10 @@ public class WebhookDeliveryLogAsserts {
             .satisfies(a -> assertThat(a.getHttpStatus()).as("check httpStatus").isEqualTo(expected.getHttpStatus()))
             .satisfies(a -> assertThat(a.getAttempts()).as("check attempts").isEqualTo(expected.getAttempts()))
             .satisfies(a -> assertThat(a.getLastError()).as("check lastError").isEqualTo(expected.getLastError()))
-            .satisfies(a -> assertThat(a.getDeliveredAt()).as("check deliveredAt").isEqualTo(expected.getDeliveredAt()));
+            .satisfies(a -> assertThat(a.getDeliveredAt()).as("check deliveredAt").isEqualTo(expected.getDeliveredAt()))
+            .satisfies(a -> assertThat(a.getNextAttemptAt()).as("check nextAttemptAt").isEqualTo(expected.getNextAttemptAt()))
+            .satisfies(a -> assertThat(a.getLockedAt()).as("check lockedAt").isEqualTo(expected.getLockedAt()))
+            .satisfies(a -> assertThat(a.getDlqReason()).as("check dlqReason").isEqualTo(expected.getDlqReason()));
     }
 
     /**

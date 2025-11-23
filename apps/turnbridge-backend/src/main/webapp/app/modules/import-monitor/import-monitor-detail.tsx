@@ -15,6 +15,19 @@ interface ImportFileDTO {
   successCount?: number;
   errorCount?: number;
   legacyType?: string;
+  tbErrorSummary?: string;
+}
+
+interface InvoiceLite {
+  id?: number;
+  invoiceNo?: string;
+  tbCode?: string;
+  tbCategory?: string;
+  tbCanAutoRetry?: boolean;
+  tbRecommendedAction?: string;
+  tbSourceCode?: string;
+  tbSourceMessage?: string;
+  tbResultCode?: string;
 }
 
 interface ImportFileItemDTO {
@@ -24,6 +37,7 @@ interface ImportFileItemDTO {
   status?: string;
   errorCode?: string;
   errorMessage?: string;
+  invoice?: InvoiceLite;
 }
 
 interface ImportFileItemErrorDTO {
@@ -144,6 +158,38 @@ const ImportMonitorDetail = () => {
       .map(err => `${err.fieldName ?? 'N/A'}(${err.columnIndex ?? '-'}) - ${err.errorCode}${err.message ? `: ${err.message}` : ''}`)
       .join('; ');
 
+  const renderAutoRetryBadge = (value?: boolean) => {
+    if (value === undefined || value === null) {
+      return '-';
+    }
+    return value ? (
+      <span className="badge bg-success">
+        <Translate contentKey="importMonitor.detail.autoRetryYes" />
+      </span>
+    ) : (
+      <span className="badge bg-secondary">
+        <Translate contentKey="importMonitor.detail.autoRetryNo" />
+      </span>
+    );
+  };
+
+  const renderPlatformMessage = (invoice?: InvoiceLite) => {
+    if (!invoice) {
+      return '-';
+    }
+    if (!invoice.tbSourceCode && !invoice.tbSourceMessage) {
+      return '-';
+    }
+    const parts: string[] = [];
+    if (invoice.tbSourceCode) {
+      parts.push(invoice.tbSourceCode);
+    }
+    if (invoice.tbSourceMessage) {
+      parts.push(invoice.tbSourceMessage);
+    }
+    return parts.join(' - ');
+  };
+
   const renderLogDetail = (log: ImportFileLogDTO): React.ReactNode => {
     if (!log.detail) {
       return '';
@@ -232,6 +278,14 @@ const ImportMonitorDetail = () => {
                 </strong>{' '}
                 {importFile.errorCount}
               </CardText>
+              {importFile.tbErrorSummary && (
+                <CardText>
+                  <strong>
+                    <Translate contentKey="importMonitor.detail.tbSummary" />:
+                  </strong>{' '}
+                  {importFile.tbErrorSummary}
+                </CardText>
+              )}
               <Button color="secondary" onClick={handleDownload}>
                 <FontAwesomeIcon icon="download" /> <Translate contentKey="importMonitor.downloadSingle" />
               </Button>
@@ -262,6 +316,21 @@ const ImportMonitorDetail = () => {
                   <th>
                     <Translate contentKey="importMonitor.detail.fieldErrors" />
                   </th>
+                  <th>
+                    <Translate contentKey="importMonitor.detail.tbCode" />
+                  </th>
+                  <th>
+                    <Translate contentKey="importMonitor.detail.tbCategory" />
+                  </th>
+                  <th>
+                    <Translate contentKey="importMonitor.detail.recommendedAction" />
+                  </th>
+                  <th>
+                    <Translate contentKey="importMonitor.detail.autoRetry" />
+                  </th>
+                  <th>
+                    <Translate contentKey="importMonitor.detail.platformMessage" />
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -275,6 +344,11 @@ const ImportMonitorDetail = () => {
                       {view.item.errorMessage ? ` - ${view.item.errorMessage}` : ''}
                     </td>
                     <td>{view.errors.length > 0 ? renderFieldErrors(view.errors) : '-'}</td>
+                    <td>{view.item.invoice?.tbCode ?? '-'}</td>
+                    <td>{view.item.invoice?.tbCategory ?? '-'}</td>
+                    <td>{view.item.invoice?.tbRecommendedAction ?? '-'}</td>
+                    <td>{renderAutoRetryBadge(view.item.invoice?.tbCanAutoRetry)}</td>
+                    <td>{renderPlatformMessage(view.item.invoice)}</td>
                   </tr>
                 ))}
               </tbody>

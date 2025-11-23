@@ -83,6 +83,25 @@ public class WebhookDeliveryLog implements Serializable {
     private Instant deliveredAt;
 
     /**
+     * 下一次投遞時間（排程用）
+     */
+    @Column(name = "next_attempt_at")
+    private Instant nextAttemptAt;
+
+    /**
+     * 最長鎖定時間，避免重複 worker 併發
+     */
+    @Column(name = "locked_at")
+    private Instant lockedAt;
+
+    /**
+     * DLQ 原因（超過上限後紀錄）
+     */
+    @Size(max = 1024)
+    @Column(name = "dlq_reason", length = 1024)
+    private String dlqReason;
+
+    /**
      * Webhook 端點設定
      */
     @ManyToOne(optional = false)
@@ -209,6 +228,45 @@ public class WebhookDeliveryLog implements Serializable {
         this.deliveredAt = deliveredAt;
     }
 
+    public Instant getNextAttemptAt() {
+        return this.nextAttemptAt;
+    }
+
+    public WebhookDeliveryLog nextAttemptAt(Instant nextAttemptAt) {
+        this.setNextAttemptAt(nextAttemptAt);
+        return this;
+    }
+
+    public void setNextAttemptAt(Instant nextAttemptAt) {
+        this.nextAttemptAt = nextAttemptAt;
+    }
+
+    public Instant getLockedAt() {
+        return this.lockedAt;
+    }
+
+    public WebhookDeliveryLog lockedAt(Instant lockedAt) {
+        this.setLockedAt(lockedAt);
+        return this;
+    }
+
+    public void setLockedAt(Instant lockedAt) {
+        this.lockedAt = lockedAt;
+    }
+
+    public String getDlqReason() {
+        return this.dlqReason;
+    }
+
+    public WebhookDeliveryLog dlqReason(String dlqReason) {
+        this.setDlqReason(dlqReason);
+        return this;
+    }
+
+    public void setDlqReason(String dlqReason) {
+        this.dlqReason = dlqReason;
+    }
+
     public WebhookEndpoint getWebhookEndpoint() {
         return this.webhookEndpoint;
     }
@@ -254,6 +312,9 @@ public class WebhookDeliveryLog implements Serializable {
             ", attempts=" + getAttempts() +
             ", lastError='" + getLastError() + "'" +
             ", deliveredAt='" + getDeliveredAt() + "'" +
+            ", nextAttemptAt='" + getNextAttemptAt() + "'" +
+            ", lockedAt='" + getLockedAt() + "'" +
+            ", dlqReason='" + getDlqReason() + "'" +
             "}";
     }
 }

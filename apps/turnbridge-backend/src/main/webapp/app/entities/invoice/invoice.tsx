@@ -170,6 +170,34 @@ export const Invoice = () => {
                   <Translate contentKey="turnbridgeBackendApp.invoice.legacyType">Legacy Type</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('legacyType')} />
                 </th>
+                <th className="hand" onClick={sort('tbCode')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbCode">Tb Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbCode')} />
+                </th>
+                <th className="hand" onClick={sort('tbCategory')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbCategory">Tb Category</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbCategory')} />
+                </th>
+                <th className="hand" onClick={sort('tbCanAutoRetry')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbCanAutoRetry">Tb Can Auto Retry</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbCanAutoRetry')} />
+                </th>
+                <th className="hand" onClick={sort('tbRecommendedAction')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbRecommendedAction">Tb Recommended Action</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbRecommendedAction')} />
+                </th>
+                <th className="hand" onClick={sort('tbSourceCode')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbSourceCode">Tb Source Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbSourceCode')} />
+                </th>
+                <th className="hand" onClick={sort('tbSourceMessage')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbSourceMessage">Tb Source Message</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbSourceMessage')} />
+                </th>
+                <th className="hand" onClick={sort('tbResultCode')}>
+                  <Translate contentKey="turnbridgeBackendApp.invoice.tbResultCode">Tb Result Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('tbResultCode')} />
+                </th>
                 <th>
                   <Translate contentKey="turnbridgeBackendApp.invoice.importFile">Import File</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
@@ -205,6 +233,13 @@ export const Invoice = () => {
                   </td>
                   <td>{invoice.issuedAt ? <TextFormat type="date" value={invoice.issuedAt} format={APP_DATE_FORMAT} /> : null}</td>
                   <td>{invoice.legacyType}</td>
+                  <td>{invoice.tbCode}</td>
+                  <td>{invoice.tbCategory}</td>
+                  <td>{invoice.tbCanAutoRetry ? 'true' : 'false'}</td>
+                  <td>{invoice.tbRecommendedAction}</td>
+                  <td>{invoice.tbSourceCode}</td>
+                  <td>{invoice.tbSourceMessage}</td>
+                  <td>{invoice.tbResultCode}</td>
                   <td>
                     {invoice.importFile ? (
                       <Link to={`/import-file/${invoice.importFile.id}`}>{invoice.importFile.originalFilename}</Link>

@@ -39,4 +39,6 @@ public interface InvoiceItemRepository
 
     @Query("select invoiceItem from InvoiceItem invoiceItem left join fetch invoiceItem.invoice where invoiceItem.id =:id")
     Optional<InvoiceItem> findOneWithToOneRelationships(@Param("id") Long id);
+
+    List<InvoiceItem> findByInvoiceIdOrderBySequenceAsc(Long invoiceId);
 }

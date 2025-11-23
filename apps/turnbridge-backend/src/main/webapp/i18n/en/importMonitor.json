@@ -37,6 +37,7 @@
       "filename": "Filename",
       "type": "Type",
       "status": "Status",
+      "tbSummary": "TB Summary",
       "success": "Success",
       "error": "Error",
       "actions": "Actions"
@@ -53,7 +54,15 @@
       "logTime": "Timestamp",
       "logEvent": "Event",
       "logLevel": "Level",
-      "logMessage": "Message"
+      "logMessage": "Message",
+      "tbSummary": "TB Summary",
+      "tbCode": "TB Code",
+      "tbCategory": "TB Category",
+      "recommendedAction": "Recommended Action",
+      "autoRetry": "Auto Retry",
+      "autoRetryYes": "Auto",
+      "autoRetryNo": "Manual",
+      "platformMessage": "Platform Message"
     }
   }
 }

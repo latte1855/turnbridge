@@ -268,13 +268,13 @@ flowchart LR
 3. **欄位錯誤拆解**：同一行可寫入多筆 `ImportFileItemError`（欄位名、欄位序、錯誤碼、訊息、嚴重度），Portal 會依此呈現欄位錯誤並附在結果檔末尾。
 4. **Invoice/InvoiceItem 寫入條件**：以「同一 InvoiceNo」為交易邊界。通過檢核才寫入 `Invoice/InvoiceItem`；若該發票失敗則 rollback 該群組，但不影響其他發票與 ImportFileItem。
 5. **ImportFileLog 角色**：記錄批次事件（`UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等）與逐筆錯誤事件 `NORMALIZE_ROW_ERROR`；detail 會保存 `lineIndex/invoiceNo/field/errorCode/rawData`，Portal 可查閱欄位級錯誤。逐行欄位錯誤仍由 `ImportFileItem(Error)` 保留以供下載結果附註。
-6. **結果回饋 API**：`GET /api/import-files/{id}/result` 會輸出原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`；`POST /api/import-files/results/download` 接受多個 importFileIds 並回傳 ZIP（系統自動壓縮）。
+6. **結果回饋 API**：`GET /api/import-files/{id}/result` 會輸出原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`，並附上 Turnkey 錯誤欄位（`tbCode/tbCategory/tbCanAutoRetry/tbRecommendedAction/tbResultCode/tbSourceCode/tbSourceMessage`）；`POST /api/import-files/results/download` 接受多個 importFileIds 並回傳 ZIP（系統自動壓縮）。
 
 ### 5.2 轉檔與上拋（F/G 唯一輸出）
 
 * **排程**：預設 **每 5 分鐘**掃描待轉檔佇列。
 * **輸出標準**：XML 一律依 **F/G XSD** 產生（F0401、F0501、F0701、G0401、G0501）。
-* **流程**：取 **Normalized(F/G)** → Schema 驗證 → ZIP → 簽章/加密 → 置 Turnkey 上拋目錄。
+* **流程**：取 **Normalized(F/G)** → Schema 驗證 → ZIP → 簽章/加密 → 置 Turnkey 上拋目錄；必要時可透過 `POST /api/turnkey/export?batchSize=`（Portal `/turnkey/export`）手動觸發，系統會立即回傳批次大小/實際處理筆數並於 `ImportFileLog` 紀錄 `XML_GENERATED`、`XML_DELIVERED_TO_TURNKEY`。
 * **重送**：自動重試（指數退避 1m/5m/15m/1h），達上限轉人工佇列；人工重送需二階段審核。
 
 ### 5.3 回饋與通知
@@ -282,6 +282,7 @@ flowchart LR
 * 監聽 Turnkey 回饋（ACK/ERROR XML）；建 `TurnkeyMessage`、回寫 `Invoice` 狀態。
 * Webhook 推播（§7.3）；WebSocket/Email 備援。
 * 每日回饋日報：Turnkey 回饋 vs 系統統計比對，不一致觸發告警。
+* 巡檢 API：`GET /api/turnkey/pickup-status` 由 `TurnkeyPickupMonitor` 輸出最近一次巡檢快照（`SRC/Pack/Upload/ERR` 滯留數、最後掃描時間），Portal 會在匯出頁顯示，供 Ops 快速檢視。
 
 ### 5.4 手動操作（需二階段審核）
 
@@ -328,7 +329,7 @@ flowchart LR
 | POST | `/api/v1/upload/e0501`         | 上傳配號       | form-data；僅接受單一 CSV；驗證 SHA-256 後回傳 `importId`                                 |
 | POST | `/api/v1/upload/invoice`       | 上傳發票檔      | 僅接受 CSV；可混合 A/B/C/D/F/G；999 切檔；成功即觸發 Normalize；回傳 `importId`                                   |
 | GET  | `/api/v1/imports/{importId}`   | 匯入結果       | 回傳 `status/successCount/errorCount`、分頁錯誤清單、**source/normalized family** |
-| GET  | `/api/import-files/{id}/result` | 匯入結果下載（單檔） | 回傳原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`                        |
+| GET  | `/api/import-files/{id}/result` | 匯入結果下載（單檔） | 回傳原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors` + Turnkey 錯誤欄位 |
 | POST | `/api/import-files/results/download` | 匯入結果下載（多檔 ZIP） | body: `importFileIds[]`；後端自動打包 ZIP 回傳多個結果檔                            |
 | GET  | `/api/v1/invoices`             | 查詢發票       | 依狀態/日期/號碼/客戶查詢（RLS 限制），支援 `normalizedMessageType=F0401/G0401...`        |
 | POST | `/api/v1/invoices/{id}/resend` | 重送         | 人工重送入佇列（需審核）                                                            |
@@ -368,26 +369,38 @@ flowchart LR
 ### 7.3 Webhook（HMAC 驗證、重試、DLQ）
 
 * **Header**：`X-Turnbridge-Signature: sha256=<base64>`（以租戶密鑰對 **request body** HMAC-SHA256）
-* **重試**：3 次（1m、5m、15m），皆失敗 → **DLQ**
+* **重試**：依 `webhook.retry-cron` 排程執行（初次即時 + 1m + 5m + 15m 延遲）；仍失敗 → **DLQ** 並觸發 `webhook.delivery.failed`。相關狀態寫入 `webhook_delivery_log.next_attempt_at / dlqReason`。
 * **事件型別**（節錄）：
 
   * `upload.completed`（含 importId、success/error 統計）
-  * `invoice.status.updated`（含 invoiceNo、status、turnkeyMessageId、**normalizedMessageType=F/G**）
+  * `invoice.status.updated`（含 invoiceNo、status、turnkeyMessageId、**normalizedMessageType=F/G**，並附 `tbCode/tbCategory/canAutoRetry/recommendedAction/sourceLayer/sourceCode/resultCode/legacyType` 等欄位）
   * `turnkey.feedback.daily-summary`
 
 **Webhook Payload（例）**
 
 ```json
 {
-  "event":"invoice.status.updated",
-  "timestamp":"2025-11-12T09:00:00Z",
-  "data":{
-    "tenantId":"TEN-001",
-    "invoiceNo":"AB12345678",
-    "status":"UPLOADED",
-    "normalizedMessageType":"F0401"
-  },
-  "retry":0
+  "delivery_id": "06f50bc6-2c18-40d0-ab0d-296a4ad1d7b9",
+  "event": "invoice.status.updated",
+  "timestamp": "2025-11-19T09:00:00Z",
+  "tenant_id": "TEN-001",
+  "data": {
+    "invoice_no": "AB12345678",
+    "status": "ERROR",
+    "normalized_message_type": "F0401",
+    "import_id": 321,
+    "mof_code": "E200",
+    "result_code": "9",
+    "tb_code": "TB-5003",
+    "tb_category": "PLATFORM.DATA_AMOUNT_MISMATCH",
+    "can_auto_retry": false,
+    "recommended_action": "FIX_DATA",
+    "source_layer": "PLATFORM",
+    "source_code": "E200",
+    "source_message": "稅額不符",
+    "legacy_type": "C0401",
+    "turnkey_message_id": 98
+  }
 }
 ```
 
@@ -444,13 +457,29 @@ if (abs(now - parse(timestamp)) > Duration.ofMinutes(5)) {
 - 投遞失敗重試次數：3（1m、5m、15m）；若仍失敗，寫入 `WebhookDLQ`，由 Ops/Portal 提供人工重送與追蹤功能。
 - DLQ 需保存原始 payload、headers、最後錯誤訊息、重試次數、firstFailureAt、lastFailureAt。
 
+#### 7.3.4 Portal Webhook 設定
+
+- **REST API**
+  - `GET /api/webhook-endpoints?page=&size=&sort=&name.contains=&events.contains=&status.equals=`：列表查詢、支援條件篩選，受多租戶 RLS 控制。
+  - `POST /api/webhook-endpoints` / `PUT /api/webhook-endpoints/{id}` / `DELETE /api/webhook-endpoints/{id}`：Portal 表單建立/編輯/刪除端點。
+  - `POST /api/webhook-endpoints/{id}/rotate-secret`：旋轉 HMAC Secret，回傳 `{ id, secret, rotatedAt }` 供 Portal 顯示一次性 token。
+- **Secret 策略**
+  - 建立端點時若未輸入 secret，後端以 `SecureRandom(32 bytes)` + Base64Url 自動產生；Portal 提醒立即備份。
+  - `Rotate Secret` 會覆寫 `webhook_endpoint.secret` 並觸發新的 webhook 簽章，Portal 只顯示一次。
+- **前端行為**
+  - 路由：`/webhook/endpoints`（Header → Webhook 設定）。
+  - 支援名稱/事件/狀態篩選、分頁、批次刪除前確認。
+  - 租戶切換：非管理者需透過 TenantSwitcher 選擇租戶；管理者若選「全部」則必須在表單選定 `Tenant` 欄位。
+- **事件勾選**
+  - UI 提供 `upload.completed`、`invoice.status.updated`、`turnkey.feedback.daily-summary` 三個核取方塊，儲存時以逗號分隔字串回寫 DB；Dispatcher 會依事件比對投遞。
+
 ### 7.x 匯入作業 Portal UI
 
 | 頁面/功能            | 說明                                                                                         |
 | ----------------- | -------------------------------------------------------------------------------------------- |
-| 匯入批次列表（/import-monitor） | 顯示 `importId / 檔名 / Status / successCount / errorCount / 上傳時間`；支援勾選多筆批次後下載 ZIP（呼叫 `POST /api/import-files/results/download`）。 |
+| 匯入批次列表（/import-monitor） | 顯示 `importId / 檔名 / Status / TB Summary / successCount / errorCount / 上傳時間`；支援勾選多筆批次後下載 ZIP（呼叫 `POST /api/import-files/results/download`）。 |
 | 匯入上傳表單 | 與列表同頁，提供 `type/sellerId/profile/legacyType/encoding` 等欄位與檔案選擇；瀏覽器自動計算 SHA-256（Web Crypto），同時保留手動輸入備援；完成後重整列表。 |
-| 單批下載             | 每筆列有「下載結果」按鈕，呼叫 `GET /api/import-files/{id}/result` 取得 CSV；欄位包含原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors`。 |
+| 單批下載             | 每筆列有「下載結果」按鈕，呼叫 `GET /api/import-files/{id}/result` 取得 CSV；欄位包含原 CSV 欄位 + `status/errorCode/errorMessage/fieldErrors` + Turnkey 錯誤欄位。 |
 | 匯入明細檢視（/import-monitor/:id） | 展開 `ImportFileItem`，顯示 `lineIndex / InvoiceNo / status / errorCode / errorMessage`，並列出多個 `ImportFileItemError`（欄位名、欄位序、錯誤碼、訊息）。 |
 | 批次事件             | 在明細頁顯示 `ImportFileLog`（UPLOAD_RECEIVED / NORMALIZE_SUMMARY / NORMALIZE_FAILURE），提供營運追蹤匯入流程。 |
 | 權限與 UX           | 僅需 USER 權限即可瀏覽；此功能以 React 新模組實作，不修改 JHipster 既有 CRUD。                         |

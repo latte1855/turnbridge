@@ -102,6 +102,53 @@
       "fieldType": "String",
       "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "16"
+    },
+    {
+      "documentation": "Turnkey TB-xxxx 錯誤碼",
+      "fieldName": "tbCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "32"
+    },
+    {
+      "documentation": "TB 錯誤分類（例：PLATFORM.DATA_AMOUNT_MISMATCH）",
+      "fieldName": "tbCategory",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "128"
+    },
+    {
+      "documentation": "是否允許系統自動重送",
+      "fieldName": "tbCanAutoRetry",
+      "fieldType": "Boolean"
+    },
+    {
+      "documentation": "建議營運處置（FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM）",
+      "fieldName": "tbRecommendedAction",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "平台原始錯誤碼（ProcessResult ErrorCode）",
+      "fieldName": "tbSourceCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "documentation": "平台錯誤訊息",
+      "fieldName": "tbSourceMessage",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1024"
+    },
+    {
+      "documentation": "ProcessResult ResultCode（0=成功）",
+      "fieldName": "tbResultCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "16"
     }
   ],
   "jpaMetamodelFiltering": true,

@@ -295,6 +295,95 @@ export const InvoiceUpdate = () => {
                 <Translate contentKey="turnbridgeBackendApp.invoice.help.legacyType" />
               </UncontrolledTooltip>
               <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbCode')}
+                id="invoice-tbCode"
+                name="tbCode"
+                data-cy="tbCode"
+                type="text"
+                validate={{
+                  maxLength: { value: 32, message: translate('entity.validation.maxlength', { max: 32 }) },
+                }}
+              />
+              <UncontrolledTooltip target="tbCodeLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbCode" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbCategory')}
+                id="invoice-tbCategory"
+                name="tbCategory"
+                data-cy="tbCategory"
+                type="text"
+                validate={{
+                  maxLength: { value: 128, message: translate('entity.validation.maxlength', { max: 128 }) },
+                }}
+              />
+              <UncontrolledTooltip target="tbCategoryLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbCategory" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbCanAutoRetry')}
+                id="invoice-tbCanAutoRetry"
+                name="tbCanAutoRetry"
+                data-cy="tbCanAutoRetry"
+                check
+                type="checkbox"
+              />
+              <UncontrolledTooltip target="tbCanAutoRetryLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbCanAutoRetry" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbRecommendedAction')}
+                id="invoice-tbRecommendedAction"
+                name="tbRecommendedAction"
+                data-cy="tbRecommendedAction"
+                type="text"
+                validate={{
+                  maxLength: { value: 64, message: translate('entity.validation.maxlength', { max: 64 }) },
+                }}
+              />
+              <UncontrolledTooltip target="tbRecommendedActionLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbRecommendedAction" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbSourceCode')}
+                id="invoice-tbSourceCode"
+                name="tbSourceCode"
+                data-cy="tbSourceCode"
+                type="text"
+                validate={{
+                  maxLength: { value: 64, message: translate('entity.validation.maxlength', { max: 64 }) },
+                }}
+              />
+              <UncontrolledTooltip target="tbSourceCodeLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbSourceCode" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbSourceMessage')}
+                id="invoice-tbSourceMessage"
+                name="tbSourceMessage"
+                data-cy="tbSourceMessage"
+                type="text"
+                validate={{
+                  maxLength: { value: 1024, message: translate('entity.validation.maxlength', { max: 1024 }) },
+                }}
+              />
+              <UncontrolledTooltip target="tbSourceMessageLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbSourceMessage" />
+              </UncontrolledTooltip>
+              <ValidatedField
+                label={translate('turnbridgeBackendApp.invoice.tbResultCode')}
+                id="invoice-tbResultCode"
+                name="tbResultCode"
+                data-cy="tbResultCode"
+                type="text"
+                validate={{
+                  maxLength: { value: 16, message: translate('entity.validation.maxlength', { max: 16 }) },
+                }}
+              />
+              <UncontrolledTooltip target="tbResultCodeLabel">
+                <Translate contentKey="turnbridgeBackendApp.invoice.help.tbResultCode" />
+              </UncontrolledTooltip>
+              <ValidatedField
                 id="invoice-importFile"
                 name="importFile"
                 data-cy="importFile"

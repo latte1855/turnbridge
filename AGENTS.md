@@ -8,6 +8,13 @@
 
 ---
 
+Codex、Gemini、自動化代理人特別遵守事項：
+
+* 回覆時請用繁體中文服回覆
+* React/Frontend 開發嚴格遵守 Prettier/ESLint（專案預設為 Prettier 逐行排版），以免編譯失敗；這是代理人必須遵守的約定。
+
+---
+
 ## 0. 快速結論（三件事）
 
 1. **MIG 新制為主**：輸出 XML 一律用 `F0401/F0501/F0701`、`G0401/G0501`；若上游仍送 A/B/C/D 舊制，**CSV 需保留原始行與 legacyType**，並映射為新制欄位再上傳。
@@ -75,15 +82,42 @@
 * Header：`X-Turnbridge-Signature: sha256=<base64>`（對 **body** 做 HMAC-SHA256）。
 * 重試：1m → 5m → 15m；失敗 → DLQ。
 * 事件：`upload.completed`、`invoice.status.updated`、`turnkey.feedback.daily-summary`。
+* `invoice.status.updated` payload 會同時帶出：
+  * `tb_code` / `tb_category`：依 Turnkey/MOF 錯誤碼映射到 TB-xxxx 與分類（例：`PLATFORM.DATA_AMOUNT_MISMATCH`）
+  * `can_auto_retry` / `recommended_action`：自動重送建議與營運處置（例：`FIX_DATA` / `FIX_LIFECYCLE_FLOW` / `CHECK_PLATFORM`）
+  * `source_layer`/`source_code`/`source_message`/`result_code`：MOF ProcessResult 原始訊息
+  * `legacy_type`：對應 agent 上傳的 `legacyType` 便於對帳；`turnkey_message_id` 供追蹤原始 ProcessResult
+  * 新增 Webhook Dashboard：`/dashboard/webhook` 顯示 Turnkey TB Summary 卡片（可連結至 Import Monitor）與具分頁的 Webhook DLQ 表格，可直接重送失敗紀錄（詳見 `docs/integration/webhook-dashboard.md`）。
+* Portal「Webhook 設定」：`/webhook/endpoints`（DEV‑010）
+  * 可查詢/分頁/篩選每個租戶的 Webhook 端點，並提供建立/編輯/刪除。
+  * Secret 由系統自動產生（URL safe 32 bytes），只會於建立或「旋轉 Secret」後顯示一次，請立即複製保存。
+  * `Rotate Secret` 透過 `POST /api/webhook-endpoints/{id}/rotate-secret`，同時更新資料庫與 HMAC Header 所需的密鑰。
+  * 管理者可從租戶切換器選擇 All 或特定租戶；選 All 時需於表單中指定 `Tenant`，否則維持目前 Header 之租戶。
 
 **Payload 範例**
 
 ```json
 {
-  "event":"invoice.status.updated",
-  "timestamp":"2025-11-12T09:00:00Z",
-  "data":{"tenantId":"TEN-001","invoiceNo":"AB12345678","status":"UPLOADED"},
-  "retry":0
+  "event": "invoice.status.updated",
+  "timestamp": "2025-11-19T09:00:00Z",
+  "tenant_id": "TEN-001",
+  "data": {
+    "invoice_no": "AB12345678",
+    "status": "ERROR",
+    "normalized_message_type": "F0401",
+    "import_id": 321,
+    "mof_code": "E200",
+    "result_code": "9",
+    "tb_code": "TB-5003",
+    "tb_category": "PLATFORM.DATA_AMOUNT_MISMATCH",
+    "can_auto_retry": false,
+    "recommended_action": "FIX_DATA",
+    "source_layer": "PLATFORM",
+    "source_code": "E200",
+    "source_message": "稅額不符",
+    "legacy_type": "C0401",
+    "turnkey_message_id": 98
+  }
 }
 ```
 
@@ -99,13 +133,14 @@
 > * `Invoice/InvoiceItem`：僅當同一發票號碼的所有檢核通過才寫入 DB；若任一欄位錯誤會 rollback 該張發票（及其明細），但其他發票不受影響。
 > * `ImportFileLog`：記錄批次事件（`UPLOAD_RECEIVED`、`NORMALIZE_SUMMARY`、`NORMALIZE_FAILURE` 等）以及「逐筆錯誤事件」`NORMALIZE_ROW_ERROR`（detail 內含 lineIndex/invoiceNo/欄位/錯誤碼/rawData JSON），方便營運在 Portal 查詢。
 > * **交易注意**：Normalize 以「同一發票」為交易邊界；整批 ImportFile 永遠可查詢，上傳 API 標註 `@Transactional(noRollbackFor = NormalizationException.class)` 以確保 ImportFile/ImportFileItem 已寫入時不會在後續檢核失敗時被回滾。
-> * **結果回饋**：`GET /api/import-files/{id}/result` 會輸出原 CSV 欄位 + `status/error/fieldErrors`；選擇多筆則由 `POST /api/import-files/results/download` 自動打包 ZIP，無須 Agent 自行壓縮。
+> * **結果回饋**：`GET /api/import-files/{id}/result` 會輸出原 CSV 欄位 + `status/error/fieldErrors`，並附上 Turnkey 錯誤欄位 `tbCode/tbCategory/tbCanAutoRetry/tbRecommendedAction/tbResultCode/tbSourceCode/tbSourceMessage`；選擇多筆則由 `POST /api/import-files/results/download` 自動打包 ZIP，無須 Agent 自行壓縮。
 
 * 排程：每 **5 分鐘**掃描待轉檔。
 * 輸出 XML：**僅** `F0401/F0501/F0701/G0401/G0501`；XSD 驗證、壓縮、簽章。
-* 投遞：置檔至 Turnkey 上拋目錄；由 Turnkey 排程上傳 MOF。
+* 投遞：置檔至 Turnkey 上拋目錄；由 Turnkey 排程上傳 MOF。必要時可在 Portal「Turnkey 匯出」頁（`/turnkey/export`，僅 ADMIN）手動觸發 `POST /api/turnkey/export?batchSize=`，系統會即時產生 XML、同步搬移至 `turnbridge.turnkey.b2s-storage-src-base/<MessageFamily>/SRC/` 並於 `ImportFileLog` 寫入 `XML_GENERATED/XML_DELIVERED_TO_TURNKEY`（或 `XML_DELIVERY_FAILURE`）。
 * 回饋：監聽 ACK/ERROR → 更新狀態 → Webhook。
 * 重送：指數退避；超限轉人工佇列（**二階段審核**）。
+* 巡檢：`TurnkeyPickupMonitor` 每 5 分鐘掃描 `SRC/Pack/Upload/ERR` 目錄並輸出指標/告警；Portal 匯出頁右側透過 `GET /api/turnkey/pickup-status` 顯示最新滯留筆數與最後巡檢時間，讓 Ops 不需登入 Turnkey 即可掌握健康狀態。
 
 ---
 

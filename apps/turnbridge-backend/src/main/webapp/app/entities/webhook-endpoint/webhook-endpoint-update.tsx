@@ -5,6 +5,8 @@ import { Translate, ValidatedField, ValidatedForm, translate } from 'react-jhips
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
+import { AUTHORITIES } from 'app/config/constants';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
 
 import { getEntities as getTenants } from 'app/entities/tenant/tenant.reducer';
 import { WebhookStatus } from 'app/shared/model/enumerations/webhook-status.model';
@@ -19,6 +21,7 @@ export const WebhookEndpointUpdate = () => {
   const isNew = id === undefined;
 
   const tenants = useAppSelector(state => state.tenant.entities);
+  const isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [AUTHORITIES.ADMIN]));
   const webhookEndpointEntity = useAppSelector(state => state.webhookEndpoint.entity);
   const loading = useAppSelector(state => state.webhookEndpoint.loading);
   const updating = useAppSelector(state => state.webhookEndpoint.updating);
@@ -53,7 +56,7 @@ export const WebhookEndpointUpdate = () => {
     const entity = {
       ...webhookEndpointEntity,
       ...values,
-      tenant: tenants.find(it => it.id.toString() === values.tenant?.toString()),
+      ...(isAdmin && { tenant: tenants.find(it => it.id.toString() === values.tenant?.toString()) }),
     };
 
     if (isNew) {
@@ -67,7 +70,6 @@ export const WebhookEndpointUpdate = () => {
     isNew
       ? {}
       : {
-          status: 'ACTIVE',
           ...webhookEndpointEntity,
           tenant: webhookEndpointEntity?.tenant?.id,
         };
@@ -168,22 +170,24 @@ export const WebhookEndpointUpdate = () => {
               <UncontrolledTooltip target="statusLabel">
                 <Translate contentKey="turnbridgeBackendApp.webhookEndpoint.help.status" />
               </UncontrolledTooltip>
-              <ValidatedField
-                id="webhook-endpoint-tenant"
-                name="tenant"
-                data-cy="tenant"
-                label={translate('turnbridgeBackendApp.webhookEndpoint.tenant')}
-                type="select"
-              >
-                <option value="" key="0" />
-                {tenants
-                  ? tenants.map(otherEntity => (
-                      <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.name}
-                      </option>
-                    ))
-                  : null}
-              </ValidatedField>
+              {isAdmin && (
+                <ValidatedField
+                  id="webhook-endpoint-tenant"
+                  name="tenant"
+                  data-cy="tenant"
+                  label={translate('turnbridgeBackendApp.webhookEndpoint.tenant')}
+                  type="select"
+                >
+                  <option value="" key="0" />
+                  {tenants
+                    ? tenants.map(otherEntity => (
+                        <option value={otherEntity.id} key={otherEntity.id}>
+                          {otherEntity.name}
+                        </option>
+                      ))
+                    : null}
+                </ValidatedField>
+              )}
               <Button tag={Link} id="cancel-save" data-cy="entityCreateCancelButton" to="/webhook-endpoint" replace color="info">
                 <FontAwesomeIcon icon="arrow-left" />
                 &nbsp;

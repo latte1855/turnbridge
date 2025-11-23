@@ -180,6 +180,20 @@ turnbridge:
   tenant:
     header-name: X-Tenant-Code
     default-code: ""
+  turnkey:
+    inbox-dir: ${TURNBRIDGE_TURNKEY_INBOX:target/turnkey/INBOX}
+    filename-prefix: FGEXPORT
+    tenant-sub-directory: true
+    b2s-storage-src-base: ${TURNBRIDGE_TURNKEY_B2S_SRC:}
+    process-result-base: ${TURNBRIDGE_TURNKEY_PROCESS_RESULT:}
+    export-cron: '0 */5 * * * *'
+    export-batch-size: 200
+    pickup-monitor-cron: '30 */5 * * * *'
+    pickup-max-age-minutes: 10
+    pack-max-age-minutes: 10
+    process-result-cron: '15 */5 * * * *'
+webhook:
+  retry-cron: '0 */1 * * * *'
 
 # Properties to be exposed on the /info management endpoint
 info:

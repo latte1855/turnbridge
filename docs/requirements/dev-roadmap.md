@@ -137,13 +137,48 @@
 
 | Task        | 描述                                    | 估工 | 完成定義                            |
 | ----------- | ------------------------------------- | -- | ------------------------------- |
-| **DEV-006** | XML Builder：FG XML + XSD 驗證           | 5d | XSD validate pass；產生 /INBOX     |
+| **DEV-006** | XML Builder：FG XML + XSD 驗證           | 5d | XSD validate pass；產生 /INBOX <br/>註：Turnkey Gateway JAR 研究紀錄見 `docs/turnkey/jar-study.md` |
 | **DEV-007** | Turnkey Pickup：投遞流程 + mock-turnkey 整合 | 3d | mock-turnkey 收到 XML；回 ACK       |
 | **DEV-008** | **Turnkey Feedback Parser**（重要新增）     | 5d | 解析 ACK/ERROR → InvoiceStatus 更新 |
 | **DEV-009** | Webhook Deliver：HMAC + Retry + DLQ    | 4d | newman-smoke/timeout case pass  |
 | **DEV-010** | Webhook Registration + Secret Rotate  | 3d | UI 可設定 URL/secret/events        |
 | **DEV-020** | （Enhance）Admin Impersonation        | 3d | 管理者可切換成租戶帳號上傳/查詢（供營運排障） |
+| **DEV-021** | （Enhance）整合 Turnkey JAR 執行上傳/下載 | 3d | 研究是否可直接呼叫 Turnkey jar（或 shell wrapper）進行上拋/下載，自動化佈署流程 |
 
+> Jar 研究： `/docs/turnkey/jar-study.md` 已整理 Turnkey Gateway API 3.1.2 的結構與後續實作方向。下一步將依該筆記整合 Transformer/Validator。  
+
+> [2025-11-18] `TurnkeyXmlBuilder` 已支援 F0401/F0501/F0701/G0401/G0501 產檔，並透過 ImportFileItem.rawData 補齊作廢/註銷/折讓欄位；官方 Validator 缺少 CBSet 時會紀錄警告後跳過（詳見 `docs/turnkey/jar-study.md §4`）。
+
+> [2025-11-18] `TurnkeyXmlExportService` 串接 Builder，依 `turnbridge.turnkey.*` 設定將 XML 寫入 INBOX（預設 `target/turnkey/INBOX/<tenant>/`），並於 ImportFileLog 紀錄 `XML_GENERATED` / `XML_GENERATE_FAILURE`。
+
+> [2025-11-19] `TurnkeyErrorMapper` 已依《Turnkey 使用說明書 v3.9》補齊 4002/4003/4004、5001–5004、9001–9004 等錯誤碼映射，ProcessResult Webhook 會帶出 `tbCode` 與建議處理策略，詳見 `docs/spec/turnbridge_turnkey_error_mapping.md §5.4`。
+
+> [2025-11-19] `invoice.status.updated` payload 已補上 `tb_category/can_auto_retry/recommended_action/source_code/source_message/result_code/legacy_type`，契約請參考 `docs/integration/webhook-contract.md`（OpenAPI 待同步）。
+
+> [2025-11-19] `TurnkeyPickupMonitor` 已接入多維度指標：`turnkey_pickup_stage_files{stage,family}`、`turnkey_pickup_last_scan_epoch`、`turnkey_pickup_alert_total`，並保留原聚合 Gauge；Ops 可據此與 Alertmanager 建立 stage-specific 告警（詳見 `docs/operations/monitoring.md`）。
+
+> [2025-11-20] Import Monitor 表格擴充「TB Summary」欄位（透過 `Invoice` TB 欄位聚合）與匯出結果 CSV，讓營運可以直接在列表/結果檔中檢視 Turnkey 錯誤集中狀態（`docs/spec/turnbridge-srs-v1.0.md`、`AGENTS.md` 已同步說明）。
+
+> [2025-11-21] 開始實作 Webhook Dashboard，提供 `GET /api/dashboard/webhook-tb-summary`、`GET /api/dashboard/webhook-dlq`、`POST /api/dashboard/webhook-dlq/{id}/resend`，前端 Route `/dashboard/webhook` 展示 TB summary 卡片與 DLQ table，詳見 `docs/integration/webhook-dashboard.md`。
+> [2025-11-22] Webhook Dashboard DLQ 列表新增分頁（`page/size` + `JhiPagination`），TB Summary 卡片可連到對應 Import Monitor，並在無資料時提供 sample fallback，方便測試。
+> [2025-11-22] Webhook Registration（Portal `/webhook/endpoints`）完成：支援列表查詢/篩選、建立/編輯/刪除端點、以及 `Rotate Secret` 操作（對應 `POST /api/webhook-endpoints/{id}/rotate-secret`），Secret 自動產生且僅顯示一次，詳見 `docs/integration/webhook-dashboard.md §2` 與 `AGENTS.md §4`。
+> [2025-11-23] Turnkey 手動匯出頁新增 ADMIN 權限提示（含當前租戶視角），並提供 ImportFileLog detail 彈窗，方便營運快速檢閱/複製 detail 內容。
+> [2025-11-23] 新增 `GET /api/turnkey/pickup-status`（由 `TurnkeyPickupMonitor` 提供最新巡檢快照），Portal `/turnkey/export` 右側同步顯示 `SRC/Pack/Upload/ERR` 滯留數與最後巡檢時間，方便營運在不登入 Turnkey 主機的情況下掌握健康狀態。
+
+### 2.1 目前進度摘要
+
+| Task | 狀態 | 摘要 |
+| --- | --- | --- |
+| DEV-000 | ✅ 完成 | 多租戶 Header/RLS skeleton 已套用於 Import/Invoice，並有整合測試（UploadServiceIT 等）驗證。 |
+| DEV-001 | ✅ 完成 | `POST /api/v1/upload/{type}` 可接收 CSV/ZIP，回傳 importId，UploadService/IT 驗證通過。 |
+| DEV-002 | ✅ 完成 | Normalize 前檢查 999 明細、不拆單；超量回 `ITEM_LIMIT_EXCEEDED`。 |
+| DEV-003 | ✅ 完成 | NormalizationService 映射舊制→F/G，維持 `legacyType/rawLine`。 |
+| DEV-004 | ✅ 完成 | ImportFileLog/NORMALIZE_* 事件齊備，可記錄逐行錯誤。 |
+| DEV-005 | ✅ 完成 | ERD/Migration 與 SRS §6 一致，JDL/Liquibase 已同步。 |
+| DEV-006 | ✅ 完成 | TurnkeyXmlBuilder + ExportService + Scheduler（`turnbridge.turnkey.export-cron`），並新增 `turnbridge.turnkey.b2s-storage-src-base` 自動搬移至 B2SSTORAGE；Portal/Ops 可透過 `/turnkey/export`（或 `POST /api/turnkey/export?batchSize=`）即時觸發匯出、查看匯出歷史與 ImportFileLog 摘要，並連結到 Import Monitor / Webhook 儀表板 / Grafana。TurnkeyPickupMonitor 會依 `pickup-monitor-cron` 產出 metrics（`turnkey_pickup_*`），`GET /api/turnkey/pickup-status` 已供 Portal 顯示巡檢卡片；TurnkeyProcessResultService 依 `process-result-base` 解析 XML、套用 TB 錯誤碼並觸發 `invoice.status.updated` webhook，並新增 `turnkey_process_result_total`、`turnkey_process_result_last_success_epoch` 指標；`webhook.retry-cron` 驅動重送/DLQ（4 次：0s→1m→5m→15m）。 |
+ | DEV-010 | ✅ 完成 | Portal `/webhook/endpoints` 表單已重新綁定欄位並通過必填/URL 驗證，新增、編輯、Rotate Secret 均能正確帶入/儲存 `name/targetUrl/status/tenant`。 |
+> TODO：Portal Webhook Registration 尚缺自動化測試（新增/編輯/Rotate Secret），待 Phase 2 後半段補完並納入 CI 報告。  
+> TODO：Turnkey 手動匯出頁尚未補上整合測試（含前端流程與 `TurnkeyExportResourceIT` B2S 搬移案例），待 DEV-006 結束前補齊。
 ---
 
 ## **Phase 3 任務（W9–W12）**

@@ -87,6 +87,13 @@ public class InvoiceQueryService extends QueryService<Invoice> {
                 buildSpecification(criteria.getInvoiceStatus(), Invoice_.invoiceStatus),
                 buildRangeSpecification(criteria.getIssuedAt(), Invoice_.issuedAt),
                 buildStringSpecification(criteria.getLegacyType(), Invoice_.legacyType),
+                buildStringSpecification(criteria.getTbCode(), Invoice_.tbCode),
+                buildStringSpecification(criteria.getTbCategory(), Invoice_.tbCategory),
+                buildSpecification(criteria.getTbCanAutoRetry(), Invoice_.tbCanAutoRetry),
+                buildStringSpecification(criteria.getTbRecommendedAction(), Invoice_.tbRecommendedAction),
+                buildStringSpecification(criteria.getTbSourceCode(), Invoice_.tbSourceCode),
+                buildStringSpecification(criteria.getTbSourceMessage(), Invoice_.tbSourceMessage),
+                buildStringSpecification(criteria.getTbResultCode(), Invoice_.tbResultCode),
                 buildSpecification(criteria.getImportFileId(), root -> root.join(Invoice_.importFile, JoinType.LEFT).get(ImportFile_.id)),
                 buildSpecification(criteria.getTenantId(), root -> root.join(Invoice_.tenant, JoinType.LEFT).get(Tenant_.id))
             );

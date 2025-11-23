@@ -39,4 +39,8 @@ public interface ImportFileLogRepository
 
     @Query("select importFileLog from ImportFileLog importFileLog left join fetch importFileLog.importFile where importFileLog.id =:id")
     Optional<ImportFileLog> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Page<ImportFileLog> findByImportFileIdOrderByOccurredAtDesc(Long importFileId, Pageable pageable);
+
+    Page<ImportFileLog> findByEventCodeInOrderByOccurredAtDesc(java.util.List<String> eventCodes, Pageable pageable);
 }

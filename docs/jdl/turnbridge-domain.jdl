@@ -223,6 +223,22 @@ entity Invoice { // extends AbstractAuditingEntity
   issuedAt Instant
   /** 原訊息別 */
   legacyType String maxlength(16)
+
+
+  /** Turnkey TB-xxxx 錯誤碼 */
+  tbCode String maxlength(32)
+  /** TB 錯誤分類（例：PLATFORM.DATA_AMOUNT_MISMATCH）*/
+  tbCategory String maxlength(128)
+  /** 是否允許系統自動重送 */
+  tbCanAutoRetry Boolean
+  /** 建議營運處置（FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM） */
+  tbRecommendedAction String maxlength(64)
+  /** 平台原始錯誤碼（ProcessResult ErrorCode） */
+  tbSourceCode String maxlength(64)
+  /** 平台錯誤訊息 */
+  tbSourceMessage String maxlength(1024)
+  /** ProcessResult ResultCode（0=成功） */
+  tbResultCode String maxlength(16)
 }
 
 /** 發票/折讓明細 */
@@ -307,6 +323,12 @@ entity WebhookDeliveryLog { // extends AbstractAuditingEntity
   lastError String maxlength(1024)
   /** 投遞完成時間 */
   deliveredAt Instant
+  /** 下一次投遞時間（排程用） */
+  nextAttemptAt Instant
+  /** 最長鎖定時間，避免重複 worker 併發 */
+  lockedAt Instant
+  /** DLQ 原因（超過上限後紀錄） */
+  dlqReason String maxlength(1024)
 }
 
 /** Manual Resend / AssignNo 審核 / 變更記錄 */

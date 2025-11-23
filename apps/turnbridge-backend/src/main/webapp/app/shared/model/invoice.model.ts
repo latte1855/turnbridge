@@ -20,8 +20,17 @@ export interface IInvoice {
   invoiceStatus?: keyof typeof InvoiceStatus;
   issuedAt?: dayjs.Dayjs | null;
   legacyType?: string | null;
+  tbCode?: string | null;
+  tbCategory?: string | null;
+  tbCanAutoRetry?: boolean | null;
+  tbRecommendedAction?: string | null;
+  tbSourceCode?: string | null;
+  tbSourceMessage?: string | null;
+  tbResultCode?: string | null;
   importFile?: IImportFile;
   tenant?: ITenant | null;
 }
 
-export const defaultValue: Readonly<IInvoice> = {};
+export const defaultValue: Readonly<IInvoice> = {
+  tbCanAutoRetry: false,
+};

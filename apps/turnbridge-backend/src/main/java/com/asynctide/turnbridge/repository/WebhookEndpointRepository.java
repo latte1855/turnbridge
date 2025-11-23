@@ -1,6 +1,7 @@
 package com.asynctide.turnbridge.repository;
 
 import com.asynctide.turnbridge.domain.WebhookEndpoint;
+import com.asynctide.turnbridge.domain.enumeration.WebhookStatus;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WebhookEndpointRepository
     extends JpaRepository<WebhookEndpoint, Long>, JpaSpecificationExecutor<WebhookEndpoint>, QuerydslPredicateExecutor<WebhookEndpoint> {
+
+    List<WebhookEndpoint> findByTenantIdAndStatus(Long tenantId, WebhookStatus status);
+
     default Optional<WebhookEndpoint> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

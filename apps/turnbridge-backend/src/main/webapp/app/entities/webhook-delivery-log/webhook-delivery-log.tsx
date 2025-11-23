@@ -151,6 +151,18 @@ export const WebhookDeliveryLog = () => {
                   <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.deliveredAt">Delivered At</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('deliveredAt')} />
                 </th>
+                <th className="hand" onClick={sort('nextAttemptAt')}>
+                  <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.nextAttemptAt">Next Attempt At</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('nextAttemptAt')} />
+                </th>
+                <th className="hand" onClick={sort('lockedAt')}>
+                  <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.lockedAt">Locked At</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('lockedAt')} />
+                </th>
+                <th className="hand" onClick={sort('dlqReason')}>
+                  <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.dlqReason">Dlq Reason</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('dlqReason')} />
+                </th>
                 <th>
                   <Translate contentKey="turnbridgeBackendApp.webhookDeliveryLog.webhookEndpoint">Webhook Endpoint</Translate>{' '}
                   <FontAwesomeIcon icon="sort" />
@@ -180,6 +192,17 @@ export const WebhookDeliveryLog = () => {
                       <TextFormat type="date" value={webhookDeliveryLog.deliveredAt} format={APP_DATE_FORMAT} />
                     ) : null}
                   </td>
+                  <td>
+                    {webhookDeliveryLog.nextAttemptAt ? (
+                      <TextFormat type="date" value={webhookDeliveryLog.nextAttemptAt} format={APP_DATE_FORMAT} />
+                    ) : null}
+                  </td>
+                  <td>
+                    {webhookDeliveryLog.lockedAt ? (
+                      <TextFormat type="date" value={webhookDeliveryLog.lockedAt} format={APP_DATE_FORMAT} />
+                    ) : null}
+                  </td>
+                  <td>{webhookDeliveryLog.dlqReason}</td>
                   <td>
                     {webhookDeliveryLog.webhookEndpoint ? (
                       <Link to={`/webhook-endpoint/${webhookDeliveryLog.webhookEndpoint.id}`}>

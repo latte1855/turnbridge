@@ -18,7 +18,13 @@ public class InvoiceTestSamples {
             .sellerId("sellerId1")
             .sellerName("sellerName1")
             .taxType("taxType1")
-            .legacyType("legacyType1");
+            .legacyType("legacyType1")
+            .tbCode("tbCode1")
+            .tbCategory("tbCategory1")
+            .tbRecommendedAction("tbRecommendedAction1")
+            .tbSourceCode("tbSourceCode1")
+            .tbSourceMessage("tbSourceMessage1")
+            .tbResultCode("tbResultCode1");
     }
 
     public static Invoice getInvoiceSample2() {
@@ -30,7 +36,13 @@ public class InvoiceTestSamples {
             .sellerId("sellerId2")
             .sellerName("sellerName2")
             .taxType("taxType2")
-            .legacyType("legacyType2");
+            .legacyType("legacyType2")
+            .tbCode("tbCode2")
+            .tbCategory("tbCategory2")
+            .tbRecommendedAction("tbRecommendedAction2")
+            .tbSourceCode("tbSourceCode2")
+            .tbSourceMessage("tbSourceMessage2")
+            .tbResultCode("tbResultCode2");
     }
 
     public static Invoice getInvoiceRandomSampleGenerator() {
@@ -42,6 +54,12 @@ public class InvoiceTestSamples {
             .sellerId(UUID.randomUUID().toString())
             .sellerName(UUID.randomUUID().toString())
             .taxType(UUID.randomUUID().toString())
-            .legacyType(UUID.randomUUID().toString());
+            .legacyType(UUID.randomUUID().toString())
+            .tbCode(UUID.randomUUID().toString())
+            .tbCategory(UUID.randomUUID().toString())
+            .tbRecommendedAction(UUID.randomUUID().toString())
+            .tbSourceCode(UUID.randomUUID().toString())
+            .tbSourceMessage(UUID.randomUUID().toString())
+            .tbResultCode(UUID.randomUUID().toString());
     }
 }

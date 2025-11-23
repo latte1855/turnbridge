@@ -125,6 +125,54 @@ public class Invoice implements Serializable {
     private String legacyType;
 
     /**
+     * Turnkey TB-xxxx 錯誤碼
+     */
+    @Size(max = 32)
+    @Column(name = "tb_code", length = 32)
+    private String tbCode;
+
+    /**
+     * TB 錯誤分類（例：PLATFORM.DATA_AMOUNT_MISMATCH）
+     */
+    @Size(max = 128)
+    @Column(name = "tb_category", length = 128)
+    private String tbCategory;
+
+    /**
+     * 是否允許系統自動重送
+     */
+    @Column(name = "tb_can_auto_retry")
+    private Boolean tbCanAutoRetry;
+
+    /**
+     * 建議營運處置（FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM）
+     */
+    @Size(max = 64)
+    @Column(name = "tb_recommended_action", length = 64)
+    private String tbRecommendedAction;
+
+    /**
+     * 平台原始錯誤碼（ProcessResult ErrorCode）
+     */
+    @Size(max = 64)
+    @Column(name = "tb_source_code", length = 64)
+    private String tbSourceCode;
+
+    /**
+     * 平台錯誤訊息
+     */
+    @Size(max = 1024)
+    @Column(name = "tb_source_message", length = 1024)
+    private String tbSourceMessage;
+
+    /**
+     * ProcessResult ResultCode（0=成功）
+     */
+    @Size(max = 16)
+    @Column(name = "tb_result_code", length = 16)
+    private String tbResultCode;
+
+    /**
      * 匯入檔主檔
      */
     @ManyToOne(optional = false)
@@ -336,6 +384,97 @@ public class Invoice implements Serializable {
         this.legacyType = legacyType;
     }
 
+    public String getTbCode() {
+        return this.tbCode;
+    }
+
+    public Invoice tbCode(String tbCode) {
+        this.setTbCode(tbCode);
+        return this;
+    }
+
+    public void setTbCode(String tbCode) {
+        this.tbCode = tbCode;
+    }
+
+    public String getTbCategory() {
+        return this.tbCategory;
+    }
+
+    public Invoice tbCategory(String tbCategory) {
+        this.setTbCategory(tbCategory);
+        return this;
+    }
+
+    public void setTbCategory(String tbCategory) {
+        this.tbCategory = tbCategory;
+    }
+
+    public Boolean getTbCanAutoRetry() {
+        return this.tbCanAutoRetry;
+    }
+
+    public Invoice tbCanAutoRetry(Boolean tbCanAutoRetry) {
+        this.setTbCanAutoRetry(tbCanAutoRetry);
+        return this;
+    }
+
+    public void setTbCanAutoRetry(Boolean tbCanAutoRetry) {
+        this.tbCanAutoRetry = tbCanAutoRetry;
+    }
+
+    public String getTbRecommendedAction() {
+        return this.tbRecommendedAction;
+    }
+
+    public Invoice tbRecommendedAction(String tbRecommendedAction) {
+        this.setTbRecommendedAction(tbRecommendedAction);
+        return this;
+    }
+
+    public void setTbRecommendedAction(String tbRecommendedAction) {
+        this.tbRecommendedAction = tbRecommendedAction;
+    }
+
+    public String getTbSourceCode() {
+        return this.tbSourceCode;
+    }
+
+    public Invoice tbSourceCode(String tbSourceCode) {
+        this.setTbSourceCode(tbSourceCode);
+        return this;
+    }
+
+    public void setTbSourceCode(String tbSourceCode) {
+        this.tbSourceCode = tbSourceCode;
+    }
+
+    public String getTbSourceMessage() {
+        return this.tbSourceMessage;
+    }
+
+    public Invoice tbSourceMessage(String tbSourceMessage) {
+        this.setTbSourceMessage(tbSourceMessage);
+        return this;
+    }
+
+    public void setTbSourceMessage(String tbSourceMessage) {
+        this.tbSourceMessage = tbSourceMessage;
+    }
+
+    public String getTbResultCode() {
+        return this.tbResultCode;
+    }
+
+    public Invoice tbResultCode(String tbResultCode) {
+        this.setTbResultCode(tbResultCode);
+        return this;
+    }
+
+    public void setTbResultCode(String tbResultCode) {
+        this.tbResultCode = tbResultCode;
+    }
+
     public ImportFile getImportFile() {
         return this.importFile;
     }
@@ -400,6 +539,13 @@ public class Invoice implements Serializable {
             ", invoiceStatus='" + getInvoiceStatus() + "'" +
             ", issuedAt='" + getIssuedAt() + "'" +
             ", legacyType='" + getLegacyType() + "'" +
+            ", tbCode='" + getTbCode() + "'" +
+            ", tbCategory='" + getTbCategory() + "'" +
+            ", tbCanAutoRetry='" + getTbCanAutoRetry() + "'" +
+            ", tbRecommendedAction='" + getTbRecommendedAction() + "'" +
+            ", tbSourceCode='" + getTbSourceCode() + "'" +
+            ", tbSourceMessage='" + getTbSourceMessage() + "'" +
+            ", tbResultCode='" + getTbResultCode() + "'" +
             "}";
     }
 }

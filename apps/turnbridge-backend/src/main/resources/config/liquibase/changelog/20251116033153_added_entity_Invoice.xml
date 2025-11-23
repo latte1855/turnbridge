@@ -56,6 +56,27 @@
             <column name="legacy_type" type="varchar(16)" remarks="原訊息別">
                 <constraints nullable="true" />
             </column>
+            <column name="tb_code" type="varchar(32)" remarks="Turnkey TB-xxxx 錯誤碼">
+                <constraints nullable="true" />
+            </column>
+            <column name="tb_category" type="varchar(128)" remarks="TB 錯誤分類（例：PLATFORM.DATA_AMOUNT_MISMATCH）">
+                <constraints nullable="true" />
+            </column>
+            <column name="tb_can_auto_retry" type="boolean" remarks="是否允許系統自動重送">
+                <constraints nullable="true" />
+            </column>
+            <column name="tb_recommended_action" type="varchar(64)" remarks="建議營運處置（FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM）">
+                <constraints nullable="true" />
+            </column>
+            <column name="tb_source_code" type="varchar(64)" remarks="平台原始錯誤碼（ProcessResult ErrorCode）">
+                <constraints nullable="true" />
+            </column>
+            <column name="tb_source_message" type="varchar(1024)" remarks="平台錯誤訊息">
+                <constraints nullable="true" />
+            </column>
+            <column name="tb_result_code" type="varchar(16)" remarks="ProcessResult ResultCode（0=成功）">
+                <constraints nullable="true" />
+            </column>
             <column name="import_file_id" type="bigint">
                 <constraints nullable="false" />
             </column>
@@ -98,6 +119,13 @@
             <column name="invoice_status" type="string"/>
             <column name="issued_at" type="date"/>
             <column name="legacy_type" type="string"/>
+            <column name="tb_code" type="string"/>
+            <column name="tb_category" type="string"/>
+            <column name="tb_can_auto_retry" type="boolean"/>
+            <column name="tb_recommended_action" type="string"/>
+            <column name="tb_source_code" type="string"/>
+            <column name="tb_source_message" type="string"/>
+            <column name="tb_result_code" type="string"/>
             <column name="tenant_id" type="numeric"/>
             <column name="import_file_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->

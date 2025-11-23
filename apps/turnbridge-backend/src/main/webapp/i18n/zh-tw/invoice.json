@@ -32,6 +32,13 @@
       "invoiceStatus": "Invoice Status",
       "issuedAt": "Issued At",
       "legacyType": "Legacy Type",
+      "tbCode": "Tb Code",
+      "tbCategory": "Tb Category",
+      "tbCanAutoRetry": "Tb Can Auto Retry",
+      "tbRecommendedAction": "Tb Recommended Action",
+      "tbSourceCode": "Tb Source Code",
+      "tbSourceMessage": "Tb Source Message",
+      "tbResultCode": "Tb Result Code",
       "importFile": "Import File",
       "tenant": "Tenant",
       "help": {
@@ -48,7 +55,14 @@
         "normalizedJson": "正規化 JSON",
         "invoiceStatus": "發票狀態",
         "issuedAt": "開立時間",
-        "legacyType": "原訊息別"
+        "legacyType": "原訊息別",
+        "tbCode": "Turnkey TB-xxxx 錯誤碼",
+        "tbCategory": "TB 錯誤分類（例：PLATFORM.DATA_AMOUNT_MISMATCH）",
+        "tbCanAutoRetry": "是否允許系統自動重送",
+        "tbRecommendedAction": "建議營運處置（FIX_DATA / FIX_LIFECYCLE_FLOW / CHECK_PLATFORM）",
+        "tbSourceCode": "平台原始錯誤碼（ProcessResult ErrorCode）",
+        "tbSourceMessage": "平台錯誤訊息",
+        "tbResultCode": "ProcessResult ResultCode（0=成功）"
       }
     }
   }

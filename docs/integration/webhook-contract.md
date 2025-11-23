@@ -50,11 +50,11 @@ Authorization: Bearer <token>
 | 事件 | 說明 | 常見欄位 |
 | --- | --- | --- |
 | `upload.completed` | 匯入完成（成功/失敗筆數） | `import_id`、`success_count`、`error_count` |
-| `invoice.status.updated` | 發票狀態改變（例如 ACK/ERROR） | `invoice_no`、`status`、`mof_code`、`message` |
+| `invoice.status.updated` | 發票狀態改變（例如 ACK/ERROR） | `invoice_no`、`status`、`normalized_message_type`、`mof_code`、`tb_code`、`tb_category`、`can_auto_retry`、`recommended_action`、`source_layer`、`source_code`、`source_message`、`result_code`、`legacy_type`、`import_id`、`turnkey_message_id` |
 | `turnkey.feedback.daily-summary` | Turnkey 回饋日報 | `date`、`expected`、`ack_count`、`error_count` |
 | `invoice.manual.issued` | 人工建立發票 | `invoice_no`、`operator` |
 | `invoice.manual.cancelled` | 人工作廢 | `invoice_no`、`operator` |
-| `webhook.delivery.failed` | （選用）系統通知某 Webhook 已進 DLQ | `webhook_id`、`delivery_id` |
+| `webhook.delivery.failed` | （選用）系統通知某 Webhook 已進 DLQ | `failed_delivery_id`、`webhook_endpoint_id`、`event_failed`、`attempts`、`last_error`、`dlq_reason` |
 
 > 如需新增事件，須更新本檔、`AGENTS.md`、`DECISION_LOG`，並發佈給客戶。
 
@@ -87,12 +87,41 @@ Authorization: Bearer <token>
 }
 ```
 
-### 3.3 Schema 對照
+### 3.3 範例 Payload（invoice.status.updated）
+
+```json
+{
+  "delivery_id": "06f50bc6-2c18-40d0-ab0d-296a4ad1d7b9",
+  "event": "invoice.status.updated",
+  "timestamp": "2025-11-12T09:00:00Z",
+  "tenant_id": "TEN-001",
+  "data": {
+    "invoice_no": "AB12345678",
+    "status": "ACKED",
+    "normalized_message_type": "F0401",
+    "import_id": 321,
+    "mof_code": "E200",
+    "tb_code": "TB-5003",
+    "tb_category": "PLATFORM.DATA_AMOUNT_MISMATCH",
+    "can_auto_retry": false,
+    "recommended_action": "FIX_DATA",
+    "source_layer": "PLATFORM",
+    "source_code": "E200",
+    "source_message": "Tax amount mismatch",
+    "result_code": "9",
+    "message": "Tax amount mismatch",
+    "turnkey_message_id": 98,
+    "legacy_type": "C0401"
+  }
+}
+```
+
+### 3.4 Schema 對照
 
 | 事件 | Schema（`openapi-turnbridge-v1.yml`） | 重要欄位 | 說明 |
 | --- | --- | --- | --- |
 | `upload.completed` | `UploadCompletedPayload` | `import_id`、`success_count`、`error_count` | 來源 `ImportFile`，`error_count>0` 需附 `importStatusUrl` |
-| `invoice.status.updated` | `InvoiceStatusPayload` | `invoice_no`、`status`、`mof_code`、`message` | `status ∈ {UPLOADED, ACKED, ERROR, VOIDED}` |
+| `invoice.status.updated` | `InvoiceStatusPayload` | `invoice_no`、`status`、`normalized_message_type`、`mof_code`、`tb_code`、`tb_category`、`can_auto_retry`、`recommended_action`、`source_layer`、`source_code`、`source_message`、`result_code`、`legacy_type`、`import_id`、`turnkey_message_id` | `status ∈ {UPLOADED, ACKED, ERROR, VOIDED}` |
 | `turnkey.feedback.daily-summary` | `TurnkeySummaryPayload` | `date`、`expected`、`ack_count`、`error_count` | 對應 Turnkey 回饋日報 |
 | `invoice.manual.issued` | `InvoiceManualPayload` | `operator`, `invoice_no` | 由人工 UI 觸發 |
 | `webhook.delivery.failed` | `WebhookDeliveryFailedPayload` | `delivery_id`、`webhook_id`、`attempts` | 可選事件 |

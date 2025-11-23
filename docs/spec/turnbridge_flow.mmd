@@ -1,0 +1,80 @@
+```mermaid
+flowchart TD
+    %% Turnbridge × Turnkey × MOF 整體流程（F/G 新制）
+
+    %% 角色區塊
+    subgraph CLIENT [Client / 上游系統]
+        C1[上游系統\n(ERP / POS / CSV App)]
+    end
+
+    subgraph TURNBRIDGE [Turnbridge 平台]
+        TB1[上傳 API\nPOST /upload/invoice]
+        TB2[Normalize Engine\n舊制欄位清洗/防呆]
+        TB3[FG Mapping\nA/B/C/D → F/G Canonical]
+        TB4[XML Builder\n依 MIG 4.1 產生 XML]
+        TB5[Result Parser\n解析 ProcessResult]
+        TB6[Error Mapper\n平台錯誤碼 → 內部錯誤碼]
+        TB7[Webhook Sender\n通知客戶成功/失敗]
+        TB8[Retry Manager\n重送/人工處理決策]
+    end
+
+    subgraph TURNKEY [Turnkey 傳輸工具]
+        TK1[監控 SRC 目錄\nUpCast/B2SSTORAGE/.. /SRC]
+        TK2[MIG/XSD 檢查\n欄位/長度/稅額/載具]
+        TK3[XML 簽章(PFX)\nzip 打包 → Pack/Upload/]
+        TK4[上傳 MOF\nHTTPS 443]
+        TK5[下載 ProcessResult\n寫入 Unpack/ + DB]
+    end
+
+    subgraph MOF [MOF 電子發票整合服務平台]
+        M1[驗證 XSD/MIG]
+        M2[生命週期檢查\n(開立/作廢/註銷)]
+        M3[產生 ProcessResult\n(ResultCode, ErrorCode)]
+    end
+
+    %% 主線流程
+    C1 -->|CSV / JSON\nlegacyType + rawLine| TB1
+    TB1 --> TB2
+    TB2 --> TB3
+    TB3 --> TB4
+    TB4 -->|F/G XML 檔\n(F0401/F0501/F0701/G0401/G0501)| TK1
+
+    TK1 --> TK2
+
+    %% MIG 檢查分支
+    TK2 -->|OK| TK3
+    TK2 -->|ERR(MIG 格式錯誤)| TB5_ERR[MIG 格式錯誤\n→ Turnbridge 解析 ERR/Log]
+
+    TK3 --> TK4
+    TK4 --> M1
+
+    M1 --> M2
+    M2 --> M3
+
+    M3 -->|ProcessResult XML| TK5
+    TK5 -->|寫入 Unpack/ + DB| TB5
+
+    %% Turnbridge 結果處理
+    TB5 --> TB6
+
+    TB6 -->|ResultCode = 0| TB7_OK[Webhook：/invoice/success]
+    TB6 -->|ResultCode ≠ 0| TB7_ERR[Webhook：/invoice/error\n附帶 errorCode, rawLine]
+
+    TB7_OK --> C1
+    TB7_ERR --> C1
+    TB7_ERR --> TB8
+
+    %% 重送決策
+    TB8 -->|可自動重送\n(平台暫時性錯誤)| TB4
+    TB8 -->|需人工修正\n(資料/生命週期錯誤)| C_MANUAL[人工介入\n修正資料/作其他訊息]
+
+    %% MIG 格式錯誤回路
+    TB5_ERR --> TB7_ERR
+
+    %% 標註說明
+    classDef good fill:#e0ffe0,stroke:#008000,stroke-width:1px;
+    classDef bad fill:#ffe0e0,stroke:#cc0000,stroke-width:1px;
+    class TB7_OK good;
+    class TB7_ERR bad;
+    class TB5_ERR bad;
+```

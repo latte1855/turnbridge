@@ -81,6 +81,9 @@ public class WebhookDeliveryLogGatlingTest extends Simulation {
                                 ", \"attempts\": 0" +
                                 ", \"lastError\": \"SAMPLE_TEXT\"" +
                                 ", \"deliveredAt\": \"2020-01-01T00:00:00.000Z\"" +
+                                ", \"nextAttemptAt\": \"2020-01-01T00:00:00.000Z\"" +
+                                ", \"lockedAt\": \"2020-01-01T00:00:00.000Z\"" +
+                                ", \"dlqReason\": \"SAMPLE_TEXT\"" +
                                 "}"
                             )
                         )

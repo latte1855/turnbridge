@@ -20,8 +20,8 @@ const apiUrl = 'api/webhook-endpoints';
 
 export const getEntities = createAsyncThunk(
   'webhookEndpoint/fetch_entity_list',
-  async ({ page, size, sort }: IQueryParams) => {
-    const requestUrl = `${apiUrl}?${sort ? `page=${page}&size=${size}&sort=${sort}&` : ''}cacheBuster=${new Date().getTime()}`;
+  async ({ page, size, sort, tenantId }: IQueryParams & { tenantId?: number }) => {
+    const requestUrl = `${apiUrl}?${sort ? `page=${page}&size=${size}&sort=${sort}&` : ''}${tenantId ? `tenantId.equals=${tenantId}&` : ''}cacheBuster=${new Date().getTime()}`;
     return axios.get<IWebhookEndpoint[]>(requestUrl);
   },
   { serializeError: serializeAxiosError },

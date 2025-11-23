@@ -12,11 +12,25 @@ public class WebhookDeliveryLogTestSamples {
     private static final AtomicInteger intCount = new AtomicInteger(random.nextInt() + (2 * Short.MAX_VALUE));
 
     public static WebhookDeliveryLog getWebhookDeliveryLogSample1() {
-        return new WebhookDeliveryLog().id(1L).deliveryId("deliveryId1").event("event1").httpStatus(1).attempts(1).lastError("lastError1");
+        return new WebhookDeliveryLog()
+            .id(1L)
+            .deliveryId("deliveryId1")
+            .event("event1")
+            .httpStatus(1)
+            .attempts(1)
+            .lastError("lastError1")
+            .dlqReason("dlqReason1");
     }
 
     public static WebhookDeliveryLog getWebhookDeliveryLogSample2() {
-        return new WebhookDeliveryLog().id(2L).deliveryId("deliveryId2").event("event2").httpStatus(2).attempts(2).lastError("lastError2");
+        return new WebhookDeliveryLog()
+            .id(2L)
+            .deliveryId("deliveryId2")
+            .event("event2")
+            .httpStatus(2)
+            .attempts(2)
+            .lastError("lastError2")
+            .dlqReason("dlqReason2");
     }
 
     public static WebhookDeliveryLog getWebhookDeliveryLogRandomSampleGenerator() {
@@ -26,6 +40,7 @@ public class WebhookDeliveryLogTestSamples {
             .event(UUID.randomUUID().toString())
             .httpStatus(intCount.incrementAndGet())
             .attempts(intCount.incrementAndGet())
-            .lastError(UUID.randomUUID().toString());
+            .lastError(UUID.randomUUID().toString())
+            .dlqReason(UUID.randomUUID().toString());
     }
 }

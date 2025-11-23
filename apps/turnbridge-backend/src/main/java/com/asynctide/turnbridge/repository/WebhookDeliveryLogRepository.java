@@ -1,6 +1,8 @@
 package com.asynctide.turnbridge.repository;
 
 import com.asynctide.turnbridge.domain.WebhookDeliveryLog;
+import com.asynctide.turnbridge.domain.enumeration.DeliveryResult;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -44,4 +46,8 @@ public interface WebhookDeliveryLogRepository
         "select webhookDeliveryLog from WebhookDeliveryLog webhookDeliveryLog left join fetch webhookDeliveryLog.webhookEndpoint where webhookDeliveryLog.id =:id"
     )
     Optional<WebhookDeliveryLog> findOneWithToOneRelationships(@Param("id") Long id);
+
+    List<WebhookDeliveryLog> findByStatusAndNextAttemptAtLessThanEqual(DeliveryResult status, Instant threshold);
+
+    Page<WebhookDeliveryLog> findByStatus(DeliveryResult status, Pageable pageable);
 }

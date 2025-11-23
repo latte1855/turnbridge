@@ -56,6 +56,12 @@ public class WebhookDeliveryLogCriteria implements Serializable, Criteria {
 
     private InstantFilter deliveredAt;
 
+    private InstantFilter nextAttemptAt;
+
+    private InstantFilter lockedAt;
+
+    private StringFilter dlqReason;
+
     private LongFilter webhookEndpointId;
 
     private Boolean distinct;
@@ -71,6 +77,9 @@ public class WebhookDeliveryLogCriteria implements Serializable, Criteria {
         this.attempts = other.optionalAttempts().map(IntegerFilter::copy).orElse(null);
         this.lastError = other.optionalLastError().map(StringFilter::copy).orElse(null);
         this.deliveredAt = other.optionalDeliveredAt().map(InstantFilter::copy).orElse(null);
+        this.nextAttemptAt = other.optionalNextAttemptAt().map(InstantFilter::copy).orElse(null);
+        this.lockedAt = other.optionalLockedAt().map(InstantFilter::copy).orElse(null);
+        this.dlqReason = other.optionalDlqReason().map(StringFilter::copy).orElse(null);
         this.webhookEndpointId = other.optionalWebhookEndpointId().map(LongFilter::copy).orElse(null);
         this.distinct = other.distinct;
     }
@@ -232,6 +241,63 @@ public class WebhookDeliveryLogCriteria implements Serializable, Criteria {
         this.deliveredAt = deliveredAt;
     }
 
+    public InstantFilter getNextAttemptAt() {
+        return nextAttemptAt;
+    }
+
+    public Optional<InstantFilter> optionalNextAttemptAt() {
+        return Optional.ofNullable(nextAttemptAt);
+    }
+
+    public InstantFilter nextAttemptAt() {
+        if (nextAttemptAt == null) {
+            setNextAttemptAt(new InstantFilter());
+        }
+        return nextAttemptAt;
+    }
+
+    public void setNextAttemptAt(InstantFilter nextAttemptAt) {
+        this.nextAttemptAt = nextAttemptAt;
+    }
+
+    public InstantFilter getLockedAt() {
+        return lockedAt;
+    }
+
+    public Optional<InstantFilter> optionalLockedAt() {
+        return Optional.ofNullable(lockedAt);
+    }
+
+    public InstantFilter lockedAt() {
+        if (lockedAt == null) {
+            setLockedAt(new InstantFilter());
+        }
+        return lockedAt;
+    }
+
+    public void setLockedAt(InstantFilter lockedAt) {
+        this.lockedAt = lockedAt;
+    }
+
+    public StringFilter getDlqReason() {
+        return dlqReason;
+    }
+
+    public Optional<StringFilter> optionalDlqReason() {
+        return Optional.ofNullable(dlqReason);
+    }
+
+    public StringFilter dlqReason() {
+        if (dlqReason == null) {
+            setDlqReason(new StringFilter());
+        }
+        return dlqReason;
+    }
+
+    public void setDlqReason(StringFilter dlqReason) {
+        this.dlqReason = dlqReason;
+    }
+
     public LongFilter getWebhookEndpointId() {
         return webhookEndpointId;
     }
@@ -288,6 +354,9 @@ public class WebhookDeliveryLogCriteria implements Serializable, Criteria {
             Objects.equals(attempts, that.attempts) &&
             Objects.equals(lastError, that.lastError) &&
             Objects.equals(deliveredAt, that.deliveredAt) &&
+            Objects.equals(nextAttemptAt, that.nextAttemptAt) &&
+            Objects.equals(lockedAt, that.lockedAt) &&
+            Objects.equals(dlqReason, that.dlqReason) &&
             Objects.equals(webhookEndpointId, that.webhookEndpointId) &&
             Objects.equals(distinct, that.distinct)
         );
@@ -295,7 +364,21 @@ public class WebhookDeliveryLogCriteria implements Serializable, Criteria {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, deliveryId, event, status, httpStatus, attempts, lastError, deliveredAt, webhookEndpointId, distinct);
+        return Objects.hash(
+            id,
+            deliveryId,
+            event,
+            status,
+            httpStatus,
+            attempts,
+            lastError,
+            deliveredAt,
+            nextAttemptAt,
+            lockedAt,
+            dlqReason,
+            webhookEndpointId,
+            distinct
+        );
     }
 
     // prettier-ignore
@@ -310,6 +393,9 @@ public class WebhookDeliveryLogCriteria implements Serializable, Criteria {
             optionalAttempts().map(f -> "attempts=" + f + ", ").orElse("") +
             optionalLastError().map(f -> "lastError=" + f + ", ").orElse("") +
             optionalDeliveredAt().map(f -> "deliveredAt=" + f + ", ").orElse("") +
+            optionalNextAttemptAt().map(f -> "nextAttemptAt=" + f + ", ").orElse("") +
+            optionalLockedAt().map(f -> "lockedAt=" + f + ", ").orElse("") +
+            optionalDlqReason().map(f -> "dlqReason=" + f + ", ").orElse("") +
             optionalWebhookEndpointId().map(f -> "webhookEndpointId=" + f + ", ").orElse("") +
             optionalDistinct().map(f -> "distinct=" + f + ", ").orElse("") +
         "}";

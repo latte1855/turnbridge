@@ -16,6 +16,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TurnkeyMessageRepository
     extends JpaRepository<TurnkeyMessage, Long>, JpaSpecificationExecutor<TurnkeyMessage>, QuerydslPredicateExecutor<TurnkeyMessage> {
+
+    boolean existsByPayloadPath(String payloadPath);
+
     default Optional<TurnkeyMessage> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

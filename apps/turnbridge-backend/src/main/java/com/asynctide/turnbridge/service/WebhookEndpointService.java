@@ -1,10 +1,15 @@
 package com.asynctide.turnbridge.service;
 
 import com.asynctide.turnbridge.domain.WebhookEndpoint;
+import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.repository.WebhookEndpointRepository;
 import com.asynctide.turnbridge.service.dto.WebhookEndpointDTO;
+import com.asynctide.turnbridge.service.dto.WebhookSecretRotateDTO;
 import com.asynctide.turnbridge.service.mapper.WebhookEndpointMapper;
+import com.asynctide.turnbridge.tenant.TenantContextHolder;
 import com.querydsl.core.types.Predicate;
+import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -19,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * Service Implementation for managing {@link com.asynctide.turnbridge.domain.WebhookEndpoint}.
@@ -30,12 +37,18 @@ public class WebhookEndpointService {
     private static final Logger LOG = LoggerFactory.getLogger(WebhookEndpointService.class);
 
     private final WebhookEndpointRepository webhookEndpointRepository;
-
     private final WebhookEndpointMapper webhookEndpointMapper;
+    private final TenantRepository tenantRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
 
-    public WebhookEndpointService(WebhookEndpointRepository webhookEndpointRepository, WebhookEndpointMapper webhookEndpointMapper) {
+    public WebhookEndpointService(
+        WebhookEndpointRepository webhookEndpointRepository,
+        WebhookEndpointMapper webhookEndpointMapper,
+        TenantRepository tenantRepository
+    ) {
         this.webhookEndpointRepository = webhookEndpointRepository;
         this.webhookEndpointMapper = webhookEndpointMapper;
+        this.tenantRepository = tenantRepository;
     }
 
     /**
@@ -47,6 +60,10 @@ public class WebhookEndpointService {
     public WebhookEndpointDTO save(WebhookEndpointDTO webhookEndpointDTO) {
         LOG.debug("Request to save WebhookEndpoint : {}", webhookEndpointDTO);
         WebhookEndpoint webhookEndpoint = webhookEndpointMapper.toEntity(webhookEndpointDTO);
+        ensureTenantAssociation(webhookEndpoint);
+        if (!StringUtils.hasText(webhookEndpoint.getSecret())) {
+            webhookEndpoint.setSecret(generateSecret());
+        }
         webhookEndpoint = webhookEndpointRepository.save(webhookEndpoint);
         return webhookEndpointMapper.toDto(webhookEndpoint);
     }
@@ -59,7 +76,15 @@ public class WebhookEndpointService {
      */
     public WebhookEndpointDTO update(WebhookEndpointDTO webhookEndpointDTO) {
         LOG.debug("Request to update WebhookEndpoint : {}", webhookEndpointDTO);
+        WebhookEndpoint existing = webhookEndpointRepository.findById(webhookEndpointDTO.getId()).orElseThrow();
         WebhookEndpoint webhookEndpoint = webhookEndpointMapper.toEntity(webhookEndpointDTO);
+        ensureTenantAssociation(webhookEndpoint);
+        if (webhookEndpoint.getTenant() == null) {
+            webhookEndpoint.setTenant(existing.getTenant());
+        }
+        if (!StringUtils.hasText(webhookEndpoint.getSecret())) {
+            webhookEndpoint.setSecret(existing.getSecret());
+        }
         webhookEndpoint = webhookEndpointRepository.save(webhookEndpoint);
         return webhookEndpointMapper.toDto(webhookEndpoint);
     }
@@ -209,5 +234,44 @@ public class WebhookEndpointService {
             ? webhookEndpointRepository.findAll(sort).stream()
             : StreamSupport.stream(webhookEndpointRepository.findAll(predicate, sort).spliterator(), false);
         return stream.map(mapper).collect(Collectors.toList());
+    }
+
+    /**
+     * 旋轉指定端點的 Secret，並回傳新憑證。
+     *
+     * @param endpointId 端點編號
+     * @return 包含新 Secret 的 DTO
+     */
+    public Optional<WebhookSecretRotateDTO> rotateSecret(Long endpointId) {
+        return webhookEndpointRepository
+            .findById(endpointId)
+            .map(endpoint -> {
+                String newSecret = generateSecret();
+                endpoint.setSecret(newSecret);
+                webhookEndpointRepository.save(endpoint);
+                WebhookSecretRotateDTO dto = new WebhookSecretRotateDTO();
+                dto.setId(endpoint.getId());
+                dto.setSecret(newSecret);
+                dto.setRotatedAt(Instant.now());
+                return dto;
+            });
+    }
+
+    private void ensureTenantAssociation(WebhookEndpoint webhookEndpoint) {
+        if (webhookEndpoint.getTenant() != null && webhookEndpoint.getTenant().getId() != null) {
+            tenantRepository.findById(webhookEndpoint.getTenant().getId()).ifPresent(webhookEndpoint::setTenant);
+            return;
+        }
+        TenantContextHolder
+            .get()
+            .filter(ctx -> ctx.tenantId() != null)
+            .flatMap(ctx -> tenantRepository.findById(ctx.tenantId()))
+            .ifPresent(webhookEndpoint::setTenant);
+    }
+
+    private String generateSecret() {
+        byte[] buffer = new byte[32];
+        secureRandom.nextBytes(buffer);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(buffer);
     }
 }

@@ -96,6 +96,27 @@ class InvoiceResourceIT {
     private static final String DEFAULT_LEGACY_TYPE = "AAAAAAAAAA";
     private static final String UPDATED_LEGACY_TYPE = "BBBBBBBBBB";
 
+    private static final String DEFAULT_TB_CODE = "AAAAAAAAAA";
+    private static final String UPDATED_TB_CODE = "BBBBBBBBBB";
+
+    private static final String DEFAULT_TB_CATEGORY = "AAAAAAAAAA";
+    private static final String UPDATED_TB_CATEGORY = "BBBBBBBBBB";
+
+    private static final Boolean DEFAULT_TB_CAN_AUTO_RETRY = false;
+    private static final Boolean UPDATED_TB_CAN_AUTO_RETRY = true;
+
+    private static final String DEFAULT_TB_RECOMMENDED_ACTION = "AAAAAAAAAA";
+    private static final String UPDATED_TB_RECOMMENDED_ACTION = "BBBBBBBBBB";
+
+    private static final String DEFAULT_TB_SOURCE_CODE = "AAAAAAAAAA";
+    private static final String UPDATED_TB_SOURCE_CODE = "BBBBBBBBBB";
+
+    private static final String DEFAULT_TB_SOURCE_MESSAGE = "AAAAAAAAAA";
+    private static final String UPDATED_TB_SOURCE_MESSAGE = "BBBBBBBBBB";
+
+    private static final String DEFAULT_TB_RESULT_CODE = "AAAAAAAAAA";
+    private static final String UPDATED_TB_RESULT_CODE = "BBBBBBBBBB";
+
     private static final String ENTITY_API_URL = "/api/invoices";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -148,7 +169,14 @@ class InvoiceResourceIT {
             .normalizedJson(DEFAULT_NORMALIZED_JSON)
             .invoiceStatus(DEFAULT_INVOICE_STATUS)
             .issuedAt(DEFAULT_ISSUED_AT)
-            .legacyType(DEFAULT_LEGACY_TYPE);
+            .legacyType(DEFAULT_LEGACY_TYPE)
+            .tbCode(DEFAULT_TB_CODE)
+            .tbCategory(DEFAULT_TB_CATEGORY)
+            .tbCanAutoRetry(DEFAULT_TB_CAN_AUTO_RETRY)
+            .tbRecommendedAction(DEFAULT_TB_RECOMMENDED_ACTION)
+            .tbSourceCode(DEFAULT_TB_SOURCE_CODE)
+            .tbSourceMessage(DEFAULT_TB_SOURCE_MESSAGE)
+            .tbResultCode(DEFAULT_TB_RESULT_CODE);
         // Add required entity
         ImportFile importFile;
         if (TestUtil.findAll(em, ImportFile.class).isEmpty()) {
@@ -183,7 +211,14 @@ class InvoiceResourceIT {
             .normalizedJson(UPDATED_NORMALIZED_JSON)
             .invoiceStatus(UPDATED_INVOICE_STATUS)
             .issuedAt(UPDATED_ISSUED_AT)
-            .legacyType(UPDATED_LEGACY_TYPE);
+            .legacyType(UPDATED_LEGACY_TYPE)
+            .tbCode(UPDATED_TB_CODE)
+            .tbCategory(UPDATED_TB_CATEGORY)
+            .tbCanAutoRetry(UPDATED_TB_CAN_AUTO_RETRY)
+            .tbRecommendedAction(UPDATED_TB_RECOMMENDED_ACTION)
+            .tbSourceCode(UPDATED_TB_SOURCE_CODE)
+            .tbSourceMessage(UPDATED_TB_SOURCE_MESSAGE)
+            .tbResultCode(UPDATED_TB_RESULT_CODE);
         // Add required entity
         ImportFile importFile;
         if (TestUtil.findAll(em, ImportFile.class).isEmpty()) {
@@ -328,7 +363,14 @@ class InvoiceResourceIT {
             .andExpect(jsonPath("$.[*].normalizedJson").value(hasItem(DEFAULT_NORMALIZED_JSON)))
             .andExpect(jsonPath("$.[*].invoiceStatus").value(hasItem(DEFAULT_INVOICE_STATUS.toString())))
             .andExpect(jsonPath("$.[*].issuedAt").value(hasItem(DEFAULT_ISSUED_AT.toString())))
-            .andExpect(jsonPath("$.[*].legacyType").value(hasItem(DEFAULT_LEGACY_TYPE)));
+            .andExpect(jsonPath("$.[*].legacyType").value(hasItem(DEFAULT_LEGACY_TYPE)))
+            .andExpect(jsonPath("$.[*].tbCode").value(hasItem(DEFAULT_TB_CODE)))
+            .andExpect(jsonPath("$.[*].tbCategory").value(hasItem(DEFAULT_TB_CATEGORY)))
+            .andExpect(jsonPath("$.[*].tbCanAutoRetry").value(hasItem(DEFAULT_TB_CAN_AUTO_RETRY)))
+            .andExpect(jsonPath("$.[*].tbRecommendedAction").value(hasItem(DEFAULT_TB_RECOMMENDED_ACTION)))
+            .andExpect(jsonPath("$.[*].tbSourceCode").value(hasItem(DEFAULT_TB_SOURCE_CODE)))
+            .andExpect(jsonPath("$.[*].tbSourceMessage").value(hasItem(DEFAULT_TB_SOURCE_MESSAGE)))
+            .andExpect(jsonPath("$.[*].tbResultCode").value(hasItem(DEFAULT_TB_RESULT_CODE)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -373,7 +415,14 @@ class InvoiceResourceIT {
             .andExpect(jsonPath("$.normalizedJson").value(DEFAULT_NORMALIZED_JSON))
             .andExpect(jsonPath("$.invoiceStatus").value(DEFAULT_INVOICE_STATUS.toString()))
             .andExpect(jsonPath("$.issuedAt").value(DEFAULT_ISSUED_AT.toString()))
-            .andExpect(jsonPath("$.legacyType").value(DEFAULT_LEGACY_TYPE));
+            .andExpect(jsonPath("$.legacyType").value(DEFAULT_LEGACY_TYPE))
+            .andExpect(jsonPath("$.tbCode").value(DEFAULT_TB_CODE))
+            .andExpect(jsonPath("$.tbCategory").value(DEFAULT_TB_CATEGORY))
+            .andExpect(jsonPath("$.tbCanAutoRetry").value(DEFAULT_TB_CAN_AUTO_RETRY))
+            .andExpect(jsonPath("$.tbRecommendedAction").value(DEFAULT_TB_RECOMMENDED_ACTION))
+            .andExpect(jsonPath("$.tbSourceCode").value(DEFAULT_TB_SOURCE_CODE))
+            .andExpect(jsonPath("$.tbSourceMessage").value(DEFAULT_TB_SOURCE_MESSAGE))
+            .andExpect(jsonPath("$.tbResultCode").value(DEFAULT_TB_RESULT_CODE));
     }
 
     @Test
@@ -1067,6 +1116,375 @@ class InvoiceResourceIT {
 
     @Test
     @Transactional
+    void getAllInvoicesByTbCodeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCode equals to
+        defaultInvoiceFiltering("tbCode.equals=" + DEFAULT_TB_CODE, "tbCode.equals=" + UPDATED_TB_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCodeIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCode in
+        defaultInvoiceFiltering("tbCode.in=" + DEFAULT_TB_CODE + "," + UPDATED_TB_CODE, "tbCode.in=" + UPDATED_TB_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCodeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCode is not null
+        defaultInvoiceFiltering("tbCode.specified=true", "tbCode.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCodeContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCode contains
+        defaultInvoiceFiltering("tbCode.contains=" + DEFAULT_TB_CODE, "tbCode.contains=" + UPDATED_TB_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCodeNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCode does not contain
+        defaultInvoiceFiltering("tbCode.doesNotContain=" + UPDATED_TB_CODE, "tbCode.doesNotContain=" + DEFAULT_TB_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCategoryIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCategory equals to
+        defaultInvoiceFiltering("tbCategory.equals=" + DEFAULT_TB_CATEGORY, "tbCategory.equals=" + UPDATED_TB_CATEGORY);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCategoryIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCategory in
+        defaultInvoiceFiltering("tbCategory.in=" + DEFAULT_TB_CATEGORY + "," + UPDATED_TB_CATEGORY, "tbCategory.in=" + UPDATED_TB_CATEGORY);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCategoryIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCategory is not null
+        defaultInvoiceFiltering("tbCategory.specified=true", "tbCategory.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCategoryContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCategory contains
+        defaultInvoiceFiltering("tbCategory.contains=" + DEFAULT_TB_CATEGORY, "tbCategory.contains=" + UPDATED_TB_CATEGORY);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCategoryNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCategory does not contain
+        defaultInvoiceFiltering("tbCategory.doesNotContain=" + UPDATED_TB_CATEGORY, "tbCategory.doesNotContain=" + DEFAULT_TB_CATEGORY);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCanAutoRetryIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCanAutoRetry equals to
+        defaultInvoiceFiltering("tbCanAutoRetry.equals=" + DEFAULT_TB_CAN_AUTO_RETRY, "tbCanAutoRetry.equals=" + UPDATED_TB_CAN_AUTO_RETRY);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCanAutoRetryIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCanAutoRetry in
+        defaultInvoiceFiltering(
+            "tbCanAutoRetry.in=" + DEFAULT_TB_CAN_AUTO_RETRY + "," + UPDATED_TB_CAN_AUTO_RETRY,
+            "tbCanAutoRetry.in=" + UPDATED_TB_CAN_AUTO_RETRY
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbCanAutoRetryIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbCanAutoRetry is not null
+        defaultInvoiceFiltering("tbCanAutoRetry.specified=true", "tbCanAutoRetry.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbRecommendedActionIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbRecommendedAction equals to
+        defaultInvoiceFiltering(
+            "tbRecommendedAction.equals=" + DEFAULT_TB_RECOMMENDED_ACTION,
+            "tbRecommendedAction.equals=" + UPDATED_TB_RECOMMENDED_ACTION
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbRecommendedActionIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbRecommendedAction in
+        defaultInvoiceFiltering(
+            "tbRecommendedAction.in=" + DEFAULT_TB_RECOMMENDED_ACTION + "," + UPDATED_TB_RECOMMENDED_ACTION,
+            "tbRecommendedAction.in=" + UPDATED_TB_RECOMMENDED_ACTION
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbRecommendedActionIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbRecommendedAction is not null
+        defaultInvoiceFiltering("tbRecommendedAction.specified=true", "tbRecommendedAction.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbRecommendedActionContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbRecommendedAction contains
+        defaultInvoiceFiltering(
+            "tbRecommendedAction.contains=" + DEFAULT_TB_RECOMMENDED_ACTION,
+            "tbRecommendedAction.contains=" + UPDATED_TB_RECOMMENDED_ACTION
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbRecommendedActionNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbRecommendedAction does not contain
+        defaultInvoiceFiltering(
+            "tbRecommendedAction.doesNotContain=" + UPDATED_TB_RECOMMENDED_ACTION,
+            "tbRecommendedAction.doesNotContain=" + DEFAULT_TB_RECOMMENDED_ACTION
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceCodeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceCode equals to
+        defaultInvoiceFiltering("tbSourceCode.equals=" + DEFAULT_TB_SOURCE_CODE, "tbSourceCode.equals=" + UPDATED_TB_SOURCE_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceCodeIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceCode in
+        defaultInvoiceFiltering(
+            "tbSourceCode.in=" + DEFAULT_TB_SOURCE_CODE + "," + UPDATED_TB_SOURCE_CODE,
+            "tbSourceCode.in=" + UPDATED_TB_SOURCE_CODE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceCodeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceCode is not null
+        defaultInvoiceFiltering("tbSourceCode.specified=true", "tbSourceCode.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceCodeContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceCode contains
+        defaultInvoiceFiltering("tbSourceCode.contains=" + DEFAULT_TB_SOURCE_CODE, "tbSourceCode.contains=" + UPDATED_TB_SOURCE_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceCodeNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceCode does not contain
+        defaultInvoiceFiltering(
+            "tbSourceCode.doesNotContain=" + UPDATED_TB_SOURCE_CODE,
+            "tbSourceCode.doesNotContain=" + DEFAULT_TB_SOURCE_CODE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceMessageIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceMessage equals to
+        defaultInvoiceFiltering(
+            "tbSourceMessage.equals=" + DEFAULT_TB_SOURCE_MESSAGE,
+            "tbSourceMessage.equals=" + UPDATED_TB_SOURCE_MESSAGE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceMessageIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceMessage in
+        defaultInvoiceFiltering(
+            "tbSourceMessage.in=" + DEFAULT_TB_SOURCE_MESSAGE + "," + UPDATED_TB_SOURCE_MESSAGE,
+            "tbSourceMessage.in=" + UPDATED_TB_SOURCE_MESSAGE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceMessageIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceMessage is not null
+        defaultInvoiceFiltering("tbSourceMessage.specified=true", "tbSourceMessage.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceMessageContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceMessage contains
+        defaultInvoiceFiltering(
+            "tbSourceMessage.contains=" + DEFAULT_TB_SOURCE_MESSAGE,
+            "tbSourceMessage.contains=" + UPDATED_TB_SOURCE_MESSAGE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbSourceMessageNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbSourceMessage does not contain
+        defaultInvoiceFiltering(
+            "tbSourceMessage.doesNotContain=" + UPDATED_TB_SOURCE_MESSAGE,
+            "tbSourceMessage.doesNotContain=" + DEFAULT_TB_SOURCE_MESSAGE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbResultCodeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbResultCode equals to
+        defaultInvoiceFiltering("tbResultCode.equals=" + DEFAULT_TB_RESULT_CODE, "tbResultCode.equals=" + UPDATED_TB_RESULT_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbResultCodeIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbResultCode in
+        defaultInvoiceFiltering(
+            "tbResultCode.in=" + DEFAULT_TB_RESULT_CODE + "," + UPDATED_TB_RESULT_CODE,
+            "tbResultCode.in=" + UPDATED_TB_RESULT_CODE
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbResultCodeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbResultCode is not null
+        defaultInvoiceFiltering("tbResultCode.specified=true", "tbResultCode.specified=false");
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbResultCodeContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbResultCode contains
+        defaultInvoiceFiltering("tbResultCode.contains=" + DEFAULT_TB_RESULT_CODE, "tbResultCode.contains=" + UPDATED_TB_RESULT_CODE);
+    }
+
+    @Test
+    @Transactional
+    void getAllInvoicesByTbResultCodeNotContainsSomething() throws Exception {
+        // Initialize the database
+        insertedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+        // Get all the invoiceList where tbResultCode does not contain
+        defaultInvoiceFiltering(
+            "tbResultCode.doesNotContain=" + UPDATED_TB_RESULT_CODE,
+            "tbResultCode.doesNotContain=" + DEFAULT_TB_RESULT_CODE
+        );
+    }
+
+    @Test
+    @Transactional
     void getAllInvoicesByImportFileIsEqualToSomething() throws Exception {
         ImportFile importFile;
         if (TestUtil.findAll(em, ImportFile.class).isEmpty()) {
@@ -1136,7 +1554,14 @@ class InvoiceResourceIT {
             .andExpect(jsonPath("$.[*].normalizedJson").value(hasItem(DEFAULT_NORMALIZED_JSON)))
             .andExpect(jsonPath("$.[*].invoiceStatus").value(hasItem(DEFAULT_INVOICE_STATUS.toString())))
             .andExpect(jsonPath("$.[*].issuedAt").value(hasItem(DEFAULT_ISSUED_AT.toString())))
-            .andExpect(jsonPath("$.[*].legacyType").value(hasItem(DEFAULT_LEGACY_TYPE)));
+            .andExpect(jsonPath("$.[*].legacyType").value(hasItem(DEFAULT_LEGACY_TYPE)))
+            .andExpect(jsonPath("$.[*].tbCode").value(hasItem(DEFAULT_TB_CODE)))
+            .andExpect(jsonPath("$.[*].tbCategory").value(hasItem(DEFAULT_TB_CATEGORY)))
+            .andExpect(jsonPath("$.[*].tbCanAutoRetry").value(hasItem(DEFAULT_TB_CAN_AUTO_RETRY)))
+            .andExpect(jsonPath("$.[*].tbRecommendedAction").value(hasItem(DEFAULT_TB_RECOMMENDED_ACTION)))
+            .andExpect(jsonPath("$.[*].tbSourceCode").value(hasItem(DEFAULT_TB_SOURCE_CODE)))
+            .andExpect(jsonPath("$.[*].tbSourceMessage").value(hasItem(DEFAULT_TB_SOURCE_MESSAGE)))
+            .andExpect(jsonPath("$.[*].tbResultCode").value(hasItem(DEFAULT_TB_RESULT_CODE)));
 
         // Check, that the count call also returns 1
         restInvoiceMockMvc
@@ -1198,7 +1623,14 @@ class InvoiceResourceIT {
             .normalizedJson(UPDATED_NORMALIZED_JSON)
             .invoiceStatus(UPDATED_INVOICE_STATUS)
             .issuedAt(UPDATED_ISSUED_AT)
-            .legacyType(UPDATED_LEGACY_TYPE);
+            .legacyType(UPDATED_LEGACY_TYPE)
+            .tbCode(UPDATED_TB_CODE)
+            .tbCategory(UPDATED_TB_CATEGORY)
+            .tbCanAutoRetry(UPDATED_TB_CAN_AUTO_RETRY)
+            .tbRecommendedAction(UPDATED_TB_RECOMMENDED_ACTION)
+            .tbSourceCode(UPDATED_TB_SOURCE_CODE)
+            .tbSourceMessage(UPDATED_TB_SOURCE_MESSAGE)
+            .tbResultCode(UPDATED_TB_RESULT_CODE);
         InvoiceDTO invoiceDTO = invoiceMapper.toDto(updatedInvoice);
 
         restInvoiceMockMvc
@@ -1291,7 +1723,10 @@ class InvoiceResourceIT {
             .taxAmount(UPDATED_TAX_AMOUNT)
             .totalAmount(UPDATED_TOTAL_AMOUNT)
             .normalizedJson(UPDATED_NORMALIZED_JSON)
-            .legacyType(UPDATED_LEGACY_TYPE);
+            .legacyType(UPDATED_LEGACY_TYPE)
+            .tbCategory(UPDATED_TB_CATEGORY)
+            .tbSourceCode(UPDATED_TB_SOURCE_CODE)
+            .tbResultCode(UPDATED_TB_RESULT_CODE);
 
         restInvoiceMockMvc
             .perform(
@@ -1333,7 +1768,14 @@ class InvoiceResourceIT {
             .normalizedJson(UPDATED_NORMALIZED_JSON)
             .invoiceStatus(UPDATED_INVOICE_STATUS)
             .issuedAt(UPDATED_ISSUED_AT)
-            .legacyType(UPDATED_LEGACY_TYPE);
+            .legacyType(UPDATED_LEGACY_TYPE)
+            .tbCode(UPDATED_TB_CODE)
+            .tbCategory(UPDATED_TB_CATEGORY)
+            .tbCanAutoRetry(UPDATED_TB_CAN_AUTO_RETRY)
+            .tbRecommendedAction(UPDATED_TB_RECOMMENDED_ACTION)
+            .tbSourceCode(UPDATED_TB_SOURCE_CODE)
+            .tbSourceMessage(UPDATED_TB_SOURCE_MESSAGE)
+            .tbResultCode(UPDATED_TB_RESULT_CODE);
 
         restInvoiceMockMvc
             .perform(

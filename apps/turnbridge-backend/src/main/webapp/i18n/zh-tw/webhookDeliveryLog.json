@@ -26,6 +26,9 @@
       "attempts": "Attempts",
       "lastError": "Last Error",
       "deliveredAt": "Delivered At",
+      "nextAttemptAt": "Next Attempt At",
+      "lockedAt": "Locked At",
+      "dlqReason": "Dlq Reason",
       "webhookEndpoint": "Webhook Endpoint",
       "help": {
         "deliveryId": "投遞 ID",
@@ -35,7 +38,10 @@
         "httpStatus": "HTTP 回應碼",
         "attempts": "嘗試次數",
         "lastError": "最後錯誤訊息",
-        "deliveredAt": "投遞完成時間"
+        "deliveredAt": "投遞完成時間",
+        "nextAttemptAt": "下一次投遞時間（排程用）",
+        "lockedAt": "最長鎖定時間，避免重複 worker 併發",
+        "dlqReason": "DLQ 原因（超過上限後紀錄）"
       }
     }
   }

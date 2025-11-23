@@ -27,6 +27,13 @@ public interface ImportFileItemMapper extends EntityMapper<ImportFileItemDTO, Im
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
     @Mapping(target = "invoiceNo", source = "invoiceNo")
+    @Mapping(target = "tbCode", source = "tbCode")
+    @Mapping(target = "tbCategory", source = "tbCategory")
+    @Mapping(target = "tbCanAutoRetry", source = "tbCanAutoRetry")
+    @Mapping(target = "tbRecommendedAction", source = "tbRecommendedAction")
+    @Mapping(target = "tbSourceCode", source = "tbSourceCode")
+    @Mapping(target = "tbSourceMessage", source = "tbSourceMessage")
+    @Mapping(target = "tbResultCode", source = "tbResultCode")
     InvoiceDTO toDtoInvoiceInvoiceNo(Invoice invoice);
 
     @Named("select2DTO")

@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@SpringBootTest(classes = { TurnbridgeBackendApp.class, JacksonConfiguration.class, AsyncSyncConfiguration.class })
+@SpringBootTest(classes = { TurnbridgeBackendApp.class, JacksonConfiguration.class, AsyncSyncConfiguration.class, com.asynctide.turnbridge.config.TenantTestMockMvcConfiguration.class })
 @EmbeddedRedis
 @EmbeddedSQL
 public @interface IntegrationTest {

@@ -12,6 +12,9 @@ export interface IWebhookDeliveryLog {
   attempts?: number | null;
   lastError?: string | null;
   deliveredAt?: dayjs.Dayjs | null;
+  nextAttemptAt?: dayjs.Dayjs | null;
+  lockedAt?: dayjs.Dayjs | null;
+  dlqReason?: string | null;
   webhookEndpoint?: IWebhookEndpoint;
 }
 

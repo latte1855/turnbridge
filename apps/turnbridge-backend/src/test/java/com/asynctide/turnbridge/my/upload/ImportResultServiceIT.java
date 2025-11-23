@@ -6,13 +6,17 @@ import com.asynctide.turnbridge.IntegrationTest;
 import com.asynctide.turnbridge.domain.ImportFile;
 import com.asynctide.turnbridge.domain.ImportFileItem;
 import com.asynctide.turnbridge.domain.ImportFileItemError;
+import com.asynctide.turnbridge.domain.Invoice;
 import com.asynctide.turnbridge.domain.Tenant;
 import com.asynctide.turnbridge.domain.enumeration.ImportItemStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportStatus;
 import com.asynctide.turnbridge.domain.enumeration.ImportType;
+import com.asynctide.turnbridge.domain.enumeration.InvoiceStatus;
+import com.asynctide.turnbridge.domain.enumeration.MessageFamily;
 import com.asynctide.turnbridge.repository.ImportFileItemErrorRepository;
 import com.asynctide.turnbridge.repository.ImportFileItemRepository;
 import com.asynctide.turnbridge.repository.ImportFileRepository;
+import com.asynctide.turnbridge.repository.InvoiceRepository;
 import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.service.upload.ImportResultService;
 import java.nio.charset.StandardCharsets;
@@ -45,6 +49,9 @@ class ImportResultServiceIT {
     private ImportFileItemErrorRepository importFileItemErrorRepository;
 
     @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Autowired
     private TenantRepository tenantRepository;
 
     private ImportFile importFile;
@@ -55,6 +62,7 @@ class ImportResultServiceIT {
         importFileItemErrorRepository.deleteAll();
         importFileItemRepository.deleteAll();
         importFileRepository.deleteAll();
+        invoiceRepository.deleteAll();
         tenantRepository.deleteAll();
 
         tenant = tenantRepository.save(new Tenant().name("匯出租戶").code("TEN-RESULT").status("ACTIVE"));
@@ -79,6 +87,21 @@ class ImportResultServiceIT {
         success.setStatus(ImportItemStatus.NORMALIZED);
         importFileItemRepository.save(success);
 
+        Invoice failedInvoice = new Invoice();
+        failedInvoice.setInvoiceNo("ZX0002");
+        failedInvoice.setMessageFamily(MessageFamily.F0401);
+        failedInvoice.setInvoiceStatus(InvoiceStatus.ERROR);
+        failedInvoice.setImportFile(importFile);
+        failedInvoice.setTenant(tenant);
+        failedInvoice.setTbCode("TB-5003");
+        failedInvoice.setTbCategory("PLATFORM.DATA_AMOUNT_MISMATCH");
+        failedInvoice.setTbCanAutoRetry(false);
+        failedInvoice.setTbRecommendedAction("FIX_DATA");
+        failedInvoice.setTbSourceCode("E200");
+        failedInvoice.setTbSourceMessage("稅額不符");
+        failedInvoice.setTbResultCode("9");
+        failedInvoice = invoiceRepository.save(failedInvoice);
+
         ImportFileItem failed = new ImportFileItem();
         failed.setImportFile(importFile);
         failed.setLineIndex(2);
@@ -88,6 +111,7 @@ class ImportResultServiceIT {
         failed.setStatus(ImportItemStatus.FAILED);
         failed.setErrorCode("AMOUNT_MISMATCH");
         failed.setErrorMessage("含稅金額與明細加總不一致");
+        failed.setInvoice(failedInvoice);
         failed = importFileItemRepository.save(failed);
 
         ImportFileItemError error = new ImportFileItemError();
@@ -107,9 +131,13 @@ class ImportResultServiceIT {
         ImportResultService.ResultFile result = importResultService.generateCsv(importFile.getId());
         String csv = new String(result.content(), StandardCharsets.UTF_8);
         assertThat(result.filename()).isEqualTo("sample_result.csv");
-        assertThat(csv).contains("status,errorCode,errorMessage,fieldErrors");
-        assertThat(csv).contains("AB0001,100,NORMALIZED,,,");
-        assertThat(csv).contains("AB0002,200,FAILED,AMOUNT_MISMATCH,含稅金額與明細加總不一致,Amount(5):AMOUNT_MISMATCH-含稅金額與明細加總不一致");
+        assertThat(csv)
+            .contains("status,errorCode,errorMessage,fieldErrors,tbCode,tbCategory,tbCanAutoRetry,tbRecommendedAction,tbResultCode,tbSourceCode,tbSourceMessage");
+        assertThat(csv).contains("AB0001,100,NORMALIZED,,,,,,,,,");
+        assertThat(csv)
+            .contains(
+                "AB0002,200,FAILED,AMOUNT_MISMATCH,含稅金額與明細加總不一致,Amount(5):AMOUNT_MISMATCH-含稅金額與明細加總不一致,TB-5003,PLATFORM.DATA_AMOUNT_MISMATCH,false,FIX_DATA,9,E200,稅額不符"
+            );
     }
 
     /** 驗證可一次下載多個批次並打包為 ZIP。 */
