@@ -213,6 +213,33 @@ class UploadServiceIT {
         assertThat(importFileLogRepository.findAll()).extracting(ImportFileLog::getEventCode).contains("UPLOAD_RECEIVED", "NORMALIZE_FAILURE");
     }
 
+    @Test
+    void handleUpload_whenFilenameMissing_shouldAssignFallback() {
+        MultipartFile file = new MockMultipartFile(
+            "file",
+            "",
+            "text/csv",
+            """
+                Type,InvoiceNo,SellerId,BuyerId,SalesAmount,Tax,Total,TaxType,DateTime,rawLine,legacyType
+                F0401,AB12345000,24556677,15888888,500,25,525,TX,2025-11-05T12:00:00+08:00,RAW-LINE,C0401
+                """.getBytes(StandardCharsets.UTF_8)
+        );
+        UploadMetadata metadata = new UploadMetadata(
+            SELLER_ID,
+            "UTF-8",
+            "default",
+            sha256(file),
+            "C0401",
+            "upload-it-fallback"
+        );
+
+        UploadResponse response = uploadService.handleUpload(ImportType.INVOICE, file, metadata);
+
+        ImportFile saved = importFileRepository.findById(response.importId()).orElseThrow();
+        assertThat(saved.getOriginalFilename()).isNotBlank();
+        assertThat(saved.getOriginalFilename()).endsWith(".csv");
+    }
+
     private MultipartFile csv(String content) {
         return new MockMultipartFile("file", "input.csv", "text/csv", content.getBytes(StandardCharsets.UTF_8));
     }

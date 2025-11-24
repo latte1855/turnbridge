@@ -5,6 +5,8 @@ import { Button, Table, Spinner, Alert, Input, Row, Col, Card, CardBody, CardTit
 import { Translate, JhiPagination, JhiItemCount } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { triggerDownload, resolveFilename } from './utils';
+import { useAppSelector } from 'app/config/store';
+import { AUTHORITIES } from 'app/config/constants';
 
 interface ImportFileSummary {
   id?: number;
@@ -23,7 +25,11 @@ interface UploadResponse {
   importId: number;
 }
 
+const TENANT_STORAGE_KEY = 'turnbridge-tenant-code';
+
 const ImportMonitorList = () => {
+  const account = useAppSelector(state => state.authentication.account);
+  const isAdmin = account?.authorities?.includes(AUTHORITIES.ADMIN) ?? false;
   const [files, setFiles] = useState<ImportFileSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +141,7 @@ const ImportMonitorList = () => {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     setUploadFile(file);
+    setUploadError(null);
     if (file) {
       try {
         const hash = await computeSha256(file);
@@ -148,19 +155,25 @@ const ImportMonitorList = () => {
   };
 
   const handleUpload = () => {
+    setUploadError(null);
+    setUploadSuccessId(null);
     if (!uploadFile) {
       setUploadError('importMonitor.upload.noFile');
-      setUploadSuccessId(null);
       return;
+    }
+    if (isAdmin) {
+      const currentTenant = (localStorage.getItem(TENANT_STORAGE_KEY) || '').trim();
+      if (!currentTenant) {
+        setUploadError('importMonitor.upload.tenantRequired');
+        return;
+      }
     }
     if (!uploadState.sellerId) {
       setUploadError('importMonitor.upload.noSeller');
-      setUploadSuccessId(null);
       return;
     }
     if (!uploadState.sha256) {
       setUploadError('importMonitor.upload.noSha');
-      setUploadSuccessId(null);
       return;
     }
     const formData = new FormData();
@@ -221,7 +234,10 @@ const ImportMonitorList = () => {
               <label className="form-label">
                 <Translate contentKey="importMonitor.upload.file" />
               </label>
-              <Input type="file" accept=".csv" onChange={handleFileChange} />
+              <Input type="file" onChange={handleFileChange} />
+              <small className="form-text text-muted">
+                <Translate contentKey="importMonitor.upload.fileHelp" />
+              </small>
             </Col>
             <Col md="5">
               <label className="form-label">

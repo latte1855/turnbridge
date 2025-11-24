@@ -41,7 +41,7 @@ Codex、Gemini、自動化代理人特別遵守事項：
 
 ## 2. 上傳規格（E0501 / Invoice）
 
-**共同：** `multipart/form-data`，欄位：`file` (`*.csv` 單一檔案)、`sha256`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。  
+**共同：** `multipart/form-data`，欄位：`file`（CSV 單一檔案，允許無副檔名；系統會依內容與 SHA-256 判斷）、`sha256`（16 進位小寫）、`encoding`（預設 UTF-8；E0501 可 BIG5）、`profile`（可選，如加油站卷=250）。  
 > 不再接受 ZIP 上傳；若需一次下載多個結果檔，後端會在下載階段自動將多個 CSV 壓成 ZIP 回傳。
 
 **分檔：** 以**明細行數**計 `<= 999`；**不得拆單**；需附分割序號（splitSeq）。伺服器若偵測超過 999 筆，將以 `ITEM_LIMIT_EXCEEDED` ProblemDetail 拒收（欄位 `lineIndex`），請 Agent 依提示拆檔後再上傳。

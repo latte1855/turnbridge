@@ -12,7 +12,10 @@ import com.asynctide.turnbridge.tenant.TenantContextHolder;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -61,7 +64,7 @@ public class UploadService {
 
         ImportFile importFile = new ImportFile();
         importFile.setImportType(type);
-        importFile.setOriginalFilename(file.getOriginalFilename());
+        importFile.setOriginalFilename(resolveOriginalFilename(file, type));
         importFile.setSha256(actualHash);
         importFile.setTotalCount(0);
         importFile.setSuccessCount(0);
@@ -105,5 +108,15 @@ public class UploadService {
             .filter(TenantContext -> TenantContext.tenantId() != null)
             .map(ctx -> tenantRepository.getReferenceById(ctx.tenantId()))
             .orElseThrow(() -> new BadRequestAlertException("缺少租戶資訊", "importFile", "tenantmissing"));
+    }
+
+    private String resolveOriginalFilename(MultipartFile file, ImportType type) {
+        String originalName = file.getOriginalFilename();
+        if (StringUtils.hasText(originalName)) {
+            return originalName;
+        }
+        String prefix = type != null ? type.name().toLowerCase(Locale.ROOT) : "import";
+        String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+        return prefix + "_" + timestamp + ".csv";
     }
 }

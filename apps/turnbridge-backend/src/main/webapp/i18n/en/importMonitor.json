@@ -17,10 +17,12 @@
       "sha": "SHA-256",
       "legacyType": "Legacy Type",
       "profile": "Profile",
+      "fileHelp": "Files without a .csv extension are also supported; the system determines the format by content/SHA-256.",
       "submit": "Upload",
       "noFile": "Please select a CSV file.",
       "noSeller": "Seller ID is required.",
       "noSha": "Please provide SHA-256.",
+      "tenantRequired": "Please choose a tenant before uploading (ADMIN only).",
       "failed": "Upload failed, please retry.",
       "successMessage": "Upload accepted. Import ID = {{importId}}"
     },
