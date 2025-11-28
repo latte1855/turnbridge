@@ -180,12 +180,14 @@ turnbridge:
   tenant:
     header-name: X-Tenant-Code
     default-code: ""
+  upload:
+    backup-dir: ${TURNBRIDGE_UPLOAD_BACKUP:target/upload-backup}
   turnkey:
     inbox-dir: ${TURNBRIDGE_TURNKEY_INBOX:target/turnkey/INBOX}
     filename-prefix: FGEXPORT
     tenant-sub-directory: true
-    b2s-storage-src-base: ${TURNBRIDGE_TURNKEY_B2S_SRC:}
-    process-result-base: ${TURNBRIDGE_TURNKEY_PROCESS_RESULT:}
+    b2s-storage-src-base: ${TURNBRIDGE_TURNKEY_B2S_SRC:target/turnkey/UpCast/B2SSTORAGE}
+    process-result-base: ${TURNBRIDGE_TURNKEY_PROCESS_RESULT:target/turnkey/Unpack/B2SSTORAGE}
     export-cron: '0 */5 * * * *'
     export-batch-size: 200
     pickup-monitor-cron: '30 */5 * * * *'

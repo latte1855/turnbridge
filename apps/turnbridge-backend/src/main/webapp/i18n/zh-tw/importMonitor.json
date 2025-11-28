@@ -17,10 +17,12 @@
       "sha": "SHA-256",
       "legacyType": "原訊息別",
       "profile": "Profile",
+      "fileHelp": "即使檔名沒有 .csv 副檔名也可上傳，系統會依內容與 SHA-256 自動判斷。",
       "submit": "送出上傳",
       "noFile": "請選擇 CSV 檔案。",
       "noSeller": "請填寫賣方統編。",
       "noSha": "請提供 SHA-256。",
+      "tenantRequired": "請先選取租戶後再上傳（僅限管理者）。",
       "failed": "上傳失敗，請稍後再試。",
       "successMessage": "上傳成功，批次編號 = {{importId}}"
     },

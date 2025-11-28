@@ -9,10 +9,18 @@ import com.asynctide.turnbridge.repository.TenantRepository;
 import com.asynctide.turnbridge.repository.ImportFileLogRepository;
 import com.asynctide.turnbridge.web.rest.errors.BadRequestAlertException;
 import com.asynctide.turnbridge.tenant.TenantContextHolder;
+import com.asynctide.turnbridge.upload.UploadProperties;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,17 +40,20 @@ public class UploadService {
     private final ImportFileLogRepository importFileLogRepository;
     private final NormalizationService normalizationService;
     private final TenantRepository tenantRepository;
+    private final UploadProperties uploadProperties;
 
     public UploadService(
         ImportFileRepository importFileRepository,
         ImportFileLogRepository importFileLogRepository,
         NormalizationService normalizationService,
-        TenantRepository tenantRepository
+        TenantRepository tenantRepository,
+        UploadProperties uploadProperties
     ) {
         this.importFileRepository = importFileRepository;
         this.importFileLogRepository = importFileLogRepository;
         this.normalizationService = normalizationService;
         this.tenantRepository = tenantRepository;
+        this.uploadProperties = uploadProperties;
     }
 
     @Transactional(noRollbackFor = NormalizationException.class)
@@ -61,7 +72,7 @@ public class UploadService {
 
         ImportFile importFile = new ImportFile();
         importFile.setImportType(type);
-        importFile.setOriginalFilename(file.getOriginalFilename());
+        importFile.setOriginalFilename(resolveOriginalFilename(file, type));
         importFile.setSha256(actualHash);
         importFile.setTotalCount(0);
         importFile.setSuccessCount(0);
@@ -73,6 +84,7 @@ public class UploadService {
         importFile.setTenant(resolveTenant());
         importFile = importFileRepository.save(importFile);
         saveUploadLog(importFile, metadata);
+        backupOriginalFile(importFile, file);
         log.info("Accepted upload [{}] size={} bytes", importFile.getId(), file.getSize());
         normalizationService.normalize(importFile, file, metadata);
         ImportFile latest = importFileRepository.findById(importFile.getId()).orElseThrow();
@@ -105,5 +117,39 @@ public class UploadService {
             .filter(TenantContext -> TenantContext.tenantId() != null)
             .map(ctx -> tenantRepository.getReferenceById(ctx.tenantId()))
             .orElseThrow(() -> new BadRequestAlertException("缺少租戶資訊", "importFile", "tenantmissing"));
+    }
+
+    private String resolveOriginalFilename(MultipartFile file, ImportType type) {
+        String originalName = file.getOriginalFilename();
+        if (StringUtils.hasText(originalName)) {
+            return originalName;
+        }
+        String prefix = type != null ? type.name().toLowerCase(Locale.ROOT) : "import";
+        String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+        return prefix + "_" + timestamp + ".csv";
+    }
+
+    private void backupOriginalFile(ImportFile importFile, MultipartFile source) {
+        if (!StringUtils.hasText(uploadProperties.getBackupDir())) {
+            return;
+        }
+        try {
+            Path targetDir = Path.of(uploadProperties.getBackupDir());
+            String tenantCode = importFile.getTenant() != null && StringUtils.hasText(importFile.getTenant().getCode())
+                ? importFile.getTenant().getCode()
+                : "default";
+            targetDir = targetDir.resolve(tenantCode);
+            targetDir = targetDir.resolve(DateTimeFormatter.BASIC_ISO_DATE.format(LocalDate.now()));
+            Files.createDirectories(targetDir);
+            String originalName = importFile.getOriginalFilename();
+            if (!StringUtils.hasText(originalName)) {
+                originalName = "upload.csv";
+            }
+            String sanitizedName = originalName.replaceAll("[^A-Za-z0-9._-]", "_");
+            Path backupFile = targetDir.resolve(String.format("import-%06d-%s", importFile.getId(), sanitizedName));
+            Files.copy(source.getInputStream(), backupFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            log.warn("無法備份上傳檔案 importId={}", importFile.getId(), ex);
+        }
     }
 }

@@ -179,6 +179,9 @@
  | DEV-010 | ✅ 完成 | Portal `/webhook/endpoints` 表單已重新綁定欄位並通過必填/URL 驗證，新增、編輯、Rotate Secret 均能正確帶入/儲存 `name/targetUrl/status/tenant`。 |
 > TODO：Portal Webhook Registration 尚缺自動化測試（新增/編輯/Rotate Secret），待 Phase 2 後半段補完並納入 CI 報告。  
 > TODO：Turnkey 手動匯出頁尚未補上整合測試（含前端流程與 `TurnkeyExportResourceIT` B2S 搬移案例），待 DEV-006 結束前補齊。
+> TODO：Turnkey 匯出與 Webhook 儀表板需提供事件過濾/分頁（`XML_GENERATED`、`XML_DELIVERED_TO_TURNKEY`、`XML_DELIVERY_FAILURE`）與 `turnkeyFile/reason` 顯示，方便 Ops 追蹤搬移狀態。
+>
+> 新增資料處理補充：`NormalizationService` 現在會透過 `LegacyMessageFamilyMapper` 將 `C0401/C0501/C0701` 等 legacy type 轉成 `F0401/F0501/F0701`，保留與舊上傳檔的相容性；這份對應也載於 `docs/spec/turnbridge_flow.md`，且 `ImportFileItem.normalizedFamily` 會寫入新制 `MessageFamily` 名稱。
 ---
 
 ## **Phase 3 任務（W9–W12）**

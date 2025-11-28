@@ -53,7 +53,14 @@
       "viewDetail": "查看內容",
       "detailModalTitle": "匯出事件原始明細",
       "detailDescription": "事件 {eventCode} 的 detail 內容如下",
-      "detailEmpty": "此事件沒有 detail 內容。"
+      "detailEmpty": "此事件沒有 detail 內容。",
+      "pageInfo": "第 {page}/{total} 頁",
+      "prev": "上一頁",
+      "next": "下一頁",
+      "filterTitle": "事件過濾",
+      "pageSize": "每頁筆數",
+      "gotoLabel": "跳至頁碼",
+      "gotoButton": "前往"
     },
     "pickup": {
       "title": "Turnkey 拾取巡檢",
@@ -68,6 +75,13 @@
       "count": "數量",
       "empty": "目前未偵測到滯留或錯誤檔案。",
       "error": "無法取得巡檢資料，請稍後再試。"
+    },
+    "filters": {
+      "filterTitle": "事件過濾",
+      "pageSize": "每頁筆數",
+      "pageInfo": "第 {page}/{total} 頁",
+      "prev": "上一頁",
+      "next": "下一頁"
     }
   }
 }

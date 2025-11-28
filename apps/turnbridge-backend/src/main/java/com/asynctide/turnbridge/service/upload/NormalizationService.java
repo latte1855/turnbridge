@@ -19,6 +19,7 @@ import com.asynctide.turnbridge.repository.InvoiceRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,6 +31,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -40,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -60,6 +63,9 @@ public class NormalizationService {
     private static final Logger log = LoggerFactory.getLogger(NormalizationService.class);
     private static final TypeReference<List<Map<String, Object>>> ITEM_LIST_TYPE = new TypeReference<>() {};
     private static final int MAX_DETAIL_LINES = 999;
+    private static final Pattern INVOICE_NO_PATTERN = Pattern.compile("[A-Z]{2}\\d{8}");
+    private static final Pattern RANDOM_NUMBER_PATTERN = Pattern.compile("[0-9A]{4}");
+    private static final Pattern DONATE_MARK_PATTERN = Pattern.compile("[01]");
 
     private final ImportFileRepository importFileRepository;
     private final ImportFileItemRepository importFileItemRepository;
@@ -98,32 +104,30 @@ public class NormalizationService {
             ensureLineLimit(file, charset);
             try (
                 BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), charset));
-                CSVParser parser = CSVFormat.DEFAULT
-                    .builder()
-                    .setTrim(true)
-                    .setIgnoreEmptyLines(true)
-                    .setHeader()
-                    .setSkipHeaderRecord(true)
-                    .build()
-                    .parse(reader)
+                CSVParser parser = createCsvParser(reader)
             ) {
                 List<RowBundle> currentGroup = new ArrayList<>();
                 String currentKey = null;
-                for (CSVRecord record : parser) {
-                    RowContext rowContext = RowContext.from(record);
-                    ImportFileItem item = createItem(importFile, rowContext);
-                    stats.total++;
-                    RowBundle bundle = new RowBundle(rowContext, item);
-                    String key = groupKey(rowContext);
-                    if (currentKey == null) {
-                        currentKey = key;
-                    }
-                    if (!currentKey.equals(key)) {
-                        processGroup(currentGroup, importFile, metadata, stats);
-                        currentGroup = new ArrayList<>();
-                        currentKey = key;
-                    }
-                    currentGroup.add(bundle);
+		        int debugCsvIndx = 0;
+		        int debugInvCnt = 0;
+		        for (CSVRecord record : parser) {
+		        	log.info("處理檔案第 {} 行資料.", ++debugCsvIndx);
+		            RowContext rowContext = RowContext.from(record, ColumnProfileRegistry.forRecord(record));
+		                    ImportFileItem item = createItem(importFile, rowContext);
+		                    stats.total++;
+		                    RowBundle bundle = new RowBundle(rowContext, item);
+		                    String key = groupKey(rowContext);
+		                    if (currentKey == null) {
+		                        currentKey = key;
+		                    }
+		                    if (!currentKey.equals(key)) {
+
+		    		        	log.info("儲存第 {} 張發票號碼.", ++debugInvCnt);
+		                        processGroup(currentGroup, importFile, metadata, stats);
+		                        currentGroup = new ArrayList<>();
+		                        currentKey = key;
+		                    }
+		                    currentGroup.add(bundle);
                 }
 
                 if (!currentGroup.isEmpty()) {
@@ -148,14 +152,7 @@ public class NormalizationService {
     private void ensureLineLimit(MultipartFile file, Charset charset) {
         try (
             BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), charset));
-            CSVParser parser = CSVFormat.DEFAULT
-                .builder()
-                .setTrim(true)
-                .setIgnoreEmptyLines(true)
-                .setHeader()
-                .setSkipHeaderRecord(true)
-                .build()
-                .parse(reader)
+            CSVParser parser = createCsvParser(reader)
         ) {
             int count = 0;
             for (CSVRecord record : parser) {
@@ -215,7 +212,12 @@ public class NormalizationService {
         String rawJson = toJson(rowContext.original());
         item.setRawData(rawJson);
         item.setRawHash(sha256(rawJson));
-        item.setSourceFamily(firstNonBlank(rowContext, "legacyType", "LegacyType"));
+        String legacyReference = firstNonBlank(rowContext, "legacyType", "LegacyType", "type");
+        String sourceFamily = MessageTypeUtils.baseType(legacyReference);
+        if (!StringUtils.hasText(sourceFamily)) {
+            sourceFamily = null;
+        }
+        item.setSourceFamily(sourceFamily);
         item.setStatus(ImportItemStatus.PENDING);
         return importFileItemRepository.save(item);
     }
@@ -274,11 +276,33 @@ public class NormalizationService {
             logEntity.setDetail(toJson(detail));
         }
         logEntity.setOccurredAt(Instant.now());
+        log.info("saveLog {}", logEntity);
         importFileLogRepository.save(logEntity);
     }
 
     private String summaryMessage(NormalizationStats stats) {
         return "正規化完成：success=" + stats.success + ",error=" + stats.error;
+    }
+
+    private CSVParser createCsvParser(BufferedReader reader) throws IOException {
+        reader.mark(8192);
+        String firstLine = reader.readLine();
+        reader.reset();
+        boolean headerPresent = firstLine != null && isHeaderLine(firstLine);
+        var builder = CSVFormat.newFormat('|').builder().setTrim(true).setIgnoreEmptyLines(true);
+        if (headerPresent) {
+            builder.setHeader();
+            builder.setSkipHeaderRecord(true);
+        }
+        return builder.build().parse(reader);
+    }
+
+    private boolean isHeaderLine(String line) {
+        if (line == null) {
+            return false;
+        }
+        String lower = line.trim().toLowerCase(Locale.ROOT);
+        return lower.startsWith("type") || lower.contains("invoice") || lower.contains("legacytype");
     }
 
     private Charset resolveCharset(String encoding) {
@@ -296,6 +320,7 @@ public class NormalizationService {
         RowContext row = bundles.get(0).row();
         String type = require(row, "type", "Type 欄位必填", "Type");
         MessageFamily family = resolveFamily(type);
+        validateRowContext(row, family);
         String invoiceNo = firstNonBlank(row, "InvoiceNo", "AllowanceNo");
         if (!StringUtils.hasText(invoiceNo)) {
             throw new NormalizationException("缺少發票/折讓號碼", "INVOICE_NO_MISSING", "InvoiceNo", family.name());
@@ -307,7 +332,7 @@ public class NormalizationService {
         invoice.setImportFile(importFile);
         invoice.setTenant(importFile.getTenant());
         invoice.setInvoiceStatus(InvoiceStatus.NORMALIZED);
-        invoice.setLegacyType(resolveLegacyType(row, importFile, metadata));
+        invoice.setLegacyType(resolveLegacyType(row, importFile, metadata, type));
         String sellerId = firstNonBlank(row, "SellerId");
         if (!StringUtils.hasText(sellerId)) {
             sellerId = metadata.sellerId();
@@ -316,7 +341,7 @@ public class NormalizationService {
         invoice.setSellerName(firstNonBlank(row, "SellerName"));
         invoice.setBuyerId(firstNonBlank(row, "BuyerId"));
         invoice.setBuyerName(firstNonBlank(row, "BuyerName"));
-        invoice.setSalesAmount(parseDecimal(row, family, "SalesAmount"));
+        invoice.setSalesAmount(parseDecimal(row, family, "SalesAmount", "TaxableAmount", "Amount"));
         invoice.setTaxAmount(parseDecimal(row, family, "Tax", "TaxAmount"));
         invoice.setTotalAmount(parseDecimal(row, family, "Total", "TotalAmount"));
         invoice.setTaxType(firstNonBlank(row, "TaxType"));
@@ -344,10 +369,48 @@ public class NormalizationService {
     }
 
     private MessageFamily resolveFamily(String rawType) {
+        String typeKey = MessageTypeUtils.baseType(rawType);
+        if (!StringUtils.hasText(typeKey)) {
+            throw new NormalizationException("不支援的訊息別: " + rawType, "ILLEGAL_MESSAGE_TYPE", "Type", "UNKNOWN");
+        }
+        MessageFamily family = LegacyMessageFamilyMapper.map(typeKey);
+        if (family != null) {
+            return family;
+        }
         try {
-            return MessageFamily.valueOf(rawType.trim().toUpperCase(Locale.ROOT));
+            return MessageFamily.valueOf(typeKey);
         } catch (IllegalArgumentException e) {
-            throw new NormalizationException("不支援的訊息別: " + rawType, "ILLEGAL_MESSAGE_TYPE", "Type", rawType);
+            throw new NormalizationException("不支援的訊息別: " + rawType, "ILLEGAL_MESSAGE_TYPE", "Type", typeKey);
+        }
+    }
+
+    private void validateRowContext(RowContext row, MessageFamily family) {
+        String invoiceNo = firstNonBlank(row, "InvoiceNo");
+        if (!StringUtils.hasText(invoiceNo) || !INVOICE_NO_PATTERN.matcher(invoiceNo).matches()) {
+            throw new NormalizationException(
+                "發票號碼格式錯誤: " + invoiceNo,
+                "INVOICE_NO_INVALID",
+                "InvoiceNo",
+                family.name()
+            );
+        }
+        String randomNumber = firstNonBlank(row, "RandomNumber", "randomCode");
+        if (StringUtils.hasText(randomNumber) && !RANDOM_NUMBER_PATTERN.matcher(randomNumber).matches()) {
+            throw new NormalizationException(
+                "防偽隨機碼格式錯誤: " + randomNumber,
+                "RANDOM_NUMBER_INVALID",
+                "RandomNumber",
+                family.name()
+            );
+        }
+        String donateMark = firstNonBlank(row, "DonateMark", "donate");
+        if (StringUtils.hasText(donateMark) && !DONATE_MARK_PATTERN.matcher(donateMark).matches()) {
+            throw new NormalizationException(
+                "捐贈註記格式錯誤: " + donateMark,
+                "DONATE_MARK_INVALID",
+                "DonateMark",
+                family.name()
+            );
         }
     }
 
@@ -438,13 +501,16 @@ public class NormalizationService {
         return new BigDecimal(String.valueOf(target).trim());
     }
 
-    private String resolveLegacyType(RowContext row, ImportFile importFile, UploadMetadata metadata) {
+    private String resolveLegacyType(RowContext row, ImportFile importFile, UploadMetadata metadata, String fallbackType) {
         String value = firstNonBlank(row, "legacyType", "LegacyType");
         if (!StringUtils.hasText(value)) {
             value = importFile.getLegacyType();
         }
         if (!StringUtils.hasText(value)) {
             value = metadata.legacyType();
+        }
+        if (!StringUtils.hasText(value) && StringUtils.hasText(fallbackType)) {
+            value = fallbackType;
         }
         return value;
     }
@@ -462,30 +528,62 @@ public class NormalizationService {
     }
 
     private Instant parseIssueInstant(RowContext row, MessageFamily family) {
-        String text = firstNonBlank(row, "DateTime", "InvoiceDateTime", "IssueDateTime", "InvoiceDate");
-        if (!StringUtils.hasText(text)) {
-            return null;
-        }
-        String trimmed = text.trim();
-        List<DateTimeFormatter> formatters = List.of(
-            DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-            DateTimeFormatter.ISO_INSTANT,
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME
-        );
-        for (DateTimeFormatter formatter : formatters) {
-            try {
-                if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
-                    LocalDateTime ldt = LocalDateTime.parse(trimmed, formatter);
-                    return ldt.toInstant(ZoneOffset.UTC);
+        String text = firstNonBlank(row, "DateTime", "InvoiceDateTime", "IssueDateTime");
+        if (StringUtils.hasText(text)) {
+            String trimmed = text.trim();
+            if (trimmed.matches("\\d{8}") && StringUtils.hasText(row.get("InvoiceTime"))) {
+                return parseInvoiceDateTime(row, family);
+            }
+            List<DateTimeFormatter> formatters = List.of(
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+                DateTimeFormatter.ISO_INSTANT,
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            );
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    if (formatter == DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
+                        LocalDateTime ldt = LocalDateTime.parse(trimmed, formatter);
+                        return ldt.toInstant(ZoneOffset.UTC);
+                    }
+                    return OffsetDateTime.parse(trimmed, formatter).toInstant();
+                } catch (DateTimeParseException ignored) {
+                    // continue
                 }
-                return OffsetDateTime.parse(trimmed, formatter).toInstant();
-            } catch (DateTimeParseException ignored) {}
+            }
+            try {
+                LocalDate date = LocalDate.parse(trimmed);
+                return date.atStartOfDay(ZoneOffset.UTC).toInstant();
+            } catch (DateTimeParseException e) {
+                throw new NormalizationException("日期格式錯誤: " + trimmed, "DATETIME_INVALID", "DateTime", family.name());
+            }
+        }
+        return parseInvoiceDateTime(row, family);
+    }
+
+    private Instant parseInvoiceDateTime(RowContext row, MessageFamily family) {
+        String dateText = firstNonBlank(row, "InvoiceDate");
+        String timeText = firstNonBlank(row, "InvoiceTime");
+        if (!StringUtils.hasText(dateText) || !StringUtils.hasText(timeText)) {
+            throw new NormalizationException("日期格式錯誤: 發票日期/時間缺值", "DATETIME_INVALID", "DateTime", family.name());
         }
         try {
-            LocalDate date = LocalDate.parse(trimmed);
-            return date.atStartOfDay(ZoneOffset.UTC).toInstant();
+            LocalDate date = LocalDate.parse(dateText.trim(), DateTimeFormatter.BASIC_ISO_DATE);
+            LocalTime time = parseLocalTime(timeText.trim());
+            return date.atTime(time).toInstant(ZoneOffset.UTC);
         } catch (DateTimeParseException e) {
-            throw new NormalizationException("日期格式錯誤: " + trimmed, "DATETIME_INVALID", "DateTime", family.name());
+            throw new NormalizationException("日期格式錯誤: " + dateText + " " + timeText, "DATETIME_INVALID", "DateTime", family.name());
+        }
+    }
+
+    private LocalTime parseLocalTime(String text) {
+        try {
+            return LocalTime.parse(text, DateTimeFormatter.ISO_LOCAL_TIME);
+        } catch (DateTimeParseException e) {
+            String normalized = text.replace(":", "");
+            if (normalized.length() == 6) {
+                return LocalTime.parse(normalized, DateTimeFormatter.ofPattern("HHmmss"));
+            }
+            throw e;
         }
     }
 
@@ -520,11 +618,12 @@ public class NormalizationService {
         if (!StringUtils.hasText(invoiceNo)) {
             return "LINE-" + row.lineNumber();
         }
-        String type = firstNonBlank(row, "type", "Type");
-        if (!StringUtils.hasText(type)) {
-            type = "UNKNOWN";
+        String rawType = firstNonBlank(row, "type", "Type");
+        String typeKey = MessageTypeUtils.baseType(rawType);
+        if (!StringUtils.hasText(typeKey)) {
+            typeKey = "UNKNOWN";
         }
-        return type.trim().toUpperCase(Locale.ROOT) + "::" + invoiceNo.trim().toUpperCase(Locale.ROOT);
+        return typeKey + "::" + invoiceNo.trim().toUpperCase(Locale.ROOT);
     }
 
     private String sha256(String value) {
@@ -553,11 +652,33 @@ public class NormalizationService {
             this.lineNumber = lineNumber;
         }
 
-        public static RowContext from(CSVRecord record) {
-            Map<String, String> source = new LinkedHashMap<>(record.toMap());
+        public static RowContext from(CSVRecord record, ColumnProfileRegistry.ColumnProfile profile) {
+        	System.out.println("from.record: " + record + ", profile:" + profile);
+            Map<String, String> source = new LinkedHashMap<>();
+            List<String> headers = new ArrayList<>();
             Map<String, String> lower = new HashMap<>();
-            source.forEach((k, v) -> lower.put(k.toLowerCase(Locale.ROOT), v));
-            return new RowContext(source, lower, new ArrayList<>(source.keySet()), (int) record.getRecordNumber());
+            System.out.println("record.getParser().getHeaderNames(): " + record.getParser().getHeaderNames().size());
+            if (!record.getParser().getHeaderNames().isEmpty()) {
+                record.toMap().forEach((k, v) -> {
+                    source.put(k, v);
+                    headers.add(k);
+                    lower.put(k.toLowerCase(Locale.ROOT), v);
+                });
+            } else {
+
+                System.out.println("走 profile 設定: " );
+                List<String> profileHeaders = profile.headers();
+                for (int i = 0; i < profileHeaders.size() && i < record.size(); i++) {
+                    String key = profileHeaders.get(i);
+                    String value = record.get(i);
+                    source.put(key, value);
+                    headers.add(key);
+                    lower.put(key.toLowerCase(Locale.ROOT), value);
+                }
+            }
+            
+            System.out.println("最後回：" + source);
+            return new RowContext(source, lower, headers, (int) record.getRecordNumber());
         }
 
         public String get(String key) {

@@ -6,6 +6,10 @@ import com.asynctide.turnbridge.repository.ImportFileRepository;
 import com.asynctide.turnbridge.service.criteria.ImportFileCriteria;
 import com.asynctide.turnbridge.service.dto.ImportFileDTO;
 import com.asynctide.turnbridge.service.mapper.ImportFileMapper;
+import com.asynctide.turnbridge.security.AuthoritiesConstants;
+import com.asynctide.turnbridge.security.SecurityUtils;
+import com.asynctide.turnbridge.tenant.TenantContextHolder;
+import tech.jhipster.service.filter.LongFilter;
 import jakarta.persistence.criteria.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +50,8 @@ public class ImportFileQueryService extends QueryService<ImportFile> {
     @Transactional(readOnly = true)
     public Page<ImportFileDTO> findByCriteria(ImportFileCriteria criteria, Pageable page) {
         LOG.debug("find by criteria : {}, page: {}", criteria, page);
-        final Specification<ImportFile> specification = createSpecification(criteria);
+        ImportFileCriteria resolvedCriteria = applyTenantScope(criteria);
+        final Specification<ImportFile> specification = createSpecification(resolvedCriteria);
         return importFileRepository.findAll(specification, page).map(importFileMapper::toDto);
     }
 
@@ -58,7 +63,8 @@ public class ImportFileQueryService extends QueryService<ImportFile> {
     @Transactional(readOnly = true)
     public long countByCriteria(ImportFileCriteria criteria) {
         LOG.debug("count by criteria : {}", criteria);
-        final Specification<ImportFile> specification = createSpecification(criteria);
+        ImportFileCriteria resolvedCriteria = applyTenantScope(criteria);
+        final Specification<ImportFile> specification = createSpecification(resolvedCriteria);
         return importFileRepository.count(specification);
     }
 
@@ -86,5 +92,20 @@ public class ImportFileQueryService extends QueryService<ImportFile> {
             );
         }
         return specification;
+    }
+
+    private ImportFileCriteria applyTenantScope(ImportFileCriteria criteria) {
+        ImportFileCriteria resolved = criteria != null ? criteria : new ImportFileCriteria();
+        boolean isAdmin = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN);
+        TenantContextHolder
+            .get()
+            .ifPresent(ctx -> {
+                if (!isAdmin || ctx.hasTenant()) {
+                    LongFilter filter = new LongFilter();
+                    filter.setEquals(ctx.tenantId());
+                    resolved.setTenantId(filter);
+                }
+            });
+        return resolved;
     }
 }

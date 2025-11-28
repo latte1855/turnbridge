@@ -96,6 +96,7 @@ Turnbridge 會：
 3. 字軌／發票號碼合法
 4. 載具格式是否合法
 5. **最多 999 明細（不可拆單）**
+6. 若設定 `turnbridge.upload.backup-dir`，在 Normalize 前即備份原始 CSV 至 `<backup>/<tenant>/<yyyymmdd>/import-<id>-<檔名>`，供日後回覆或稽核。
 
 ---
 
@@ -137,6 +138,12 @@ docs/turnkey/AGENTS_MAPPING_v1.md
 | C0701 →       | F0701 |
 | B0401、D0401 → | G0401 |
 | B0501、D0501 → | G0501 |
+
+Turnbridge 內部 `LegacyMessageFamilyMapper` 會先將 `Type` 欄位（例如 `C0401|UF...`）的第一段抽出，再回寫成上述 `MessageFamily`，避免把完整 row/pipe string 直接寫入 `normalizedFamily`，同時仍保留 `legacyType` 讓前端可查。該邏輯會先處理 legacy C 系再處理 MIG4.x 原生 `F/G` 訊息，後續若需擴充 `MessageFamily` 只要補 `LegacyMessageFamilyMapper` 即可。
+
+匯出 XML 時，`TurnkeyXmlExportService` 先將檔案寫到 `turnbridge.turnkey.inbox-dir`（預設 `target/turnkey/INBOX`），再依 `turnbridge.turnkey.b2s-storage-src-base` 指定的 B2SSTORAGE 路徑將檔案複製到 `<B2S根>/<租戶可選>/<MessageFamily>/SRC`，同時紀錄 `XML_DELIVERED_TO_TURNKEY` 或失敗的 `XML_DELIVERY_FAILURE`，確保 Turnkey 端可以直接讀取這些檔案。若未設定 `b2s-storage-src-base` 則僅在 INBOX 產檔，方便 DEV 測試但不提供 Turnkey 實際消費位置。
+
+> UI／監控注意：Turnkey Export 頁與 Webhook Dashboard 需支援 event code 過濾與分頁，至少能依 `XML_GENERATED`、`XML_DELIVERED_TO_TURNKEY`、`XML_DELIVERY_FAILURE` 快速查詢並顯示 `detail.turnkeyFile`/`detail.reason`。搬移失敗時前端必須揭露 `XML_DELIVERY_FAILURE`，以便 Ops 快速得知路徑或權限錯誤。
 
 Mapping 需：
 
