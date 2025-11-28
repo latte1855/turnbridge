@@ -53,7 +53,21 @@
       "viewDetail": "查看內容",
       "detailModalTitle": "匯出事件詳細內容",
       "detailDescription": "事件 {eventCode} 的原始 detail",
-      "detailEmpty": "此事件沒有 detail 內容。"
+      "detailEmpty": "此事件沒有 detail 內容。",
+      "pageInfo": "第 {page}/{total} 頁",
+      "prev": "上一頁",
+      "next": "下一頁",
+      "filterTitle": "事件過濾",
+      "pageSize": "每頁筆數",
+      "gotoLabel": "跳至頁碼",
+      "gotoButton": "前往"
+    },
+    "filters": {
+      "filterTitle": "事件過濾",
+      "pageSize": "每頁筆數",
+      "pageInfo": "第 {page}/{total} 頁",
+      "prev": "上一頁",
+      "next": "下一頁"
     },
     "pickup": {
       "title": "Turnkey 拾取巡檢",

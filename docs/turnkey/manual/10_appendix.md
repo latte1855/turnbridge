@@ -63,6 +63,7 @@ Turnbridge 需特別關注：
 * `SRC`（資料投入點）
 * `ERR`（MIG 格式錯誤之來源）
 * `Unpack/ProcessResult`（平台回覆資料來源）
+* 產檔暫存（`turnbridge.turnkey.inbox-dir`）與最終 B2S 目錄需區分：INBOX 以 `INBOX/<tenant>/<yyyyMMdd>/<importId>/` 分層，方便 Portal 追蹤；真正讓 Turnkey 讀取的路徑必須符合上圖（例如 `UpCast/B2SSTORAGE/F0401/SRC/`），**不可** 再含租戶代碼，否則 Turnkey 會視為未知目錄。
 
 ---
 

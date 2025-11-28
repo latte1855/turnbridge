@@ -42,6 +42,18 @@
                 <constraints nullable="true" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+            <column name="created_by" type="varchar(50)" remarks="稽核欄：建立者" defaultValue="system">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_date" type="${datetimeType}" remarks="稽核欄：建立時間" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_modified_by" type="varchar(50)" remarks="稽核欄：最後更新者">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" remarks="稽核欄：最後更新時間" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true" />
+            </column>
         </createTable>
     </changeSet>
 

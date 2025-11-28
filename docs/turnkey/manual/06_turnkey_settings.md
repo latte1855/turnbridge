@@ -373,3 +373,22 @@ Turnkey 只負責：
 * Log
 
 ---
+
+# 十一、Turnbridge 外掛設定（Application Properties）
+
+Turnbridge 本身也需要對接 Turnkey 的設定，主要屬性如下（`application.yml`）：
+
+| 屬性 | 說明 |
+| --- | --- |
+| `turnbridge.upload.backup-dir` | 上傳檔案的備份根目錄（預設 `target/upload-backup`）。若設定此值，UploadService 會依 `backupDir/<tenant>/<yyyymmdd>/import-<id>-<filename>` 備份原 CSV，供日後回覆業者或稽核。 |
+| `turnbridge.turnkey.inbox-dir` | 產生 XML 的暫存位置（預設 `target/turnkey/INBOX`）；Turnbridge 建議以 `INBOX/<tenant>/<yyyyMMdd>/<importId>/` 分層，方便追蹤批次。 |
+| `turnbridge.turnkey.b2s-storage-src-base` | 指向 Turnkey UpCast B2SSTORAGE 根目錄（例如 `/opt/EINVTurnkey/UpCast/B2SSTORAGE`）。設定後，`TurnkeyXmlExportService` 會自動把 INBOX 內的檔案複製到 `<base>/<MessageFamily>/SRC`。未設定則只在 INBOX 產檔，不搬移。 |
+| `turnbridge.turnkey.tenant-sub-directory` | 若為 `true`，第一階段產檔時會在 INBOX 下以租戶代碼分目錄；搬移至 B2SSTORAGE 時仍會依 MessageFamily 放置，不再保留租戶層。 |
+| `turnbridge.turnkey.export-cron` / `export-batch-size` | 控制 Turnkey 匯出排程。亦可透過 `POST /api/turnkey/export?batchSize=` 或 Portal「Turnkey 匯出」頁手動觸發。 |
+| `turnbridge.turnkey.pickup-monitor-cron` | 設定 Turnkey 拾取巡檢排程，巡檢 `SRC/Pack/Upload/ERR` 等目錄並輸出 Prometheus 指標。 |
+
+> Pickup Monitor metrics（`turnkey_pickup_src_stuck_files`、`turnkey_pickup_pack_stuck_files`、`turnkey_pickup_alert_total` 等）可連到 Grafana dashboard，顯示各階段檔案滯留與最後掃描時間；若目錄出現權限或容量問題，可透過 Grafana notification 通知 SRE。
+
+搬移成功會在 `ImportFileLog` 留下 `XML_DELIVERED_TO_TURNKEY`（detail 內含 `localFile`/`turnkeyFile`），失敗則為 `XML_DELIVERY_FAILURE`（含 `reason` 與 `targetDir`）。UI（Turnkey 匯出頁、Webhook Dashboard）需提供事件過濾與分頁，以便 Ops 直接搜尋這些事件。
+
+---

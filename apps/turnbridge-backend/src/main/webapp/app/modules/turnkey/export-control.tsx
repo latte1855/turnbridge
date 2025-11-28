@@ -71,6 +71,12 @@ const TurnkeyExportControl = () => {
   const [history, setHistory] = useState<ExportHistoryEntry[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [logPage, setLogPage] = useState(0);
+  const [logSize, setLogSize] = useState(10);
+  const [logTotal, setLogTotal] = useState(0);
+  const [logPageInput, setLogPageInput] = useState('1');
+  const LOG_EVENT_OPTIONS = ['XML_GENERATED', 'XML_DELIVERED_TO_TURNKEY', 'XML_DELIVERY_FAILURE'];
+  const [logEventFilters, setLogEventFilters] = useState<string[]>([...LOG_EVENT_OPTIONS]);
   const [loading, setLoading] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [successKey, setSuccessKey] = useState<string | null>(null);
@@ -83,9 +89,22 @@ const TurnkeyExportControl = () => {
   const fetchRecentLogs = () => {
     setLogsLoading(true);
     axios
-      .get('/api/turnkey/export/logs', { params: { size: 5 } })
-      .then(response => setLogs(response.data ?? []))
-      .catch(() => setLogs([]))
+      .get('/api/turnkey/export/logs', {
+        params: {
+          page: logPage,
+          size: logSize,
+          event: logEventFilters,
+        },
+      })
+      .then(response => {
+        setLogs(response.data ?? []);
+        const headerCount = response.headers['x-total-count'] ?? response.headers['x-totalcount'];
+        setLogTotal(Number(headerCount ?? 0));
+      })
+      .catch(() => {
+        setLogs([]);
+        setLogTotal(0);
+      })
       .finally(() => setLogsLoading(false));
   };
 
@@ -104,6 +123,9 @@ const TurnkeyExportControl = () => {
 
   useEffect(() => {
     fetchRecentLogs();
+  }, [logPage, logSize, logEventFilters]);
+
+  useEffect(() => {
     fetchPickupStatus();
   }, []);
 
@@ -166,6 +188,36 @@ const TurnkeyExportControl = () => {
     return new Date(epoch * 1000).toLocaleString();
   };
 
+  const totalLogPages = Math.max(1, Math.ceil(logTotal / logSize));
+  const canPrevPage = logPage > 0;
+  const canNextPage = logPage + 1 < totalLogPages;
+
+  useEffect(() => {
+    setLogPageInput((logPage + 1).toString());
+  }, [logPage]);
+
+  const handlePageSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(event.target.value);
+    if (value >= 1) {
+      setLogSize(value);
+      setLogPage(0);
+    }
+  };
+
+  const handleGotoPage = () => {
+    const target = Number(logPageInput);
+    if (Number.isFinite(target)) {
+      const clamped = Math.min(Math.max(1, Math.floor(target)), totalLogPages);
+      setLogPage(clamped - 1);
+      setLogPageInput(clamped.toString());
+    }
+  };
+
+  const toggleEventFilter = (code: string) => {
+    setLogPage(0);
+    setLogEventFilters(prev => (prev.includes(code) ? prev.filter(item => item !== code) : [...prev, code]));
+  };
+
   return (
     <div className="container mt-4">
       <Alert color={isAdmin ? 'info' : 'danger'}>
@@ -173,7 +225,10 @@ const TurnkeyExportControl = () => {
           <Translate contentKey="turnkeyExport.adminNotice.title" />
         </div>
         <div>
-          {translate(isAdmin ? 'turnkeyExport.adminNotice.body' : 'turnkeyExport.adminNotice.forbidden', { tenant: tenantDisplay })}
+          <Translate
+            contentKey={isAdmin ? 'turnkeyExport.adminNotice.body' : 'turnkeyExport.adminNotice.forbidden'}
+            interpolate={{ tenant: tenantDisplay }}
+          />
         </div>
       </Alert>
       <Row className="mb-3">
@@ -404,6 +459,49 @@ const TurnkeyExportControl = () => {
               <Translate contentKey="turnkeyExport.logs.refresh" />
             </Button>
           </div>
+          <Form className="mb-3">
+            <Row className="align-items-end gy-2">
+              <Col md="7">
+                <div className="fw-semibold mb-1">
+                  <Translate contentKey="turnkeyExport.logs.filterTitle" />
+                </div>
+                <div className="d-flex flex-wrap gap-2">
+                  {LOG_EVENT_OPTIONS.map(code => (
+                    <FormGroup check inline key={code}>
+                      <Input
+                        id={`log-filter-${code}`}
+                        type="checkbox"
+                        checked={logEventFilters.includes(code)}
+                        onChange={() => toggleEventFilter(code)}
+                      />
+                      <Label check htmlFor={`log-filter-${code}`}>
+                        {code}
+                      </Label>
+                    </FormGroup>
+                  ))}
+                </div>
+              </Col>
+              <Col md="5" className="text-md-end">
+                <Label className="me-2 fw-semibold">
+                  <Translate contentKey="turnkeyExport.logs.pageSize" />
+                </Label>
+                <Input
+                  type="select"
+                  value={logSize}
+                  onChange={e => {
+                    setLogPage(0);
+                    setLogSize(Number(e.target.value));
+                  }}
+                >
+                  {[5, 10, 20, 50].map(size => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </Input>
+              </Col>
+            </Row>
+          </Form>
           {logsLoading ? (
             <div className="text-center py-4">
               <Spinner color="primary" />
@@ -413,67 +511,147 @@ const TurnkeyExportControl = () => {
               <Translate contentKey="turnkeyExport.logs.empty" />
             </p>
           ) : (
-            <Table responsive>
-              <thead>
-                <tr>
-                  <th>
-                    <Translate contentKey="turnkeyExport.logs.occurredAt" />
-                  </th>
-                  <th>
-                    <Translate contentKey="turnkeyExport.logs.eventCode" />
-                  </th>
-                  <th>
-                    <Translate contentKey="turnkeyExport.logs.message" />
-                  </th>
-                  <th>
-                    <Translate contentKey="turnkeyExport.logs.importFile" />
-                  </th>
-                  <th>
-                    <Translate contentKey="turnkeyExport.logs.action" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log, index) => (
-                  <tr key={log.occurredAt + index}>
-                    <td>{new Date(log.occurredAt).toLocaleString()}</td>
-                    <td>
-                      <span className={`badge ${log.level === 'ERROR' ? 'bg-danger' : 'bg-info'}`}>{log.eventCode}</span>
-                    </td>
-                    <td>
-                      <div>{log.message}</div>
-                      {log.detail && (
-                        <div className="text-muted small">
-                          <Translate contentKey="turnkeyExport.logs.detail" />: {log.detail}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      {log.importFile?.id ? (
-                        <>
-                          #{log.importFile.id}
-                          {log.importFile.originalFilename ? ` (${log.importFile.originalFilename})` : ''}
-                        </>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                    <td>
-                      <Button color="link" className="p-0 me-2" onClick={() => openDetailModal(log)}>
-                        <Translate contentKey="turnkeyExport.logs.viewDetail" />
-                      </Button>
-                      {log.importFile?.id ? (
-                        <Button color="link" className="p-0" tag={Link} to={`/import-monitor?importFileId=${log.importFile.id}`}>
-                          <Translate contentKey="turnkeyExport.logs.viewImport" />
-                        </Button>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
+            <>
+              <Table responsive>
+                <thead>
+                  <tr>
+                    <th>
+                      <Translate contentKey="turnkeyExport.logs.occurredAt" />
+                    </th>
+                    <th>
+                      <Translate contentKey="turnkeyExport.logs.eventCode" />
+                    </th>
+                    <th>
+                      <Translate contentKey="turnkeyExport.logs.message" />
+                    </th>
+                    <th>
+                      <Translate contentKey="turnkeyExport.logs.importFile" />
+                    </th>
+                    <th>
+                      <Translate contentKey="turnkeyExport.logs.action" />
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {logs.map((log, index) => (
+                    <tr key={log.occurredAt + index}>
+                      <td>{new Date(log.occurredAt).toLocaleString()}</td>
+                      <td>
+                        <span className={`badge ${log.level === 'ERROR' ? 'bg-danger' : 'bg-info'}`}>{log.eventCode}</span>
+                      </td>
+                      <td>
+                        <div>{log.message}</div>
+                        {log.detail && (
+                          <div className="text-muted small">
+                            <Translate contentKey="turnkeyExport.logs.detail" />: {log.detail}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        {log.importFile?.id ? (
+                          <>
+                            #{log.importFile.id}
+                            {log.importFile.originalFilename ? ` (${log.importFile.originalFilename})` : ''}
+                          </>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td>
+                        <Button color="link" className="p-0 me-2" onClick={() => openDetailModal(log)}>
+                          <Translate contentKey="turnkeyExport.logs.viewDetail" />
+                        </Button>
+                        {log.importFile?.id ? (
+                          <Button color="link" className="p-0" tag={Link} to={`/import-monitor?importFileId=${log.importFile.id}`}>
+                            <Translate contentKey="turnkeyExport.logs.viewImport" />
+                          </Button>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              <div className="d-flex flex-column gap-2 mb-3">
+                <div className="d-flex flex-wrap gap-2 align-items-center">
+                  <span className="fw-semibold text-muted">
+                    <Translate contentKey="turnkeyExport.logs.filterTitle" />
+                  </span>
+                  {LOG_EVENT_OPTIONS.map(code => (
+                    <Button
+                      key={code}
+                      size="sm"
+                      color={logEventFilters.includes(code) ? 'primary' : 'outline-primary'}
+                      onClick={() => toggleEventFilter(code)}
+                    >
+                      {code}
+                    </Button>
+                  ))}
+                </div>
+                <div className="d-flex flex-wrap gap-3 align-items-center">
+                  <div className="d-flex align-items-center gap-2">
+                    <Label className="mb-0" for="logPageSize">
+                      <Translate contentKey="turnkeyExport.logs.pageSize" />
+                    </Label>
+                    <Input
+                      id="logPageSize"
+                      type="number"
+                      min="1"
+                      value={logSize}
+                      style={{ width: '5rem' }}
+                      onChange={handlePageSizeChange}
+                    />
+                  </div>
+                  <div className="d-flex align-items-center gap-2">
+                    <Label className="mb-0" for="logPageJump">
+                      <Translate contentKey="turnkeyExport.logs.gotoLabel" />
+                    </Label>
+                    <Input
+                      id="logPageJump"
+                      type="number"
+                      min="1"
+                      value={logPageInput}
+                      style={{ width: '5rem' }}
+                      onChange={event => setLogPageInput(event.target.value)}
+                      onKeyDown={event => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          handleGotoPage();
+                        }
+                      }}
+                    />
+                    <Button size="sm" color="primary" onClick={handleGotoPage}>
+                      <Translate contentKey="turnkeyExport.logs.gotoButton" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
+                <div className="text-muted">
+                  <Translate
+                    contentKey="turnkeyExport.logs.pageInfo"
+                    interpolate={{
+                      page: logPage + 1,
+                      total: totalLogPages,
+                    }}
+                  />
+                </div>
+                <div className="d-flex gap-2">
+                  <Button color="secondary" size="sm" disabled={!canPrevPage} onClick={() => setLogPage(p => Math.max(0, p - 1))}>
+                    <Translate contentKey="turnkeyExport.logs.prev" />
+                  </Button>
+                  <Button
+                    color="secondary"
+                    size="sm"
+                    disabled={!canNextPage}
+                    onClick={() => setLogPage(p => Math.min(p + 1, Math.max(0, totalLogPages - 1)))}
+                  >
+                    <Translate contentKey="turnkeyExport.logs.next" />
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </CardBody>
       </Card>
@@ -485,7 +663,7 @@ const TurnkeyExportControl = () => {
           {selectedLog ? (
             <>
               <p className="text-muted small mb-2">
-                {translate('turnkeyExport.logs.detailDescription', { eventCode: selectedLog.eventCode })}
+                <Translate contentKey="turnkeyExport.logs.detailDescription" interpolate={{ eventCode: selectedLog.eventCode }} />
               </p>
               {parsedDetail ? (
                 <pre className="bg-light p-3 rounded border small">{parsedDetail}</pre>

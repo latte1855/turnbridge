@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -102,7 +103,7 @@ public class TurnkeyXmlExportService {
     }
 
     private Path writeXmlFile(Invoice invoice, String xmlContent) throws IOException {
-        Path targetDir = resolveTargetDirectory(invoice.getTenant());
+        Path targetDir = resolveInboxDirectory(invoice);
         Files.createDirectories(targetDir);
         Path targetFile = targetDir.resolve(generateFilename(invoice));
         if (Files.exists(targetFile)) {
@@ -113,11 +114,22 @@ public class TurnkeyXmlExportService {
         return targetFile.toAbsolutePath();
     }
 
-    private Path resolveTargetDirectory(Tenant tenant) {
+    private Path resolveInboxDirectory(Invoice invoice) {
         Path base = Path.of(turnkeyProperties.getInboxDir());
         if (turnkeyProperties.isTenantSubDirectory()) {
-            String tenantCode = tenant != null && StringUtils.hasText(tenant.getCode()) ? tenant.getCode() : "default";
+            String tenantCode = Optional.ofNullable(invoice.getTenant())
+                .map(Tenant::getCode)
+                .filter(StringUtils::hasText)
+                .orElse("default");
             base = base.resolve(tenantCode);
+        }
+        Instant sourceInstant = Optional.ofNullable(invoice.getImportFile())
+            .map(ImportFile::getCreatedDate)
+            .orElse(Instant.now());
+        base = base.resolve(FILE_DATE.format(sourceInstant));
+        Long importId = Optional.ofNullable(invoice.getImportFile()).map(ImportFile::getId).orElse(null);
+        if (importId != null) {
+            base = base.resolve(String.format("import-%06d", importId));
         }
         return base;
     }
@@ -125,7 +137,7 @@ public class TurnkeyXmlExportService {
     private String generateFilename(Invoice invoice) {
         Instant issuedAt = invoice.getIssuedAt() != null ? invoice.getIssuedAt() : Instant.now();
         String prefix = StringUtils.hasText(turnkeyProperties.getFilenamePrefix()) ? turnkeyProperties.getFilenamePrefix() : "FGPAYLOAD";
-        String invoiceId = invoice.getId() != null ? String.format("%06d", invoice.getId()) : "000000";
+        String invoiceId = invoice.getId() != null ? String.format("%07d", invoice.getId()) : "0000000";
         return prefix + "_" + invoice.getMessageFamily() + "_" + FILE_DATE.format(issuedAt) + "_" + invoiceId + ".xml";
     }
 
@@ -157,11 +169,10 @@ public class TurnkeyXmlExportService {
     }
 
     private void deliverToTurnkey(Invoice invoice, Path exportedFile) {
-        String base = turnkeyProperties.getB2sStorageSrcBase();
-        if (!StringUtils.hasText(base)) {
+        Path destDir = resolveB2sTargetDirectory(invoice);
+        if (destDir == null) {
             return;
         }
-        Path destDir = Path.of(base, invoice.getMessageFamily().name(), "SRC");
         try {
             Files.createDirectories(destDir);
             Path destFile = destDir.resolve(exportedFile.getFileName());
@@ -185,7 +196,18 @@ public class TurnkeyXmlExportService {
         }
     }
 
-    public List<ImportFileLog> findRecentExportLogs(Pageable pageable) {
-        return importFileLogRepository.findByEventCodeInOrderByOccurredAtDesc(EXPORT_EVENT_CODES, pageable).getContent();
+    private Path resolveB2sTargetDirectory(Invoice invoice) {
+        String base = turnkeyProperties.getB2sStorageSrcBase();
+        if (!StringUtils.hasText(base)) {
+            return null;
+        }
+        Path destDir = Path.of(base);
+        String family = invoice.getMessageFamily() != null ? invoice.getMessageFamily().name() : "F0401";
+        return destDir.resolve(family).resolve("SRC");
+    }
+
+    public org.springframework.data.domain.Page<ImportFileLog> findExportLogs(List<String> eventCodes, Pageable pageable) {
+        List<String> filters = (eventCodes == null || eventCodes.isEmpty()) ? EXPORT_EVENT_CODES : eventCodes;
+        return importFileLogRepository.findByEventCodeInOrderByOccurredAtDesc(filters, pageable);
     }
 }

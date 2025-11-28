@@ -164,6 +164,13 @@ Row: `12345678,7,_,111/01~111/02,WB,00883662,00884124`
   - taxRate / taxAmount / totalAmount: 必填且為數字，不得為負數
   - currency 若指定必為長度 3（例: TWD）
 
+### Turnbridge Normalize 額外檢核
+ - 上傳時會先合併 `invoiceDate` (yyyyMMdd) 與 `invoiceTime` (HH:mm:ss)，若任一格式錯誤即取消該筆並回報 `DATETIME_INVALID`，未來若改成單一 `DateTime` 欄位也可延伸。  
+ - `InvoiceNo` 必須符合 `[A-Z]{2}\d{8}`，格式錯誤會回傳 `INVOICE_NO_INVALID`；未來若出現新的字軌/號碼格式，只需調整正則即可。  
+ - `RandomNumber`（發票防偽碼）限 4 碼 `[0-9A]`，違規會回傳 `RANDOM_NUMBER_INVALID`。  
+ - `DonateMark` 只能是 `0/1`，違反會回傳 `DONATE_MARK_INVALID`。  
+訊息僅驗證通過的發票才會寫入 `Invoice`/`InvoiceItem`；其他錯誤行會寫到 `ImportFileLog`/`ImportFileItem` 的 `fieldErrors` 中供前端 `欄位錯誤` 顯示。
+
 
 ### 範例（單列 C0401 範例）
 ```

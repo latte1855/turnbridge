@@ -26,6 +26,7 @@ import tech.jhipster.config.JHipsterConstants;
     ApplicationProperties.class,
     com.asynctide.turnbridge.tenant.TenantProperties.class,
     TurnkeyProperties.class,
+    com.asynctide.turnbridge.upload.UploadProperties.class,
 })
 public class TurnbridgeBackendApp {
 

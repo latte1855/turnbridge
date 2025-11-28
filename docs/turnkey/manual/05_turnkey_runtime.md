@@ -117,6 +117,16 @@ EINVTurnkey/
 * `BAK` — 成功轉檔後備份
 * `ERR` — MIG 格式錯誤
 
+Turnkey 拾取巡檢（Pickup Monitor）會定期掃描：
+
+* `UpCast/B2SSTORAGE/<MessageFamily>/SRC/`：檢查 `SRC` 是否滯留太久，若超過 `pickup-max-age-minutes` 會產警示。
+* `UpCast/B2SSTORAGE/<MessageFamily>/BAK/` & `ERR/`：確認成功/錯誤檔案數不超限，若 ERR 累積則通知 SRE。
+* `Pack/`、`Upload/`：確認 XML 已打包上傳，不會停留在 Pack。
+
+這些狀態會寫入 `TurnkeyXmlExportService` 的 metrics（`turnkey_pickup_src_stuck_files`、`turnkey_pickup_alert_total` 等），也可透過 Grafana 對應相關 dashboard。
+
+Turnbridge Portal 的 “Turnkey 匯出” / “Webhook 儀表板” 也應提供對 `ImportFileLog` 事件的過濾（`XML_GENERATED`、`XML_DELIVERED_TO_TURNKEY`、`XML_DELIVERY_FAILURE`）與分頁，並把 `detail.turnkeyFile` / `detail.reason` 顯示出來，方便 Ops 直接定位搬移成功的目的地或失敗原因（目前 UI 尚未具備，需後續補齊）。
+
 ---
 
 # 五、服務啟動與停止（Turnkey Daemon）
@@ -158,6 +168,12 @@ UpCast/B2SSTORAGE/F0401/SRC/
 Turnbridge 在此階段應負責：
 
 * MIG Normalize（你正在開發的功能）
+* 產生 XML 並落地於 `turnbridge.turnkey.inbox-dir`：建議路徑為  
+  `INBOX/<tenantCode>/<yyyyMMdd>/<importId>/FGPAYLOAD_<MessageFamily>_<yyyymmdd>_<invoiceId>.xml`  
+  這樣 Portal 能追蹤哪個批次匯出、也方便除錯。若未設定 `turnbridge.turnkey.b2s-storage-src-base`，Turnbridge 只會生成 INBOX 檔，方便 DEV 測試。
+* 若設定了 `turnbridge.turnkey.b2s-storage-src-base` 則會再執行第二階段：  
+  `TurnkeyXmlExportService` 依 MessageFamily 將檔案複製到 `UpCast/B2SSTORAGE/<MessageFamily>/SRC/`，**不可再帶 tenant code**，以符合 Turnkey 標準目錄。  
+  成功搬移 → `ImportFileLog` 記 `XML_DELIVERED_TO_TURNKEY`（detail.turnkeyFile = 目的路徑），失敗 → `XML_DELIVERY_FAILURE`（detail.reason/targetDir）。若搬移失敗但 XML 已有，可於 Portal “Turnkey 匯出” 補單按鈕（或 `POST /api/turnkey/export`）重跑第二階段。
 * 清洗資料
 * CSV → XML 轉換（Turnbridge 端做）
 * 放入 Turnkey 對應目錄

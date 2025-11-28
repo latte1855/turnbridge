@@ -6,11 +6,12 @@ import com.asynctide.turnbridge.service.mapper.ImportFileLogMapper;
 import com.asynctide.turnbridge.service.turnkey.TurnkeyXmlExportService;
 import com.asynctide.turnbridge.turnkey.TurnkeyProperties;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.web.util.PaginationUtil;
 
 /**
  * Turnkey 匯出操作入口，供管理者手動觸發 XML 產生流程。
@@ -74,10 +77,20 @@ public class TurnkeyExportResource {
      */
     @GetMapping("/export/logs")
     @PreAuthorize("hasAuthority('" + AuthoritiesConstants.ADMIN + "')")
-    public ResponseEntity<java.util.List<ImportFileLogDTO>> getRecentExportLogs(@RequestParam(name = "size", required = false) Integer size) {
-        int limit = size != null && size > 0 ? size : 5;
-        Pageable pageable = PageRequest.of(0, limit);
-        java.util.List<ImportFileLogDTO> logs = exportService.findRecentExportLogs(pageable).stream().map(importFileLogMapper::toDto).toList();
-        return ResponseEntity.ok(logs);
+    public ResponseEntity<List<ImportFileLogDTO>> getRecentExportLogs(
+        @RequestParam(name = "page", required = false) Integer page,
+        @RequestParam(name = "size", required = false) Integer size,
+        @RequestParam(name = "event", required = false) List<String> eventCodes
+    ) {
+        int pageNumber = page != null && page >= 0 ? page : 0;
+        int pageSize = size != null && size > 0 ? size : 10;
+        Page<ImportFileLogDTO> result =
+            exportService
+                .findExportLogs(eventCodes, PageRequest.of(pageNumber, pageSize))
+                .map(importFileLogMapper::toDto);
+        return ResponseEntity
+            .ok()
+            .headers(PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), result))
+            .body(result.getContent());
     }
 }
